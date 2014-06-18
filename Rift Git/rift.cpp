@@ -813,13 +813,34 @@ vector< vector<double> > leg_tracking(double xMarkers[], double yMarkers[], doub
 			}
 		}
 	}
-	cout<<"\rtransformed = " << markerArrayTransf[4][0] << ", foot_pos = " <<sdata->foot_pos_x;
+	
 
 // 	
 	return markerArrayTransf;
 }
 
+char* getJointAngles ( vector< vector<double> > markerVecs)
+{
+	vector<double> torsoHip = { 0.0, -1.0};
+	vector<double> hipKnee = { markerVecs[2][0]-markerVecs[1][0], markerVecs[2][1]-markerVecs[1][1] };
+	vector<double> kneeAnkle = { markerVecs[3][0]-markerVecs[2][0], markerVecs[3][1]-markerVecs[2][1] };
+	vector<double> ankleToe = { markerVecs[4][0]-markerVecs[3][0], markerVecs[4][1]-markerVecs[3][1] };
+	
+	vector< vector<double> > vecs = {torsoHip, hipKnee, kneeAnkle, ankleToe};
+	vector<double> angles (3, 0.0);
+	
+	for ( int vecIt = 0; vecIt < 3; vecIt++)
+	{
+		double dot = vecs[vecIt][0] * vecs[vecIt+1][0] + vecs[vecIt][1] * vecs[vecIt+1][1];
+		double det = vecs[vecIt][0] * vecs[vecIt+1][1] - vecs[vecIt][1] * vecs[vecIt+1][0];
+		angles[vecIt] = atan2(det, dot);
+	}
+	
 
+}
+
+
+	
 void my_handler(int s){
         fprintf(stdout, "Caught signal %d\n",s);
 	sdata->data_exchange = FALSE;
