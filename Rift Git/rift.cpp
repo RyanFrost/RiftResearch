@@ -755,8 +755,11 @@ vector< vector<double> > leg_tracking(double xMarkers[], double yMarkers[], doub
 	
 
 	double z_offset = 37;
-	double T[4][4];
+	vector< vector<double> > T (4, vector<double> (4, 0.0));
+	vector<double>  Foot_t (4,0.0);
 	
+	double myDubs []= { xMarkers[4], yMarkers[4], zMarkers[4], 1.0};
+	vector<double> Foot_c (myDubs, myDubs + sizeof(myDubs)/sizeof(double));
 
 	// Inverse Transformation matrix from Matlab
 	// Converts data from camera frame to treadmill frame
@@ -780,7 +783,7 @@ vector< vector<double> > leg_tracking(double xMarkers[], double yMarkers[], doub
 	T[3][2] = 0;
 	T[3][3] = 1;
 
-	// Store positions
+	// Apply coordinate transformation (NDI frame to treadmill frame)
 	for (int markerNum = 0;markerNum<5;markerNum++)
 	{
 		for (int i = 0; i < 4; i++)
@@ -788,41 +791,31 @@ vector< vector<double> > leg_tracking(double xMarkers[], double yMarkers[], doub
 			for (int j = 0; j < 4; j++)
 			{
 				markerArrayTransf[markerNum][i] += T[i][j] * markerArray[markerNum][j];
-				markerArrayTransf[markerNum][i] /= 10;		//convert to cm
-				
-				if (i == 2)
-				{
-					markerArrayTransf[markerNum][i] -= z_offset;
-				}
-// 				temp1 = T[i][j]*Foot_c[j];
-// 				Foot_t[i] = Foot_t[i] + temp1;
-// 				temp2 = T[i][j]*Mid_c[j];
-// 				Mid_t[i] = Mid_t[i] + temp2;
 			}
 		}
 	}
-// 	
-	cout<<"\roriginal = " <<zMarkers[4]<< ", transformed = " << markerArrayTransf[4][2] << ", foot_pos = " <<sdata->foot_pos_x;
-
-// 	for (int i = 0; i<5; i++)
-// 	{
-// 		cout << "\n\n\n\n";
-// 		for (int it = 0; it<5; it++)
-// 		{
-// 			cout << "Marker #" << it << endl;
-// 			for(int dim = 0; dim<3; dim++)
-// 			{
-// 				cout<< markerArray[it][dim] << endl;
-// 			}
-// 			cout <<endl;
-// 		}
-// 		
-// 		//rotate(markerArrayTransf[i].begin(),markerArrayTransf[i].begin()+2,markerArrayTransf[i].end());
-// 	}
-	//sdata->foot_pos_x = (Foot_t[2]/10.0) - z_offset;  // Convert to cm // really it's z
-// 	sdata->foot_pos_y = (Foot_t[0]/10.0);  // Convert to cm
-// 	sdata->mid_stance_x = (Mid_t[2]/10.0) - z_offset;  // really it's z
+	
+	// Convert all positions from mm to cm, and apply the z (x) offset
+	for (int markerIt = 0; markerIt<5;markerIt++)
+	{
+		markerArrayTransf[markerIt].pop_back(); // Removes the '1' scaler
 		
+		// rotates the order of the vector from z,x,y to x,y,z
+		rotate(markerArrayTransf[markerIt].begin(),markerArrayTransf[markerIt].begin()+2,markerArrayTransf[markerIt].end());
+		
+		
+		for(int dimIt = 0; dimIt<3; dimIt++)
+		{
+			markerArrayTransf[markerIt][dimIt] /= 10; // converts from mm to cm
+			if (dimIt == 0) // applies z (x) offset if current dimension is x 
+			{
+				markerArrayTransf[markerIt][dimIt] -= z_offset;
+			}
+		}
+	}
+	cout<<"\rtransformed = " << markerArrayTransf[4][0] << ", foot_pos = " <<sdata->foot_pos_x;
+
+// 	
 	return markerArrayTransf;
 }
 
