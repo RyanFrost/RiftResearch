@@ -48,6 +48,7 @@ double time_emg_absolute;
 double time_elapsed(struct timeval *, struct timeval *);
 void foot_tracking(double, double, double, double, double, double,double, double, double, double, double, double); // foot and torso tracking
 vector< vector<double> > leg_tracking(double[],double[],double[]);
+char* getJointAngles(vector< vector<double> >);
 void save2file(sensor_data *);
 void my_handler(int);
 float track_position_table(int, int);
@@ -836,7 +837,7 @@ char* getJointAngles ( vector< vector<double> > markerVecs)
 		angles[vecIt] = atan2(det, dot);
 	}
 	
-
+	return char* "x";
 }
 
 
