@@ -431,43 +431,8 @@ int main (int argc, char *argv[])
 		string currentMarkerStrX, currentMarkerStrY;
 		
 		vector< vector<double> > markerVec = leg_tracking(sdata->x_markers, sdata->y_markers, sdata->z_markers);
-// 		cout << "\n\n\n\nfootposx = "<< sdata->foot_pos_x<<endl;
-// 		for (int it = 0; it<5; it++)
-// 		{
-// 			cout << "Marker #" << it << endl;
-// 			for(int dim = 0; dim<3; dim++)
-// 			{
-// 				cout<< markerVec[it][dim] << endl;
-// 			}
-// 			cout <<endl;
-// 		}
-		
-		
-		
-// 			for (int markerIter = 0; markerIter < numMarkers; markerIter++)
-// 			{
-// 				
-// 				if ( !isnan(sdata->x_markers[markerIter]) )
-// 				{
-// 					markerArray[markerIter][0] = sdata->x_markers[markerIter];
-// 				}
-// 				else
-// 				{
-// 					
-// 				}
-// 				currentMarkerStrX = boost::lexical_cast<string>( sdata->x_markers[markerIter] );
-// 				markerStrX.append(",");
-// 				markerStrX.append(currentMarkerStrX);
-// 				
-// 			}
-// 		
-// 		char *markerCharX = new char[markerStrX.size()+1];
-// 		char *markerCharY = new char[markerStrY.size()+1];
-// 		markerCharX[markerStrX.size()] = 0;
-// 		markerCharY[markerStrY.size()] = 0;
-// 		memcpy(markerCharX,markerStrX.c_str(),markerStrX.size());
-// 		memcpy(markerCharY,markerStrY.c_str(),markerStrY.size());
-		
+		char *angleChar = getJointAngles(markerVec);
+
 		try
 		{
 			recvlen = recvfrom(sockfd, stepData, STEPSIZE, 0, (struct sockaddr *)&remote_addr, &addrlen);
@@ -485,7 +450,7 @@ int main (int argc, char *argv[])
 		
 			distance = atof(stepData);
 			
-			if(sendto(sockfd,"running", strlen("running"), 0, (struct sockaddr *)&remote_addr, addrlen) < 0)
+			if(sendto(sockfd,angleChar, strlen(angleChar), 0, (struct sockaddr *)&remote_addr, addrlen) < 0)
 			{
 				perror("Send failed.");
 				//close(sockfd);
@@ -822,12 +787,12 @@ vector< vector<double> > leg_tracking(double xMarkers[], double yMarkers[], doub
 
 char* getJointAngles ( vector< vector<double> > markerVecs)
 {
-	vector<double> torsoHip = { 0.0, -1.0};
-	vector<double> hipKnee = { markerVecs[2][0]-markerVecs[1][0], markerVecs[2][1]-markerVecs[1][1] };
-	vector<double> kneeAnkle = { markerVecs[3][0]-markerVecs[2][0], markerVecs[3][1]-markerVecs[2][1] };
-	vector<double> ankleToe = { markerVecs[4][0]-markerVecs[3][0], markerVecs[4][1]-markerVecs[3][1] };
+	vector<double> torsoHip { 0.0, -1.0};
+	vector<double> hipKnee { markerVecs[2][0]-markerVecs[1][0], markerVecs[2][1]-markerVecs[1][1] };
+	vector<double> kneeAnkle { markerVecs[3][0]-markerVecs[2][0], markerVecs[3][1]-markerVecs[2][1] };
+	vector<double> ankleToe { markerVecs[4][0]-markerVecs[3][0], markerVecs[4][1]-markerVecs[3][1] };
 	
-	vector< vector<double> > vecs = {torsoHip, hipKnee, kneeAnkle, ankleToe};
+	vector< vector<double> > vecs {torsoHip, hipKnee, kneeAnkle, ankleToe};
 	vector<double> angles (3, 0.0);
 	
 	for ( int vecIt = 0; vecIt < 3; vecIt++)
@@ -836,8 +801,24 @@ char* getJointAngles ( vector< vector<double> > markerVecs)
 		double det = vecs[vecIt][0] * vecs[vecIt+1][1] - vecs[vecIt][1] * vecs[vecIt+1][0];
 		angles[vecIt] = atan2(det, dot);
 	}
+	string currentJointStr;
+	string jointStr;
+	for (int vecIt = 0; vecIt<3; vecIt++)
+	{
+		currentJointStr = boost::lexical_cast<string>(angles[vecIt]);
+		
+		jointStr.append(currentJointStr);
+		if(vecIt != 2)
+		{
+			jointStr.append(",");
+		}
+	}
 	
-	return char* "x";
+	char *jointChar = new char[jointStr.size()+1];
+	jointChar[jointStr.size()] = 0;
+	memcpy(jointChar,jointStr.c_str(),jointStr.size());
+	
+	return jointChar;
 }
 
 
