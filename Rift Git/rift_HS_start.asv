@@ -388,8 +388,8 @@ ave_samples_per_gait_cycle = mean(diff(heel_strike_ind));
 
 %% find infinite sections
 % plot record data as single cycles
-numCyclesBefore = 2;
-numCyclesAfter = 1;
+numCyclesBefore = 1;
+numCyclesAfter = 3;
 numCyclesPlot = numCyclesBefore+numCyclesAfter+1;
 num_cycles_to_view_inf = numCyclesPlot;
 count = 1;
@@ -408,8 +408,12 @@ end
 
 num_inf_cycs = count - 1;
 ankle_angle_inf = cell(num_inf_cycs,1);
-xx = linspace(0-numCyclesBefore*100, num_cycles_to_view_inf*100, num_cycles_to_view_inf*1000 + 1);
+knee_angle_inf = cell(num_inf_cycs,1);
+hip_angle_inf = cell(num_inf_cycs,1);
+xx = linspace(0-numCyclesBefore*100, (1+numCyclesAfter)*100,1000 );
+xx = linspace(0, 100,1000 );
 pgc = xx; % percent gait cycle
+pgc = linspace(0-numCyclesBefore*100, (1+numCyclesAfter)*100,num_cycles_to_view_inf*1000 );
 
 
 for i = 1+numCyclesBefore:num_inf_cycs-numCyclesAfter-1
@@ -431,19 +435,27 @@ for i = 1+numCyclesBefore:num_inf_cycs-numCyclesAfter-1
 end
 
 ankle_infAvg = mean(cell2mat(ankle_angle_inf)); % <----- may or may not need to transpose data for finding mean.
-knee_infAvg = mean(cell2mat(knee_angle_inf'));
-hip_infAvg = mean(cell2mat(hip_angle_inf'));
+knee_infAvg = mean(cell2mat(knee_angle_inf));
+hip_infAvg = mean(cell2mat(hip_angle_inf));
 
+ankle_inf = [];% ankle_inf = ankle_infAvg;
+knee_inf = []; %knee_inf = knee_infAvg;
+hip_inf = []; %hip_inf = hip_infAvg;
 for i = 1:numCyclesBefore
-    ankle_inf = [ankle_inf, ankle_infAvg-100*i];
-    knee_inf = [knee_inf, knee_infAvg-100*i];
-    hip_inf = [hip_inf, hip_infAvg-100*i];
+    ankle_inf = [ankle_inf, ankle_infAvg];
+    knee_inf = [knee_inf, knee_infAvg];
+    hip_inf = [hip_inf, hip_infAvg];
 end
 
 ankle_inf = [ankle_inf, ankle_infAvg];
 knee_inf = [knee_inf, knee_infAvg];
 hip_inf = [hip_inf, hip_infAvg];
 
+for i = 1:numCyclesAfter
+    ankle_inf = [ankle_inf, ankle_infAvg];
+    knee_inf = [knee_inf, knee_infAvg];
+    hip_inf = [hip_inf, hip_infAvg];
+end
 
 %% find perturbation sections
 
@@ -478,67 +490,17 @@ type_w_inds = cell(3,1);
 num_types_perts = 3; % 9 different perturbation types (3 locations, 3 magnitudes)
 
 
-
+%% NEED TO FIND OUT WHY the +2 / +3 works for the number of cycles
 for cycle = 1+numCyclesBefore : length(heel_strike_ind) - numCyclesAfter-1
     hsInd = heel_strike_ind(cycle);
     if perturb(hsInd) == 1 && Kd(hsInd) == 6e4
-        type_w_inds{1}{end+1} = heel_strike_ind(cycle - numCyclesBefore) : heel_strike_ind(cycle + 1 + numCyclesAfter);
+        type_w_inds{1}{end+1} = heel_strike_ind(cycle - numCyclesBefore) : heel_strike_ind(cycle + 2 + numCyclesAfter);
     elseif perturb(hsInd) == 2 && Kd(hsInd) == 1e6
-        type_w_inds{2}{end+1} = heel_strike_ind(cycle - numCyclesBefore) : heel_strike_ind(cycle + 1 + numCyclesAfter);
+        type_w_inds{2}{end+1} = heel_strike_ind(cycle - numCyclesBefore) : heel_strike_ind(cycle + 2 + numCyclesAfter);
     elseif perturb(hsInd) == 3 && Kd(hsInd) == 6e4
-        type_w_inds{3}{end+1} = heel_strike_ind(cycle - numCyclesBefore) : heel_strike_ind(cycle + 1 + numCyclesAfter);
+        type_w_inds{3}{end+1} = heel_strike_ind(cycle - numCyclesBefore) : heel_strike_ind(cycle + 3 + numCyclesAfter);
     end
 end
-
-
-
-% 
-% pertPlotStr = NaN(1,length(perturb));
-% 
-% for pertType = 1:3
-%     pertFormatStr = [0, perturb' == pertType, 0];
-%     pertStartInd = strfind(pertFormatStr, [0,1]);
-%     pertEndInd = strfind(pertFormatStr, [1,0]);
-% 
-%     pertLocations = [];
-%     % add indices of perturb occurence between each start and end index
-%     for indIter = 1:length(pertStartInd)
-%         
-%          pertLocations = [pertLocations, pertStartInd(indIter):pertEndInd(indIter)];
-% 
-%     end
-%     
-%     pertPlotStr(pertLocations) = pertType*150+500;
-%     
-% 
-% 
-% 
-% 
-% 
-% 
-% 
-% end
-% 
-% plot(1:length(toe1_t),toe1_t(:,1),'-k'); hold on
-% plot(1:length(toe1_t),pertPlotStr,'-g','LineWidth',2); hold off;
-
-
-% stiffFormatStr = [0, Kd == stiffness, 0];
-% stiffStartInd = strfind(stiffFormatStr,[0,1]);
-% stiffEndInd = strfind(stiffFormatStr,[1,0]);
-    
-
-
-
-
-
-%%
- 
-% num_perts = 0;
-% for i = 1:num_types_perts 
-%     num_perts = num_perts + length(type_w_inds{i});
-% end
-% disp(['Total number of perturbations: ', num2str(num_perts)]);
 
 num_norm_perts = length(type_w_inds{1});
 num_type0_perts = length(type_w_inds{2});
@@ -562,9 +524,9 @@ for i = 1:num_types_perts
         
         x = numCyclesPlot*100*(data - min(data)) / ( max(data) - min(data) ) - 100*numCyclesBefore;
        
-        ankle_angle{i}{j} = spline(x,y_ankle,xx);
-        knee_angle{i}{j} = spline(x,y_knee,xx);
-        hip_angle{i}{j} = spline(x,y_hip,xx);
+        ankle_angle{i}{j} = spline(x,y_ankle,pgc);
+        knee_angle{i}{j} = spline(x,y_knee,pgc);
+        hip_angle{i}{j} = spline(x,y_hip,pgc);
         
         clear y_ankle y_knee y_hip data 
     end
@@ -573,9 +535,12 @@ end
 clear ankle knee hip
 % <-------- again may or may not need transpose
 for i = 1:num_types_perts
-    ankle{i} = mean(cell2mat(ankle_angle{i}')); % Note: transpose important for correct calculations.
-    knee{i} = mean(cell2mat(knee_angle{i}'));
-    hip{i} = mean(cell2mat(hip_angle{i}'));
+    ankle{i}(1) = mean(cell2mat(ankle_angle{i}')); % Note: transpose important for correct calculations.
+    ankle{i}(2) = std(cell2mat(ankle_angle{i}'));
+    knee{i}(1) = mean(cell2mat(knee_angle{i}'));
+    knee{i}(2) = std(cell2mat(knee_angle{i}'));
+    hip{i}(1) = mean(cell2mat(hip_angle{i}'));
+    hip{i}(2) = std(cell2mat(hip_angle{i}'));
 end
 
 ankle{4} = ankle_inf;
@@ -606,12 +571,16 @@ for j=1:3
     
     figs(j) = figure(j);
     
-    plot(pgc,joints{j}{4},'k--','LineWidth',2); hold all;
+    plot(pgc,joints{j}{4},'k--','LineWidth',2); hold on;
     for i=1:3
-        plot(pgc,joints{j}{i},'LineWidth',2);
+        plot(pgc,joints{j}{i}(1),'LineWidth',2);
+        
+        top = joints{j}{i}(1) + joints{j}{i}(2);
+        bottom = joints{j}{i}(1) - joints{j}{i}(2);
+        
     end
     hold off;
-    legend('Normal','Regular Perturbation','Type 0 Pert', 'Type 1 Pert','Location','SouthWest');
+    legend('Normal','Regular Perturbation','Type 0 Pert','Location','SouthWest');
     
     bigText{1} = title(jointStr{j});
     bigText{2} = xlabel('Progress through gait cycle (%)');
@@ -620,18 +589,24 @@ for j=1:3
     axis_d = [-100*numCyclesBefore, 100*(1+numCyclesAfter), yAxisLow(j), yAxisHigh(j)];
     
     axis(axis_d);
-    hx1=graph2d.constantline(100, 'LineStyle',':', 'Color',[.7 .7 .7]);
-    hx2=graph2d.constantline(200, 'LineStyle',':');
-    changedependvar(hx1,'x');
-    changedependvar(hx2,'x');
-    hx3=graph2d.constantline(65, 'LineStyle',':', 'Color',[.7 .7 .7]);
-    hx4=graph2d.constantline(165, 'LineStyle',':');
-    hx5=graph2d.constantline(265, 'LineStyle',':');
-
-    changedependvar(hx3,'x');
-    changedependvar(hx4,'x');
-    changedependvar(hx5,'x');
     
+    startCycle = -numCyclesBefore;
+    for i = startCycle:1+numCyclesAfter
+        hx = graph2d.constantline(100*i, 'LineStyle',':','color',[.7,.7,.7]);
+        changedependvar(hx,'x');
+    end
+%     hx1=graph2d.constantline(100, 'LineStyle',':', 'Color',[.7 .7 .7]);
+%     hx2=graph2d.constantline(200, 'LineStyle',':');
+%     changedependvar(hx1,'x');
+%     changedependvar(hx2,'x');
+%     hx3=graph2d.constantline(65, 'LineStyle',':', 'Color',[.7 .7 .7]);
+%     hx4=graph2d.constantline(165, 'LineStyle',':');
+%     hx5=graph2d.constantline(265, 'LineStyle',':');
+% 
+%     changedependvar(hx3,'x');
+%     changedependvar(hx4,'x');
+%     changedependvar(hx5,'x');
+%     
     %# horizontal line
     hy = graph2d.constantline(0, 'LineStyle',':', 'Color',[.7 .7 .7]);
     changedependvar(hy,'y');
@@ -639,10 +614,10 @@ for j=1:3
     
     HSTOheight = yAxisLow(j) + 2.5;
     
-    bigText{4} = text(100,HSTOheight,HS);
-    bigText{5} = text(65,HSTOheight,TO);
+%     bigText{4} = text(100,HSTOheight,HS);
+%     bigText{5} = text(65,HSTOheight,TO);
     
-    for iter = 1:5
+    for iter = 1:3
         set(bigText{iter},'fontSize',12,'fontWeight','bold')
     end
     

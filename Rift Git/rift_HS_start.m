@@ -535,9 +535,12 @@ end
 clear ankle knee hip
 % <-------- again may or may not need transpose
 for i = 1:num_types_perts
-    ankle{i} = mean(cell2mat(ankle_angle{i}')); % Note: transpose important for correct calculations.
-    knee{i} = mean(cell2mat(knee_angle{i}'));
-    hip{i} = mean(cell2mat(hip_angle{i}'));
+    ankle{i}(1,:) = mean(cell2mat(ankle_angle{i}')); % Note: transpose important for correct calculations.
+    ankle{i}(2,:) = std(cell2mat(ankle_angle{i}'));
+    knee{i}(1,:) = mean(cell2mat(knee_angle{i}'));
+    knee{i}(2,:) = std(cell2mat(knee_angle{i}'));
+    hip{i}(1,:) = mean(cell2mat(hip_angle{i}'));
+    hip{i}(2,:) = std(cell2mat(hip_angle{i}'));
 end
 
 ankle{4} = ankle_inf;
@@ -570,7 +573,11 @@ for j=1:3
     
     plot(pgc,joints{j}{4},'k--','LineWidth',2); hold all;
     for i=1:2
-        plot(pgc,joints{j}{i},'LineWidth',2);
+        %plot(pgc,joints{j}{i}(1),'LineWidth',2);
+        
+        top = joints{j}{i}(1,:) + joints{j}{i}(2,:);
+        bottom = joints{j}{i}(1,:) - joints{j}{i}(2,:);
+        errorbar(pgc,joints{j}{i}(1,:),bottom,top,'LineWidth',2);
     end
     hold off;
     legend('Normal','Regular Perturbation','Type 0 Pert','Location','SouthWest');
