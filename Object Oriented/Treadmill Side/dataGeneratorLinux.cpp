@@ -11,7 +11,7 @@
 
 #include <boost/lexical_cast.hpp>
 #include <chrono>
-#include <boost/thread.hpp>
+#include <boost/thread/thread.hpp>
 
 
 using namespace std;

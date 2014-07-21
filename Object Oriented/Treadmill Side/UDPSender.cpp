@@ -1,9 +1,10 @@
 
 #include "dataGenerator.h"
-#include "socketManager.h"
+#include "socketManagerLinux.h"
 
 #include <vector>
 #include <iostream>
+#include <iterator>
 
 
 
@@ -14,7 +15,7 @@ int main()
 {
 	socketManager sock(27015);
 	dataGenerator dataGen(120);
-
+	dataGen.start();
 	
 	
 	
@@ -54,20 +55,20 @@ int main()
 	///////
 
 
-	switch (currentPatchType)
-	{
-	case 1:
-		//Normal pert
-		break;
-	case 2:
-		//
-
-
-
-
-
-
-	}
+// 	switch (currentPatchType)
+// 	{
+// 	case 1:
+// 		//Normal pert
+// 		break;
+// 	case 2:
+// 		//
+// 
+// 
+// 
+// 
+// 
+// 
+// 	}
 
 
 
