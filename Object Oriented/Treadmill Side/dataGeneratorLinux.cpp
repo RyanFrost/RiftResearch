@@ -10,15 +10,17 @@
 #include <algorithm>
 
 #include <boost/lexical_cast.hpp>
-#include <chrono>
-#include <boost/thread/thread.hpp>
+
 
 
 using namespace std;
 
 
 dataGenerator::dataGenerator(int numberPatches) : numPatches(numberPatches)
-{	
+{
+	patchGenerator();
+	patchTypeGenerator();
+	startAngleGen();
 }
 
 
@@ -26,13 +28,6 @@ dataGenerator::~dataGenerator()
 {
 }
 
-
-void dataGenerator::start()
-{
-	patchGenerator();
-	patchTypeGenerator();
-	startAngleGen();
-}
 
 void dataGenerator::patchGenerator(void)
 {
@@ -90,42 +85,42 @@ void dataGenerator::patchTypeGenerator(void)
 void dataGenerator::angleFootPosGenerator(void)
 {
 
-	std::cout<< "Inside anglefootPosGenerator" << std::endl;
-	typedef std::chrono::high_resolution_clock Clock;
-	typedef std::chrono::duration<double> secDouble;
-	
-	std::chrono::high_resolution_clock timer;
-	
-	Clock::time_point startTime = timer.now();
-	secDouble secs;
-
-	angles.resize(6);
-	
-
-	int runLoop = 1;
-	while (runLoop)
-	{
-		secs = timer.now() - startTime;
-		
-		footPos = 45 * sin(secs.count()) + 50;
-		
-		angles[0] = 20 * sin(secs.count()) + 20;		// Toe angle
-		angles[1] = 40 * sin(secs.count() - 1) + 40;	// Knee angle
-		angles[2] = 30 * sin(secs.count() + 0.5) -10 ;	// Hip angle
-		
-		angles[3] = 20 * sin(secs.count() + 3.14) + 20;		// Toe angle
-		angles[4] = 40 * sin(secs.count() - 1 + 3.14) + 40;	// Knee angle
-		angles[5] = 30 * sin(secs.count() + 0.5 + 3.14) - 10 ;	// Hip angle
-		
-	}
+// 	std::cout<< "Inside anglefootPosGenerator" << std::endl;
+// 	typedef std::chrono::high_resolution_clock Clock;
+// 	typedef std::chrono::duration<double> secDouble;
+// 	
+// 	std::chrono::high_resolution_clock timer;
+// 	
+// 	Clock::time_point startTime = timer.now();
+// 	secDouble secs;
+// 
+// 	angles.resize(6);
+// 	
+// 
+// 	int runLoop = 1;
+// 	while (runLoop)
+// 	{
+// 		secs = timer.now() - startTime;
+// 		
+// 		footPos = 45 * sin(secs.count()) + 50;
+// 		
+// 		angles[0] = 20 * sin(secs.count()) + 20;		// Toe angle
+// 		angles[1] = 40 * sin(secs.count() - 1) + 40;	// Knee angle
+// 		angles[2] = 30 * sin(secs.count() + 0.5) -10 ;	// Hip angle
+// 		
+// 		angles[3] = 20 * sin(secs.count() + 3.14) + 20;		// Toe angle
+// 		angles[4] = 40 * sin(secs.count() - 1 + 3.14) + 40;	// Knee angle
+// 		angles[5] = 30 * sin(secs.count() + 0.5 + 3.14) - 10 ;	// Hip angle
+// 		
+// 	}
 
 }
 
 void dataGenerator::startAngleGen(void)
 {
 	
-	std::cout << "inside startAngleGen" << std::endl;
-	boost::thread t1(&dataGenerator::angleFootPosGenerator, this);
+	std::cout << "Angle Generator not working in Linux - thread issue" << std::endl;
+	//boost::thread t1(&dataGenerator::angleFootPosGenerator, this);
 	
 }
 

@@ -2,10 +2,11 @@
 
 using namespace std;
 
+// updated 6/30/2014
 struct sensor_data {
 int motorv_int; // voltage to motor in int format
-double lc1_lbs; // loadcell 1 in pounds
-double lc2_lbs; // loadcell 2 in pounds
+double lcR_lbs; // Right loadcell [lbs] (was lc1)
+double lcL_lbs; // Left loadcell [lbs] (was lc2)
 double time;	// Absolute system time (sec) the Arduino measurement was taken
 uint8_t motorv_2Arduino; // Commanded motor voltage to Arduino range: [0-255] [0-5]V
 double motorv_double; // Commanded motor voltage: [0-5]V
@@ -15,14 +16,6 @@ bool enable_treadmill;	// Enable treadmill motor
 bool data_exchange;	// Bool for acknowledging data exchange with Arduino
 float xd; // Linear track desired position wrt the home position in cm
 float xact; // Linear track actual position wrt the home position in cm
-int forcesensors_int[8]; // force sensor vector in int format
-double forcesensors_lbs[8]; // force sensor vector in pounds
-double foot_pos_x; // x position of foot along treadmill in cm
-double foot_pos_y; // y position of foot above treadmill in cm
-double mid_stance_x; // Average of torso and hip positions (x)
-double x_markers[10]; // x position of markers from NDI wrt camara
-double y_markers[10]; // y position of markers from NDI wrt camara
-double z_markers[10]; // z position of markers from NDI wrt camara
 int perturb; // (T/F) perturb this cycle?
 int cycle; // number of gait cycles
 double angle_enc; // angle from encoder (deg)
@@ -30,21 +23,20 @@ double Kd; // Desired stiffness
 double Kact; // Actual Stiffness
 double force_b; // Force at location B of kin. analysis
 double elapsed; // Time elapsed each iteration of VST for loop
-double* sharedData; // Pointer to emg data
 bool start_EMG; // Tells to start collecting EMG data
 bool get_EMG; // Tells when to get EMG
-double time_emg; // Computer time that emg was sampled
 bool experiment; // Tells wheather to do experiment or stop it.
 int numEMG; // Number of EMG electrodes used in experiment
 bool beep; // Causes beep
-//
-double time_vst_startEMG;
-double time_vst_absolute;
-double start_aq_grt;
-double start_aq_gtod;
-double time_emg_startEMG;
-double time_emg_absolute;
+double time_vst_absolute; // Timestamp for each iteration of vst code in absolute computer time
+double zero_time_absolute; // Timestamp for Zero time of EMG data in absolute computer time
+double marker_x_posl[6]; 	// x position of left leg markers from DUO wrt camara
+double marker_y_posl[6]; 	// y position of left leg markers from DUO wrt camara
+double jt_angles_l[3];		// joint angles left leg
+double xf;					// foot position x only (average of both foot makers in x)
 };
+
+
 double time_elapsed(struct timeval *, struct timeval *);
 void foot_tracking(double, double, double, double, double, double,double, double, double, double, double, double); // foot and torso tracking
 vector< vector<double> > leg_tracking(double[],double[],double[]);
@@ -104,6 +96,7 @@ int main (int argc, char *argv[])
     	}
 
 	/* ----( Connect to NDI system )----*/
+	/*
 	char *main_ip_address = "10.200.148.198"; // VST space 
    	markers_struct markers;
 
@@ -113,7 +106,7 @@ int main (int argc, char *argv[])
 
     	update_markers(&markers);
 	printf("Number of Markers: %d\n",markers.size); 
-	
+	*/
 	// Initialization
 	int K_table, xf_table;	
 	const double dK1 = 1000.0;
@@ -364,7 +357,7 @@ int main (int argc, char *argv[])
 	cout << "Type one perturbations at: ";
 	
 	for (int i = 0; i < oneCounter; i++)
-	{
+	{ 
 		cout << "  " << typeOne[i];
 	}
 	
@@ -398,18 +391,7 @@ int main (int argc, char *argv[])
 			
 	
 		/* ----( Read in data )---- */
-		// Get data from NDI		
-		update_markers(&markers);
-		for ( int main_i = 0; main_i < markers.size; main_i++)
-		{
-			sdata->x_markers[main_i] = markers.marker[main_i].x;
-			sdata->y_markers[main_i] = markers.marker[main_i].y;
-			sdata->z_markers[main_i] = markers.marker[main_i].z;
-		}	
-	
-		// Calculates foot position
-		foot_tracking(sdata->x_markers[4], sdata->y_markers[4], sdata->z_markers[4], sdata->x_markers[3], sdata->y_markers[3], sdata->z_markers[3],sdata->x_markers[0], sdata->y_markers[0], sdata->z_markers[0], sdata->x_markers[1], sdata->y_markers[1], sdata->z_markers[1]);
-	
+		
 		/*else // sdata->experiment = FALSE
 		{
 			i = length_of_for_loop;
@@ -426,10 +408,10 @@ int main (int argc, char *argv[])
 		
 		/*----( Limb Tracking )----*/
 	
-		string markerStrX, markerStrY;
-		string currentMarkerStrX, currentMarkerStrY;
+		string jointStr;
+		string currentJointStr;
 		
-		vector< vector<double> > markerVec = leg_tracking(sdata->x_markers, sdata->y_markers, sdata->z_markers);
+		//vector< vector<double> > markerVec = leg_tracking(sdata->x_markers, sdata->y_markers, sdata->z_markers);
 // 		cout << "\n\n\n\nfootposx = "<< sdata->foot_pos_x<<endl;
 // 		for (int it = 0; it<5; it++)
 // 		{
@@ -466,7 +448,19 @@ int main (int argc, char *argv[])
 // 		markerCharY[markerStrY.size()] = 0;
 // 		memcpy(markerCharX,markerStrX.c_str(),markerStrX.size());
 // 		memcpy(markerCharY,markerStrY.c_str(),markerStrY.size());
-		
+		for(int it = 0; it<3; it++)
+		{
+			currentJointStr = boost::lexical_cast<string> (sdata->jt_angles_l[it]);
+			jointStr.append(currentJointStr);
+			if(it <2)
+			{
+				jointStr.append(",");
+			}
+		}
+		char *jointChar = new char[jointStr.size()+1];
+		jointChar[jointStr.size()] = 0;
+		memcpy(jointChar,jointStr.c_str(),jointStr.size());
+		cout << jointChar << endl;	
 		try
 		{
 			recvlen = recvfrom(sockfd, stepData, STEPSIZE, 0, (struct sockaddr *)&remote_addr, &addrlen);
@@ -483,14 +477,22 @@ int main (int argc, char *argv[])
 			}
 		
 			distance = atof(stepData);
-			
-			if(sendto(sockfd,"running", strlen("running"), 0, (struct sockaddr *)&remote_addr, addrlen) < 0)
+			if(sendto(sockfd,"Running", strlen("Running"), 0, (struct sockaddr *)&remote_addr, addrlen) < 0)
 			{
 				perror("Send failed.");
 				//close(sockfd);
 				return 0;
 			}
 			
+			/*
+			
+			if(sendto(sockfd,jointChar, strlen(jointChar), 0, (struct sockaddr *)&remote_addr, addrlen) < 0)
+			{
+				perror("Send failed.");
+				//close(sockfd);
+				return 0;
+			}
+			*/
 		}
 		catch (int e)
 		{
@@ -575,6 +577,7 @@ int main (int argc, char *argv[])
 				{
 					cout << "No stiffness change at patch number " << typeZero[currentPertZero];
 				}
+
 				else
 				{
 					cout << "Stiffness change between patches " << typeOne[currentPertOne] - 1 << " and " << typeOne[currentPertOne];
@@ -602,7 +605,7 @@ int main (int argc, char *argv[])
 	} // close for i.. loop	
 		
 	/* ----( Print data to file )---- */
-	save2file(sdata);// call if you want data to be saved to a file
+	//save2file(sdata);// call if you want data to be saved to a file
 	gettimeofday(&end, NULL);
 	sdata->elapsed = time_elapsed(&start, &end);
 	gettimeofday(&start, NULL);
@@ -626,14 +629,14 @@ int main (int argc, char *argv[])
 /* ----( Sub Functions )---- */
 //---------------------------//
 
-
+#if 0
 void save2file(sensor_data * d) 
 {
 	fprintf(fp,"%d %f %f %f %f %f %f %f %f %d %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %d %d %d %d %d %d %d %d %d\n", d->motorv_int /*1*/, d->lc1_lbs/*2*/, d->lc2_lbs/*3*/, d->time /*4*/,d->tspeed_desired/*5*/, d->xd/*6*/,d->xact/*7*/,d->foot_pos_x/*8*/, d->mid_stance_x/*9*/, d->perturb/*10*/,d->angle_enc/*11*/,d->Kd/*12*/,d->Kact/*13*/,d->force_b/*14*/,d->elapsed/*15*/,d->x_markers[0]/*16*/, d->x_markers[1]/*17*/, d->x_markers[2]/*18*/, d->x_markers[3]/*19*/, d->x_markers[4]/*20*/, d->y_markers[0]/*21*/, d->y_markers[1]/*22*/, d->y_markers[2]/*23*/, d->y_markers[3]/*24*/, d->y_markers[4]/*25*/, d->z_markers[0]/*26*/, d->z_markers[1]/*27*/, d->z_markers[2]/*28*/, d->z_markers[3]/*29*/, d->z_markers[4]/*30*/, d->x_markers[5]/*31*/, d->x_markers[6]/*32*/, d->x_markers[7]/*33*/, d->x_markers[8]/*34*/, d->x_markers[9]/*35*/, d->y_markers[5]/*36*/, d->y_markers[6]/*37*/, d->y_markers[7]/*38*/, d->y_markers[8]/*39*/, d->y_markers[9]/*40*/, d->z_markers[5]
 /*41*/, d->z_markers[6]/*42*/, d->z_markers[7]/*43*/, d->z_markers[8]/*44*/, d->z_markers[9]/*45*/,d->forcesensors_int[0]/*46*/,d->forcesensors_int[1]/*47*/,d->forcesensors_int[2]/*48*/,d->forcesensors_int[3]/*49*/,d->forcesensors_int[4]/*50*/,d->forcesensors_int[5]/*51*/,d->forcesensors_int[6]/*52*/,d->forcesensors_int[7]/*53*/,d->numEMG/*54*/); 
 
 }
-
+#endif
 void convert64to16(float p){
 	int a, b, c, d, e, f, g, h, q, i;
 	q=p*(pow(2,20))*2500/2749;
@@ -671,7 +674,7 @@ double time_elapsed(struct timeval * start, struct timeval * end)
     return elapsed;
 }
 
-
+#if 0
 void foot_tracking(double toe_x, double toe_y, double toe_z, double ankle_x, double ankle_y, double ankle_z, double torso_x, double torso_y, double torso_z, double hip_x, double hip_y, double hip_z)
 {
 	
@@ -755,8 +758,11 @@ vector< vector<double> > leg_tracking(double xMarkers[], double yMarkers[], doub
 	
 
 	double z_offset = 37;
-	double T[4][4];
+	vector< vector<double> > T (4, vector<double> (4, 0.0));
+	vector<double>  Foot_t (4,0.0);
 	
+	double myDubs []= { xMarkers[4], yMarkers[4], zMarkers[4], 1.0};
+	vector<double> Foot_c (myDubs, myDubs + sizeof(myDubs)/sizeof(double));
 
 	// Inverse Transformation matrix from Matlab
 	// Converts data from camera frame to treadmill frame
@@ -780,7 +786,7 @@ vector< vector<double> > leg_tracking(double xMarkers[], double yMarkers[], doub
 	T[3][2] = 0;
 	T[3][3] = 1;
 
-	// Store positions
+	// Apply coordinate transformation (NDI frame to treadmill frame)
 	for (int markerNum = 0;markerNum<5;markerNum++)
 	{
 		for (int i = 0; i < 4; i++)
@@ -788,45 +794,35 @@ vector< vector<double> > leg_tracking(double xMarkers[], double yMarkers[], doub
 			for (int j = 0; j < 4; j++)
 			{
 				markerArrayTransf[markerNum][i] += T[i][j] * markerArray[markerNum][j];
-				markerArrayTransf[markerNum][i] /= 10;		//convert to cm
-				
-				if (i == 2)
-				{
-					markerArrayTransf[markerNum][i] -= z_offset;
-				}
-// 				temp1 = T[i][j]*Foot_c[j];
-// 				Foot_t[i] = Foot_t[i] + temp1;
-// 				temp2 = T[i][j]*Mid_c[j];
-// 				Mid_t[i] = Mid_t[i] + temp2;
 			}
 		}
 	}
-// 	
-	cout<<"\roriginal = " <<zMarkers[4]<< ", transformed = " << markerArrayTransf[4][2] << ", foot_pos = " <<sdata->foot_pos_x;
-
-// 	for (int i = 0; i<5; i++)
-// 	{
-// 		cout << "\n\n\n\n";
-// 		for (int it = 0; it<5; it++)
-// 		{
-// 			cout << "Marker #" << it << endl;
-// 			for(int dim = 0; dim<3; dim++)
-// 			{
-// 				cout<< markerArray[it][dim] << endl;
-// 			}
-// 			cout <<endl;
-// 		}
-// 		
-// 		//rotate(markerArrayTransf[i].begin(),markerArrayTransf[i].begin()+2,markerArrayTransf[i].end());
-// 	}
-	//sdata->foot_pos_x = (Foot_t[2]/10.0) - z_offset;  // Convert to cm // really it's z
-// 	sdata->foot_pos_y = (Foot_t[0]/10.0);  // Convert to cm
-// 	sdata->mid_stance_x = (Mid_t[2]/10.0) - z_offset;  // really it's z
+	
+	// Convert all positions from mm to cm, and apply the z (x) offset
+	for (int markerIt = 0; markerIt<5;markerIt++)
+	{
+		markerArrayTransf[markerIt].pop_back(); // Removes the '1' scaler
 		
+		// rotates the order of the vector from z,x,y to x,y,z
+		rotate(markerArrayTransf[markerIt].begin(),markerArrayTransf[markerIt].begin()+2,markerArrayTransf[markerIt].end());
+		
+		
+		for(int dimIt = 0; dimIt<3; dimIt++)
+		{
+			markerArrayTransf[markerIt][dimIt] /= 10; // converts from mm to cm
+			if (dimIt == 0) // applies z (x) offset if current dimension is x 
+			{
+				markerArrayTransf[markerIt][dimIt] -= z_offset;
+			}
+		}
+	}
+	cout<<"\rtransformed = " << markerArrayTransf[4][0] << ", foot_pos = " <<sdata->foot_pos_x;
+
+// 	
 	return markerArrayTransf;
 }
 
-
+#endif
 void my_handler(int s){
         fprintf(stdout, "Caught signal %d\n",s);
 	sdata->data_exchange = FALSE;

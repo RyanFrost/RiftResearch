@@ -26,7 +26,6 @@ public:
 	dataGenerator(int);
 	~dataGenerator();
 
-	void start();
 	
 	std::vector<double> getAngles();
 	std::vector<int> getPatches();

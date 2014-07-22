@@ -42,11 +42,11 @@ using namespace std;
 const char filename[] = "mydatarift.txt";
 //const char filename_emg[] = "emg_sampled_data.txt";
 
-// updated 5/3/2014
+// updated 6/30/2014
 struct sensor_data {
 int motorv_int; // voltage to motor in int format
-double lc1_lbs; // loadcell 1 in pounds
-double lc2_lbs; // loadcell 2 in pounds
+double lcR_lbs; // Right loadcell [lbs] (was lc1)
+double lcL_lbs; // Left loadcell [lbs] (was lc2)
 double time;	// Absolute system time (sec) the Arduino measurement was taken
 uint8_t motorv_2Arduino; // Commanded motor voltage to Arduino range: [0-255] [0-5]V
 double motorv_double; // Commanded motor voltage: [0-5]V
@@ -56,14 +56,6 @@ bool enable_treadmill;	// Enable treadmill motor
 bool data_exchange;	// Bool for acknowledging data exchange with Arduino
 float xd; // Linear track desired position wrt the home position in cm
 float xact; // Linear track actual position wrt the home position in cm
-int forcesensors_int[8]; // force sensor vector in int format
-double forcesensors_lbs[8]; // force sensor vector in pounds
-double foot_pos_x; // x position of foot along treadmill in cm
-double foot_pos_y; // y position of foot above treadmill in cm
-double mid_stance_x; // Average of torso and hip positions (x)
-double x_markers[10]; // x position of markers from NDI wrt camara
-double y_markers[10]; // y position of markers from NDI wrt camara
-double z_markers[10]; // z position of markers from NDI wrt camara
 int perturb; // (T/F) perturb this cycle?
 int cycle; // number of gait cycles
 double angle_enc; // angle from encoder (deg)
@@ -71,22 +63,18 @@ double Kd; // Desired stiffness
 double Kact; // Actual Stiffness
 double force_b; // Force at location B of kin. analysis
 double elapsed; // Time elapsed each iteration of VST for loop
-double* sharedData; // Pointer to emg data
 bool start_EMG; // Tells to start collecting EMG data
 bool get_EMG; // Tells when to get EMG
-double time_emg; // Computer time that emg was sampled
 bool experiment; // Tells wheather to do experiment or stop it.
 int numEMG; // Number of EMG electrodes used in experiment
 bool beep; // Causes beep
-//
-double time_vst_startEMG;
-double time_vst_absolute;
-double start_aq_grt;
-double start_aq_gtod;
-double time_emg_startEMG;
-double time_emg_absolute;
+double time_vst_absolute; // Timestamp for each iteration of vst code in absolute computer time
+double zero_time_absolute; // Timestamp for Zero time of EMG data in absolute computer time
+double marker_x_posl[6]; 	// x position of left leg markers from DUO wrt camara
+double marker_y_posl[6]; 	// y position of left leg markers from DUO wrt camara
+double jt_angles_l[3];		// joint angles left leg
+double xf;					// foot position x only (average of both foot makers in x)
 };
-
 
 /* ----( Function Prototypes )---- */
 void foot_tracking(double, double, double, double, double, double,double, double, double, double, double, double); // foot and torso tracking
@@ -99,7 +87,7 @@ void move_track(float);
 float read_track(void);
 void get_angle_enc(void);
 double time_elapsed(struct timeval *, struct timeval *);
-void save2file(sensor_data *);
+void save2file(sensor_data *, bool movingBackward, bool movingForward, bool transitioning);
 void save2file_emg(sensor_data *);
 
 bool is_sorted(vector<double>);
@@ -240,8 +228,7 @@ int main (int argc, char *argv[])
  	timeval a, b;
 	gettimeofday(&a,0);
 	double t = (double)(a.tv_usec);
-	//double time_vst_startEMG = a.tv_sec + t/1000000;
-	sdata->time_vst_startEMG = a.tv_sec + t/1000000; // <--------
+	
 	double past1 = 0;
 	double past2 = 0;
 	double past3 = 0;
@@ -258,10 +245,21 @@ int main (int argc, char *argv[])
 	bool movingForward = false;
 	bool movingBackward = false;
 	bool movingBackwardFirst = false;
+	bool transitioning = false;
 	sdata->beep = FALSE;
 	double tasdf;
 //********************************
-	while( true )
+	
+	
+	/* ----( Wait to start experiment )---- */
+	cout << "\nWaiting to start experiment...\n";
+	sdata->experiment = FALSE; // make sure sdata->experiment is false for correct timing
+	sdata->cycle = 0; // make sure number of cycles is 0 
+
+//	while (sdata->experiment == FALSE){} // waits for 'main' to change 'experiment' to true
+// 	while (sdata->start_EMG == FALSE){}  // waits for 'main' to change 'start_EMG' to true
+	
+	while (true) // continuously runs experiment unless 'main' ends the experiment
 	{
 		end_low_stiff = FALSE;		
 		sdata->beep = FALSE;
@@ -271,6 +269,7 @@ int main (int argc, char *argv[])
 		movingForward = false;
 		movingBackward = false;
 		movingBackwardFirst = false;
+		transitioning = false;
 		// Normal inf stiffness
 		sdata->Kd = 1e6;
 		sdata->xd = 0.01;
@@ -284,14 +283,14 @@ int main (int argc, char *argv[])
 			past3 = past2;
 			past2 = past1;
 			past1 = xf;
-			xf = sdata->foot_pos_x;
+			xf = sdata->xf;
 			fprintf(stdout,"Values: %f, %f, %f, %f\n",xf,past1,past2,past3);
 
 			gettimeofday(&b,0);
 			tasdf = (double)(b.tv_usec);
 			sdata->time_vst_absolute = b.tv_sec + tasdf/1000000;
 			
-			save2file(sdata);// call if you want data to be saved to a file
+			save2file(sdata, movingBackward,movingForward, transitioning);// call if you want data to be saved to a file
 			
 			usleep(10000);
 		}	
@@ -309,8 +308,8 @@ int main (int argc, char *argv[])
 			// Calculate xf progression
 						
 
-			xf = sdata->foot_pos_x;
-			xmid = sdata->mid_stance_x;
+			xf = sdata->xf;
+			xmid = 50.0;
 			pastVals.erase(pastVals.begin());		// Removes first element from list
 			pastVals.push_back(xf);					// Adds current foot pos to end of list
 			
@@ -344,7 +343,7 @@ int main (int argc, char *argv[])
 				}				
 				
 			}		
-			if ( movingForward && fabs(xf-45.0)<=5)
+			if ( movingForward && fabs(xf-xmid)<=5)
 			{
 				changedStiff = true;
 				sdata->Kd = 6e4;
@@ -390,7 +389,7 @@ int main (int argc, char *argv[])
 				
 				/* ----( Controller )---- */
 				// Calculate actual stiffness
-				sdata->Kact = (xb*sdata->force_b) / (pow( (sdata->foot_pos_x/100.0) ,2.0)*tan(sdata->angle_enc*M_PI/180.0));
+				sdata->Kact = (xb*sdata->force_b) / (pow( (sdata->xf/100.0) ,2.0)*tan(sdata->angle_enc*M_PI/180.0));
 		
 				// Calculate error
 				err = sdata->Kd - sdata->Kact;
@@ -401,7 +400,7 @@ int main (int argc, char *argv[])
 				else 
 					K_table = static_cast<int>( (90 + (sdata->Kd - K_02)/dK2) + 0.5);
 	
-				xf_table = static_cast<int>( (sdata->foot_pos_x - xf_0)/dxf + 0.5);
+				xf_table = static_cast<int>( (sdata->xf - xf_0)/dxf + 0.5);
 				uff = track_position_table(xf_table, K_table); // Updates desired track position
 				//duff = uff - uffp;
 				//sdata->beep = FALSE;
@@ -483,7 +482,7 @@ int main (int argc, char *argv[])
 			gettimeofday(&b,0);
 			tasdf = (double)(b.tv_usec);
 			sdata->time_vst_absolute = b.tv_sec + tasdf/1000000;
-			save2file(sdata);// call if you want data to be saved to a file
+			save2file(sdata, movingBackward,movingForward, transitioning);// call if you want data to be saved to a file
 				
 		} // end of while loop
 
@@ -716,7 +715,7 @@ void save2file(sensor_data * d)
 
 }
 
-#endif
+
 
 void save2file(sensor_data * d) 
 {
@@ -732,14 +731,35 @@ void save2file(sensor_data * d)
 			d->start_aq_grt/*60*/,d->start_aq_gtod/*61*/,d->time_emg_startEMG/*62*/,d->time_emg_absolute/*63*/); 
 
 }
+#endif
 
 
-void save2file_emg(sensor_data * d) 
+void save2file(sensor_data * d, bool movingBackward, bool movingForward, bool transitioning) 
 {
-	fprintf(fp_emg,"%f %f %f %f %f %f %f %f %f %f %f %f %f %f\n",d->sharedData[0]/*47*/,d->sharedData[1]/*48*/,d->sharedData[2]/*49*/,d->sharedData[3]/*50*/,d->sharedData[4]/*51*/,d->sharedData[5]/*52*/,d->sharedData[6]/*53*/,d->sharedData[7]/*54*/,d->sharedData[8]/*55*/,d->sharedData[9]/*56*/,d->sharedData[10]/*57*/,d->sharedData[11]/*58*/,d->sharedData[12]/*59*/,d->sharedData[13]/*60*/);
+	// ensure proper spacing between 'fprintf' w/ a space after last %f
+	fprintf(fp,"%d %f %f ",d->motorv_int /*1*/, d->lcR_lbs/*2*/, d->lcL_lbs/*3*/);
 
+	fprintf(fp,"%f %f %f %f %d %f %f %f %f %f ", d->time /*4*/,d->tspeed_desired/*5*/, d->xd/*6*/,d->xact/*7*/, d->perturb/*8*/,d->angle_enc/*9*/,d->Kd/*10*/,d->Kact/*11*/,d->force_b/*12*/,d->elapsed/*13*/);
+
+	fprintf(fp,"%d %d %f %f ",d->numEMG/*14*/,d->cycle/*15*/,d->time_vst_absolute/*16*/,d->zero_time_absolute/*17*/);
+
+	//Jeremy added
+	//double marker_x_posl[6]; 	// x position of left leg markers from DUO wrt camara
+	//double marker_y_posl[6]; 	// y position of left leg markers from DUO wrt camara
+	//double jt_angles_l[3];		// joint angles left leg
+	//double xf;					// foot position x only (average of both foot makers in x)
+ 
+	for (int i = 0; i<3; i++)
+	fprintf(fp,"%f ",d->jt_angles_l[i]); /*18-20*/ 
+
+	fprintf(fp,"%f ",d->xf);/*21*/
+	
+	fprintf(fp,"%d %d %d",movingBackward/*22*/,movingForward/*23*/,transitioning/*24*/); 
+
+	fprintf(fp,"\n");
 }
 
+#if 0
 void foot_tracking(double toe_x, double toe_y, double toe_z, double ankle_x, double ankle_y, double ankle_z, double torso_x, double torso_y, double torso_z, double hip_x, double hip_y, double hip_z)
 {
 	
@@ -798,7 +818,7 @@ void foot_tracking(double toe_x, double toe_y, double toe_z, double ankle_x, dou
 		
 	return;
 }
-
+#endif
 void track_position(double K, double foot_pos_x) // K in N/m, x_track in cm
 {
 	// Best fit line from experimental data
