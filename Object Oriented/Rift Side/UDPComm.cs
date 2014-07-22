@@ -19,13 +19,14 @@ public class UDPComm : MonoBehaviour
 	private GameObject patchManagerObj;
 	
 	private int port = 27015;
-	private string addr = "66.253.248.207";
+	private string addr = "10.200.148.33";
 	
 	private IPEndPoint home;
 	
 	private bool running = true;
 
 	private double[] angles;
+	private float distanceToNext;
 	private int[] patchArray;
 	private int[] patchTypes;
 	
@@ -38,14 +39,14 @@ public class UDPComm : MonoBehaviour
 		receiveThread.IsBackground = true;
 		receiveThread.Start();
 		
-		patchManagerObj = GameObject.Find("PatchManager");
+		patchManagerObj = GameObject.Find("Patch Manager");
 	}
 	
 	
 
 	void Update()
 	{
-		
+		updateDistanceToNext();
 		
 	}
 
@@ -74,20 +75,23 @@ public class UDPComm : MonoBehaviour
 		try
 		{
 			
-			client.Connect("Windsor",27015);
+			client.Connect("treadmill-OptiPlex-980",27015);
 			byte[] sendBytes = Encoding.UTF8.GetBytes("Send Patch Array");
 			client.Send(sendBytes, sendBytes.Length);
 			byte[] data = client.Receive(ref home);
 			string text = Encoding.UTF8.GetString(data);
-			
+			print(text);
 			patchArray = intParser(text);
+			
 			
 			sendBytes = Encoding.UTF8.GetBytes("Send Patch Type Array");
 			client.Send(sendBytes, sendBytes.Length);
 			
 			data = client.Receive(ref home);
 			text = Encoding.UTF8.GetString(data);
+			print(text);
 			patchTypes = intParser(text);
+			print("parsed patch types");
 		}
 
 		catch (Exception err)
@@ -99,21 +103,20 @@ public class UDPComm : MonoBehaviour
 		{
 
 			try
-			{
+			{				
 				// Send distance to next patch
 				float distance = getDistanceToNext();
 				string distanceStr = distance.ToString();
 				byte[] sendBytes = Encoding.UTF8.GetBytes(distanceStr);
 				client.Send(sendBytes, sendBytes.Length);
-				
 				// Get joint angles
 				byte[] angleData = client.Receive(ref home);
 				string angleStr = Encoding.UTF8.GetString(angleData);
 				angles = doubleParser (angleStr);
 				
 				// Check if next step will be stiffness change
-				byte[] nextStepData = client.Receive(ref home);
-				nextStepWarning = BitConverter.ToBoolean(nextStepData, 0);
+				//byte[] nextStepData = client.Receive(ref home);
+				//nextStepWarning = BitConverter.ToBoolean(nextStepData, 0);
 
 			}
 			catch(SocketException err)
@@ -124,6 +127,7 @@ public class UDPComm : MonoBehaviour
 			catch(ObjectDisposedException err)
 			{
 				print(err.ToString());
+				running = false;
 			}
 			
 		}
@@ -131,10 +135,13 @@ public class UDPComm : MonoBehaviour
 	
 	private float getDistanceToNext()
 	{
-		return patchManagerObj.GetComponent<patchManager>().getDistance();
+		return distanceToNext;
 	}
 	
-	
+	private void updateDistanceToNext()
+	{
+		distanceToNext = patchManagerObj.GetComponent<patchManager>().getDistanceToPatch();
+	}
 	
 	
 	private double[] doubleParser(string inputStr)
