@@ -30,7 +30,7 @@ public class UDPComm : MonoBehaviour
 	private int[] patchArray;
 	private int[] patchTypes;
 	
-	private bool nextStepWarning = false;
+	private int pertProgress;
 	
 
 	void Start()
@@ -114,9 +114,8 @@ public class UDPComm : MonoBehaviour
 				string angleStr = Encoding.UTF8.GetString(angleData);
 				angles = doubleParser (angleStr);
 				
-				// Check if next step will be stiffness change
-				//byte[] nextStepData = client.Receive(ref home);
-				//nextStepWarning = BitConverter.ToBoolean(nextStepData, 0);
+				byte[] perturbationProgress = client.Receive(ref home);
+				pertProgress = BitConverter.ToInt32(perturbationProgress,0);
 
 			}
 			catch(SocketException err)
@@ -171,9 +170,10 @@ public class UDPComm : MonoBehaviour
 		return patchTypes;
 	}
 	
-	public bool getNextStepWarning()
+	public int[] getPertProgress()
 	{
-		return nextStepWarning;
+		return pertProgress;
 	}
+	
 	
 }

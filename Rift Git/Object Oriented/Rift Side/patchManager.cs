@@ -10,6 +10,7 @@ public class patchManager : MonoBehaviour {
 	
 	private int currentPatch = 0;
 	private float distanceToPatch = 1.0f;
+	private int pertProgress;
 	
 	void Start()
 	{
@@ -67,6 +68,11 @@ public class patchManager : MonoBehaviour {
 	private void calcDistanceToPatch(GameObject gameObj)
 	{
 		distanceToPatch = patchList[currentPatch].getPatchDistance(gameObj);
+	}
+	
+	private int getPertProgress()
+	{
+		pertProgress = udpObj.getComponent<UDPComm>().getPertProgress();
 	}
 	
 	public float getDistanceToPatch()
