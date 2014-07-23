@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 public class patchManager : MonoBehaviour {
 
-	private GameObject udpObj, patchObj, playerObj;
+	private GameObject udpObj, patchObj, playerObj, leftFootObj;
 	private List<patch> patchList;
 	
 	private int[] patchLocations, patchTypes;
@@ -19,6 +19,7 @@ public class patchManager : MonoBehaviour {
 		udpObj = GameObject.Find( "UDP" );
 		patchObj = GameObject.Find("SandPatch Terrain");
 		playerObj = GameObject.Find("OVRPlayerController");
+		leftFootObj = GameObject.Find("LeftToeBase");
 		patchLocations = udpObj.GetComponent<UDPComm>().getPatchArray();
 		patchTypes = udpObj.GetComponent<UDPComm>().getPatchTypes();
 
@@ -32,7 +33,10 @@ public class patchManager : MonoBehaviour {
 	
 	void Update()
 	{
-		switch ( patchList[currentPatch].getType())
+		
+		calcDistanceToPatch(leftFootObj);
+		
+		/* switch ( patchList[currentPatch].getType())
 		{
 			case 1:
 				
@@ -43,7 +47,7 @@ public class patchManager : MonoBehaviour {
 			case 3:
 				
 				break;
-		}
+		} */
 	}
 	
 	
@@ -51,7 +55,7 @@ public class patchManager : MonoBehaviour {
 	private void case1()
 	{
 	
-		distanceToPatch = patchList[currentPatch].getPatchDistance(playerObj);
+		distanceToPatch = patchList[currentPatch].getPatchDistance(leftFootObj);
 	
 		if(distanceToPatch <= 0)
 		{
@@ -60,7 +64,12 @@ public class patchManager : MonoBehaviour {
 		
 	}
 	
-	public float getDistance()
+	private void calcDistanceToPatch(GameObject gameObj)
+	{
+		distanceToPatch = patchList[currentPatch].getPatchDistance(gameObj);
+	}
+	
+	public float getDistanceToPatch()
 	{
 		return distanceToPatch;
 	}
