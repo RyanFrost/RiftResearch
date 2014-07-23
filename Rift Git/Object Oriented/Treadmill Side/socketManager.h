@@ -1,17 +1,19 @@
 #pragma once
 
-#include <WinSock2.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <netinet/in.h>
 #include <vector>
 
 
 
 
-class socketManagerWindows
+class socketManager
 {
 private:
 	
 	//Properties
-	SOCKET sockfd;
+	int sockfd;
 	struct sockaddr_in remoteHost;
 	int port;
 	
@@ -24,8 +26,8 @@ private:
 
 
 public:
-	socketManagerWindows(int);
-	~socketManagerWindows();
+	socketManager(int);
+	~socketManager();
 	
 
 

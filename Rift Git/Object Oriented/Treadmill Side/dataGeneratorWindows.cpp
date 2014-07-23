@@ -1,4 +1,4 @@
-#include "dataGenerator.h"
+#include "dataGeneratorWindows.h"
 
 
 #include <ctime>
@@ -10,30 +10,33 @@
 #include <algorithm>
 
 #include <boost/lexical_cast.hpp>
-#include <boost/thread.hpp>
 #include <chrono>
+#include <boost/thread.hpp>
 
 
+using namespace std;
 
 
+dataGeneratorWindows::dataGeneratorWindows(int numberPatches) : numPatches(numberPatches)
+{	
+}
 
-dataGenerator::dataGenerator(int numberPatches) : numPatches(numberPatches)
+
+dataGeneratorWindows::~dataGeneratorWindows()
+{
+}
+
+
+void dataGeneratorWindows::start()
 {
 	patchGenerator();
 	patchTypeGenerator();
-	patchSeparationGenerator();
+	startAngleGen();
 }
 
-
-dataGenerator::~dataGenerator()
+void dataGeneratorWindows::patchGenerator(void)
 {
-}
-
-
-
-
-void dataGenerator::patchGenerator(void)
-{
+	std::cout << "inside patchGenerator" << std::endl;
 	
 	patches.clear(); // Clears patch vector for reuse
 	
@@ -54,10 +57,10 @@ void dataGenerator::patchGenerator(void)
 }
 
 
-
-void dataGenerator::patchTypeGenerator(void)
+void dataGeneratorWindows::patchTypeGenerator(void)
 {
 	
+	std::cout<< "inside patchTypeGenerator" << std::endl;
 	int numPert = 10;
 	std::vector<int> patchTypeOrder;
 	patchTypeOrder.insert(patchTypeOrder.end(), numPert / 2, 2);
@@ -83,19 +86,11 @@ void dataGenerator::patchTypeGenerator(void)
 }
 
 
-void dataGenerator::patchSeparationGenerator(void)
-{
-	patchSeparations[0] = 0;
-	for(int i = 1; i < patches.size(); i++)
-	{
-		patchSeparations[i] = (double) (patches[i] - patches[i-1]) /2;
-	}
-}
 
-
-void dataGenerator::angleFootPosGenerator(void)
+void dataGeneratorWindows::angleFootPosGenerator(void)
 {
 
+	std::cout<< "Inside anglefootPosGenerator" << std::endl;
 	typedef std::chrono::high_resolution_clock Clock;
 	typedef std::chrono::duration<double> secDouble;
 	
@@ -126,38 +121,33 @@ void dataGenerator::angleFootPosGenerator(void)
 
 }
 
-
-// Starts the angle generation in a separate thread
-
-void dataGenerator::startAngleGen(void)
+void dataGeneratorWindows::startAngleGen(void)
 {
-	boost::thread t1(&dataGenerator::angleFootPosGenerator, this);
+	
+	std::cout << "inside startAngleGen" << std::endl;
+	boost::thread t1(&dataGeneratorWindows::angleFootPosGenerator, this);
+	
 }
 
 
 
 
-std::vector<int> dataGenerator::getPatches(void)
+vector<int> dataGeneratorWindows::getPatches(void)
 {
 	return patches;
 }
 
-std::vector<int> dataGenerator::getPatchTypes(void)
+vector<int> dataGeneratorWindows::getPatchTypes(void)
 {
 	return patchTypes;
 }
 
-std::vector<double> dataGenerator::getPatchSeparations(void)
-{
-	return patchSeparations;
-}
-
-std::vector<double> dataGenerator::getAngles(void)
+vector<double> dataGeneratorWindows::getAngles(void)
 {
 	return angles;
 }
 
-double dataGenerator::getFootPos(void)
+double dataGeneratorWindows::getFootPos(void)
 {
 	return footPos;
 }

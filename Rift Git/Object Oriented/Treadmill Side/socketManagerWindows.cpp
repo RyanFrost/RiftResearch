@@ -1,4 +1,4 @@
-#include "socketManager.h"
+#include "socketManagerWindows.h"
 #include <WinSock2.h>
 #include <iostream>
 #include <vector>
@@ -9,19 +9,19 @@
 
 #define PORT 27015
 
-socketManager::socketManager(int portNumber) : port(portNumber)
+socketManagerWindows::socketManagerWindows(int portNumber) : port(portNumber)
 {
 	initSocket();
 }
 
 
-socketManager::~socketManager()
+socketManagerWindows::~socketManagerWindows()
 {
 	cleanUpSocket();
 }
 
 
-void socketManager::initSocket()
+void socketManagerWindows::initSocket()
 {
 	std::cout << "Initializing socket." << std::endl;
 	
@@ -74,7 +74,7 @@ void socketManager::initSocket()
 }
 
 
-std::vector<char> socketManager::recvData(void)
+std::vector<char> socketManagerWindows::recvData(void)
 {
 	//Declare sockaddr_in struct for client
 	
@@ -99,7 +99,7 @@ std::vector<char> socketManager::recvData(void)
 
 }
 
-void socketManager::sendBuf(void)
+void socketManagerWindows::sendBuf(void)
 {
 	
 	int remLen = sizeof(remoteHost);
@@ -111,7 +111,7 @@ void socketManager::sendBuf(void)
 	}
 }
 
-void socketManager::loadIntArrayToBuf(std::vector<int> vec)
+void socketManagerWindows::loadIntArrayToBuf(std::vector<int> vec)
 {
 	// clear buffer
 	
@@ -135,7 +135,7 @@ void socketManager::loadIntArrayToBuf(std::vector<int> vec)
 	std::copy(valStr.begin(), valStr.end(), back_inserter(buf));
 }
 
-void socketManager::loadDubArrayToBuf(std::vector<double> vec)
+void socketManagerWindows::loadDubArrayToBuf(std::vector<double> vec)
 {
 
 	buf.clear();
@@ -160,7 +160,7 @@ void socketManager::loadDubArrayToBuf(std::vector<double> vec)
 
 
 }
-std::vector<char> socketManager::getBuf(void)
+std::vector<char> socketManagerWindows::getBuf(void)
 {
 	return buf;
 }
@@ -169,7 +169,7 @@ std::vector<char> socketManager::getBuf(void)
 
 
 
-void socketManager::cleanUpSocket(void)
+void socketManagerWindows::cleanUpSocket(void)
 {
 	closesocket(sockfd);
 	WSACleanup();

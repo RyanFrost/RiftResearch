@@ -1,35 +1,45 @@
 
 #include "dataGenerator.h"
-#include "socketManagerLinux.h"
+#include "socketManager.h"
 #include "sharedMemObject.h"
 
 
 #include <vector>
 #include <iostream>
 #include <iterator>
+#include <boost/thread.hpp>
 
 
-
+void startComm(void);
 void printCharVec(std::vector<char>);
 std::string charVecToStr(std::vector<char>);
 std::vector<double> arrayToVec(double *);
 
+
+socketManager sock(27015); // Creates socket object ---> opens socket on local port 27015
+dataGenerator dataGen(120); // dataGen creates the patch & patch type vectors
+sharedMemObject sharedMemory;
+
+
+std::vector<char> response;
 int main()
 {
-	socketManager sock(27015);
-	dataGenerator dataGen(120);
-	std::cout << dataGen.getPatches().size() << std::endl;
-	sharedMemObject sharedMemory;
+	
+	
+	//Uncomment following line for automatic joint angle generation
+	//dataGen.startAngleGen();
 	
 	
 	
 // 	while(true)
 // 	{
-// // 		for(int iter = 0; iter< 6; iter++)
-// // 			std::cout << sharedMemory.sdata->joint_angles_rift[iter] << " ";
-// // 		std::cout << "\n";
+// 		for(int iter = 0; iter< 6; iter++)
+// 			std::cout << sharedMemory.sdata->joint_angles_rift[iter] << " ";
+// 		std::cout << "\n";
+// 		
 // 		
 // 		sock.loadDubArrayToBuf( arrayToVec(sharedMemory.sdata->joint_angles_rift) );
+// 		sock.loadDubArrayToBuf(dataGen.getAngles());
 // 		printCharVec(sock.getBuf());	
 // 	}
 	
@@ -40,20 +50,74 @@ int main()
 	std::cout << "Received." << std::endl;
 
 	std::vector<int> patchesVec = dataGen.getPatches();
-	
 	sock.loadIntArrayToBuf(patchesVec);
 	printCharVec(sock.getBuf());
 	sock.sendBuf();
 	
 	response = sock.recvData();
 	printCharVec(response);
+	
 	std::vector<int> patchTypesVec = dataGen.getPatchTypes();
-
 	sock.loadIntArrayToBuf(patchTypesVec);
 	printCharVec(sock.getBuf());
 	sock.sendBuf();
-	std::cout << "Running..." << std::endl;
 	
+	
+	boost::thread commThread(startComm);
+	std::cout << "Running..." << std::endl;
+
+	while( charVecToStr(response) != "Quit")
+	{
+		
+		switch(currentPatchType)
+		{
+		case 1:
+			pertCycler("LOWER THAN INF STIFFNESS INT", 0.0);
+			currentPatch++;
+			break;
+		case 2:
+			pertCycler("INF STIFFNESS INT", 0.0);
+			currentPatch++;
+			break;
+		case 3:
+			pertCycler("LOWER THAN INF STIFFNESS INT", 3);
+			currentPatch++;
+			break;
+		
+		
+	commThread.join();
+	return 0;
+}
+
+void pertCycler(int stiffnessLevel, int patchType)
+{
+	
+	if(patchType == 3)
+	{
+		while(dataGen.getPatchSeparations()[currentPatch] >= 0.0);
+	
+	// Waits until foot is moving forward and foot is behind the 75cm mark
+	while( ~movingForward or sharedMemory.sdata->footpos >= 75.0)
+	{}
+	
+	// Waits until foot passes the 75cm mark
+	while(sharedMemory.sdata->footpos <= 75.0)
+	{}
+	
+	
+	// Changes stiffness until the foot has gone through a full step to toe off, 
+	// then goes back to infinite stiffness at midstance
+	while(~movingForward or sharedMemory.sdata->footpos <=50)
+	{
+		moveTrack(stiffnessLevel);
+	}
+}
+	
+	
+
+void startComm(void)
+{
+	std::vector<char> response;
 	while ( charVecToStr(response) != "Quit")
 	{
 		response = sock.recvData();  // This is the distance to next patch
@@ -63,38 +127,8 @@ int main()
 		sock.sendBuf();
 
 	}
-
-
-
-	///////
-
-
-// 	switch (currentPatchType)
-// 	{
-// 	case 1:
-// 		//Normal pert
-// 		break;
-// 	case 2:
-// 		//
-// 
-// 
-// 
-// 
-// 
-// 
-// 	}
-
-
-
-
-
-
-
-	///////
-
-
-	return 0;
 }
+
 
 
 void printCharVec(std::vector<char> vec)

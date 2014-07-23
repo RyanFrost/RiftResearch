@@ -14,7 +14,7 @@ socketManager.o : socketManager.h socketManager.cpp
 	$(CC) $(CXXFLAGS) socketManager.cpp
 
 dataGenerator.o : dataGenerator.h dataGenerator.cpp
-	$(CC) $(CXXFLAGS) dataGenerator.cpp
+	$(CC) $(CXXFLAGS) dataGenerator.cpp $(LFLAGS)
 
 sharedMemObject.o : sharedMemObject.h sharedMemObject.cpp
 	$(CC) $(CXXFLAGS) sharedMemObject.cpp
