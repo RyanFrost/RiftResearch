@@ -34,5 +34,5 @@ sharedMemObject::sharedMemObject()
 
 sharedMemObject::~sharedMemObject()
 {
-	free(sdata);
+	delete sdata;
 }

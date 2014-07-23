@@ -52,7 +52,7 @@ public:
 	std::vector<int> getPatches();
 	std::vector<int> getPatchTypes();
 	std::vector<double> getPatchSeparations();
-{
+
 	
 	// Generates sinusoidal joint angle functions in 
 	// place of actual data. For testing purposes.

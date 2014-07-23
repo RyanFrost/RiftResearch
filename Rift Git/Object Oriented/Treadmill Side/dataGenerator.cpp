@@ -85,10 +85,11 @@ void dataGenerator::patchTypeGenerator(void)
 
 void dataGenerator::patchSeparationGenerator(void)
 {
-	patchSeparations[0] = 0;
-	for(int i = 1; i < patches.size(); i++)
+	patchSeparations.reserve(numPatches);
+	patchSeparations.push_back(0);
+	for(uint i = 1; i < patches.size(); i++)
 	{
-		patchSeparations[i] = (double) (patches[i] - patches[i-1]) /2;
+		patchSeparations.push_back((patches[i] - patches[i-1]) /2);
 	}
 }
 
