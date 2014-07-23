@@ -32,7 +32,6 @@ int main()
 	//Uncomment following line for automatic joint angle generation
 	//dataGen.startAngleGen();
 	
-	std::cout << "Inside main loop" << std::endl;
 	
 // 	while(true)
 // 	{

@@ -125,16 +125,16 @@ void pertCycler(int stiffnessLevel, int patchType)
 
 void startComm(void)
 {
-	std::vector<char> response;
-	while ( charVecToStr(response) != "Quit")
-	{
-		response = sock.recvData();  // This is the distance to next patch
-		//printCharVec(response);
-		sock.loadDubArrayToBuf( arrayToVec(sharedMemory.sdata->joint_angles_rift) );
-		//printCharVec(sock.getBuf());
-		sock.sendBuf();
-
-	}
+// 	std::vector<char> response;
+// 	while ( charVecToStr(response) != "Quit")
+// 	{
+// 		response = sock.recvData();  // This is the distance to next patch
+// 		//printCharVec(response);
+// 		sock.loadDubArrayToBuf( arrayToVec(sharedMemory.sdata->joint_angles_rift) );
+// 		//printCharVec(sock.getBuf());
+// 		sock.sendBuf();
+// 
+// 	}
 }
 
 
