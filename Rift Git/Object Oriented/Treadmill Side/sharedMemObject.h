@@ -2,6 +2,7 @@
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <cstdint>
+#include <fstream>
 
 class sharedMemObject
 {
@@ -45,11 +46,17 @@ private:
 		double joint_angles_rift[6];	// joint angles in vector charactor form
 	};
 	
+	// File saving components
+	FILE *fp;
+		
+	void openFile();
+	
 	
 public:
 	sharedMemObject();
 	~sharedMemObject();
 	
+	void save2file(double xfoot, bool movingBackward, bool movingForward, bool transitioning);
 	
 	sensor_data *sdata;
 };
