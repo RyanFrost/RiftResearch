@@ -34,7 +34,7 @@ public:
 	
 	void loadIntArrayToBuf(std::vector<int>);
 	void loadDubArrayToBuf(std::vector<double>);
-	void loadIntToBuf(int);
+	void socketManager::loadIntToBuf(int);
 	
 	std::vector<char> recvData(void);
 	void sendBuf();

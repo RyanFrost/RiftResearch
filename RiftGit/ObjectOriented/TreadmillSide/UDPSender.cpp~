@@ -137,9 +137,9 @@ void startComm(void)
 	while ( charVecToStr(response) != "Quit")
 	{
 		response = sock.recvData();  // This is the distance to next patch
-		printCharVec(response);
+		//printCharVec(response);
 		sock.loadDubArrayToBuf( arrayToVec(sharedMemory.sdata->joint_angles_rift) );
-		printCharVec(sock.getBuf());
+		//printCharVec(sock.getBuf());
 		sock.sendBuf();
 		
 		sock.loadIntToBuf(sharedMemory.sdata->perturb);

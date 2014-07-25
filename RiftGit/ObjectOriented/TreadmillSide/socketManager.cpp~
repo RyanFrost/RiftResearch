@@ -150,7 +150,7 @@ void socketManager::loadIntToBuf(int integer)
 	
 	buf.clear();
 	std::string intStr = std::to_string(integer);
-	std::copy(intStr.begin(), intStr.end(), back_inserter(buf));
+	std::copy(intStr.begin(), intStr.end(), back_inserter(buf);
 }
 
 std::vector<char> socketManager::getBuf(void)
