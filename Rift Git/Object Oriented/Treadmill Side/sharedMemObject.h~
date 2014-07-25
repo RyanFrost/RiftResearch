@@ -56,7 +56,7 @@ public:
 	sharedMemObject();
 	~sharedMemObject();
 	
-	virtual void save2file();
+	virtual void save2file(double xfoot, bool movingBackward, bool movingForward, bool transitioning);
 	
 	sensor_data *sdata;
 };
