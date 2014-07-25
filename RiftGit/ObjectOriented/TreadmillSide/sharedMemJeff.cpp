@@ -1,7 +1,7 @@
 
 #include "sharedMemJeff.h"
 
-void sharedMemObject::save2file(double xfoot, bool movingBackward, bool movingForward, bool transitioning)
+void sharedMemJeff::save2file(double xfoot, bool movingBackward, bool movingForward, bool transitioning)
 {
 	// ensure proper spacing between 'fprintf' w/ a space after last %f
 	fprintf(fp,"%d %f %f ",sdata->motorv_int /*1*/, sdata->lcR_lbs/*2*/, sdata->lcL_lbs/*3*/);

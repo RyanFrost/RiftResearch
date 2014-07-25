@@ -7,7 +7,7 @@
 class sharedMemObject
 {
 
-private:
+protected:
 	struct sensor_data 
 	{
 		int motorv_int; // voltage to motor in int format

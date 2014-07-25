@@ -18,7 +18,7 @@ void pertCycler(int, int);
 
 socketManager sock(27015); // Creates socket object ---> opens socket on local port 27015
 dataGenerator dataGen(120); // dataGen creates the patch & patch type vectors
-sharedMemJeff sharedMemory;
+//sharedMemJeff sharedMemory;
 
 
 std::vector<char> response;
