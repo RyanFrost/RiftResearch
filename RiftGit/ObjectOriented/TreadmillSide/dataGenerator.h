@@ -49,17 +49,15 @@ public:
 
 	
 	
-	std::vector<int> getPatches();
-	std::vector<int> getPatchTypes();
-	std::vector<double> getPatchSeparations();
-
+	std::vector<int> getPatches() {return patches;}
+	std::vector<int> getPatchTypes() {return patchTypes;}
 	
 	// Generates sinusoidal joint angle functions in 
 	// place of actual data. For testing purposes.
 	void startAngleGen();
 	
-	std::vector<double> getAngles();
-	double getFootPos();
+	std::vector<double> getAngles() {return angles;}
+	double getFootPos() {return footPos;}
 
 
 };

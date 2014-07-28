@@ -153,14 +153,6 @@ void socketManager::loadIntToBuf(int integer)
 	std::copy(intStr.begin(), intStr.end(), back_inserter(buf));
 }
 
-std::vector<char> socketManager::getBuf(void)
-{
-	return buf;
-}
-
-
-
-
 
 void socketManager::cleanUpSocket(void)
 {

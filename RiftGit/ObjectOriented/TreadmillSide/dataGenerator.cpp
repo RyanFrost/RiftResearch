@@ -109,19 +109,20 @@ void dataGenerator::angleFootPosGenerator(void)
 	
 
 	int runLoop = 1;
+	float freqMult = 2;
 	while (runLoop)
 	{
 		secs = timer.now() - startTime;
 		
-		footPos = 45 * sin(secs.count()) + 50;
+		footPos = 45 * sin(secs.count()*freqMult) + 50;
 		
-		angles[0] = 20 * sin(secs.count()) + 20;		// Toe angle
-		angles[1] = 40 * sin(secs.count() - 1) + 40;	// Knee angle
-		angles[2] = 30 * sin(secs.count() + 0.5) -10 ;	// Hip angle
+		angles[0] = 20 * sin(secs.count()*freqMult) - 20;		// Hip angle
+		angles[1] = 40 * sin(secs.count()*freqMult - 1) + 40;	// Knee angle
+		angles[2] = 30 * sin(secs.count()*freqMult + 0.5) - 30;	// Toe angle
 		
-		angles[3] = 20 * sin(secs.count() + 3.14) + 20;		// Toe angle
-		angles[4] = 40 * sin(secs.count() - 1 + 3.14) + 40;	// Knee angle
-		angles[5] = 30 * sin(secs.count() + 0.5 + 3.14) - 10 ;	// Hip angle
+		angles[3] = 20 * sin(secs.count()*freqMult + 3.14) - 20;		// Hip angle
+		angles[4] = 40 * sin(secs.count()*freqMult - 1 + 3.14) + 40;	// Knee angle
+		angles[5] = 30 * sin(secs.count()*freqMult + 0.5 + 3.14) + 30;	// Toe angle
 		
 	}
 
@@ -135,30 +136,3 @@ void dataGenerator::startAngleGen(void)
 	boost::thread t1(&dataGenerator::angleFootPosGenerator, this);
 }
 
-
-
-
-std::vector<int> dataGenerator::getPatches(void)
-{
-	return patches;
-}
-
-std::vector<int> dataGenerator::getPatchTypes(void)
-{
-	return patchTypes;
-}
-
-std::vector<double> dataGenerator::getPatchSeparations(void)
-{
-	return patchSeparations;
-}
-
-std::vector<double> dataGenerator::getAngles(void)
-{
-	return angles;
-}
-
-double dataGenerator::getFootPos(void)
-{
-	return footPos;
-}

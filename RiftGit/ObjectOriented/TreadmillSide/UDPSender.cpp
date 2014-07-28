@@ -26,9 +26,10 @@ sharedMemObject sharedMemory;
 
 std::vector<char> response;
 int currentPatch = 0;
-std::vector<double> footPosPastValues;
 bool movingForward;
 bool movingBackward;
+double distance = 10.0;
+bool unityRunning = true;
 
 int main()
 {
@@ -75,14 +76,15 @@ int main()
 
 	int CHANGETHISVALUE = 1000; //This is a placeholder for the first argument of the perCycler function
 	
-	while( charVecToStr(response) != "Quit")
+	while( unityRunning )
 	{
 	
 		
-		switch(dataGen.getPatchTypes()[currentPatch])
+		int nextPatchType = dataGen.getPatchTypes()[currentPatch];
+		std::cout << "next patch type: " << nextPatchType << ", next patch number: " << currentPatch << std::endl;
+		switch (nextPatchType)
 		{
 		case 1:
-			
 			pertCycler(CHANGETHISVALUE, 1);
 			currentPatch++;
 			break;
@@ -96,34 +98,42 @@ int main()
 			break;
 		}
 	}
-		
 	commThread.join();
+	pastValsThread.join();
+	
+	sharedMemory.sdata->beep = false;
+	
+	
 	return 0;
 }
 
 void pertCycler(int stiffnessLevel, int patchType)
 {
+	//Waits until the left foot has passed over the next patch (i.e. the distance to next patch is negative)
+	while ( distance > 0) { if(unityRunning == false) return;}
+	std::cout << "< Over patch -- ";
 	
-	if(patchType == 3)
-	{}
-	while(dataGen.getPatchSeparations()[currentPatch] >= 0.0);
 	
-	// Waits until foot is moving forward and foot is behind the 75cm mark
-	while( ~movingForward)
-	{}
+	// Waits until foot starts moving forward ( approximately toe-off)
+	while( !movingForward) { if(unityRunning == false) return;}
+	std::cout << "toe-off -- ";
 	
-	// Waits until foot passes the 75cm mark
-	while(movingForward)
-	{}
 	
-	sharedMemory.sdata->perturb = patchType;
+	// Waits until foot stops moving forward ( approximately heel-strike )
+	while(movingForward) { if(unityRunning == false) return;}
 	
-	// Changes stiffness until the foot has gone through a full step to toe off, 
-	// then goes back to infinite stiffness at midstance
-	while(~movingForward or sharedMemory.sdata->xf <=50)
+	sharedMemory.sdata->perturb = patchType; // 
+	std::cout << "perturbing: " << sharedMemory.sdata->perturb << " -- ";
+	
+	// Changes stiffness until the foot has gone through a full step to toe-off, 
+	// then goes back to infinite stiffness at toe-off
+	while(!movingForward)
 	{
 		sharedMemory.sdata->beep = true;
+		if(unityRunning == false) return;
 	}
+	
+	std::cout << "done perturbing >" >> std::endl;
 	
 	sharedMemory.sdata->perturb = 0;
 	sharedMemory.sdata->beep = false;
@@ -134,14 +144,31 @@ void pertCycler(int stiffnessLevel, int patchType)
 void startComm(void)
 {
 
-	while ( charVecToStr(response) != "Quit")
+	while ( unityRunning )
 	{
-		response = sock.recvData();  // This is the distance to next patch
-		printCharVec(response);
+		response = sock.recvData(); // This will usually be the distance to the next perturbation
+		
+		// Check if Unity has sent the "Quit" command, and if so, stop all processes by setting
+		// unityRunning to false. Otherwise, convert the byte message to a double.
+		if( charVecToStr(response) != "Quit")
+		{
+			unityRunning = false;
+			break;
+		}
+		else
+		{
+			std::string strResp = charVecToStr(response);
+			distance = std::stod(strResp);
+		}
+		
+		// Send Joint Angles
 		sock.loadDubArrayToBuf( arrayToVec(sharedMemory.sdata->joint_angles_rift) );
-		printCharVec(sock.getBuf());
 		sock.sendBuf();
 		
+		// Send perturbation status
+		// This will send either a 0 for not perturbing, or {1, 2, 3} for the type of perturbation.
+		// This lets Unity know when it starts perturbing, stops perturbing, and also if it
+		// is a type 3 perturbation lets Unity destroy the following patch.
 		sock.loadIntToBuf(sharedMemory.sdata->perturb);
 		sock.sendBuf();
 		
@@ -153,12 +180,10 @@ void dataSaver()
 {
 	std::vector<double> pastVals(5, 0.0);
 	
-	while(charVecToStr(response) != "Quit")
+	while( unityRunning )
 	{
 		pastVals.erase(pastVals.begin());
 		pastVals.push_back(sharedMemory.sdata->xf);
-		footPosPastValues = pastVals;
-		std::vector<double> pastValsReversed (pastVals.rbegin(), pastVals.rend());
 		if(is_sorted(pastVals.begin(),pastVals.end()))
 		{
 			movingForward = false;
@@ -175,6 +200,9 @@ void dataSaver()
 			movingBackward = false;
 		}
 	}
+	
+	boost::this_thread::sleep_for(  boost::posix_time::milliseconds(30));
+	
 }		
 
 
