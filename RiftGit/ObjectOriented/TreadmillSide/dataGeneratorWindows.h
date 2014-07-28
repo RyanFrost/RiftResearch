@@ -3,7 +3,7 @@
 #include <vector>
 #include <string>
 
-class dataGeneratorWindows
+class dataGenerator
 {
 
 private:
@@ -23,11 +23,10 @@ private:
 	char* loadBuffer(std::string);
 
 public:
-	dataGeneratorWindows(int);
-	~dataGeneratorWindows();
+	dataGenerator(int);
+	~dataGenerator();
 
-	void start();
-	
+
 	std::vector<double> getAngles();
 	std::vector<int> getPatches();
 	std::vector<int> getPatchTypes();

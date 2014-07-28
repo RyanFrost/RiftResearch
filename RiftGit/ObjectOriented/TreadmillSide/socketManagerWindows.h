@@ -6,7 +6,7 @@
 
 
 
-class socketManagerWindows
+class socketManager
 {
 private:
 	
@@ -24,15 +24,15 @@ private:
 
 
 public:
-	socketManagerWindows(int);
-	~socketManagerWindows();
+	socketManager(int);
+	~socketManager();
 	
 
 
 	
 	void loadIntArrayToBuf(std::vector<int>);
 	void loadDubArrayToBuf(std::vector<double>);
-
+	void loadIntToBuf(int);
 	std::vector<char> recvData(void);
 	void sendBuf();
 	std::vector<char> getBuf(void);

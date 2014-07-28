@@ -7,37 +7,33 @@
 #include <iostream>
 #include <math.h>
 #include <vector>
-#include <algorithm>
 
 #include <boost/lexical_cast.hpp>
-#include <chrono>
+#include <boost/chrono.hpp>
 #include <boost/thread.hpp>
 
+#include <Windows.h>
 
 using namespace std;
 
 
-dataGeneratorWindows::dataGeneratorWindows(int numberPatches) : numPatches(numberPatches)
-{	
-}
-
-
-dataGeneratorWindows::~dataGeneratorWindows()
+dataGenerator::dataGenerator(int numberPatches) : numPatches(numberPatches)
 {
-}
-
-
-void dataGeneratorWindows::start()
-{
+	
 	patchGenerator();
 	patchTypeGenerator();
 	startAngleGen();
+	
 }
 
-void dataGeneratorWindows::patchGenerator(void)
+
+dataGenerator::~dataGenerator()
 {
-	std::cout << "inside patchGenerator" << std::endl;
-	
+}
+
+
+void dataGenerator::patchGenerator(void)
+{
 	patches.clear(); // Clears patch vector for reuse
 	
 	srand(std::time(0));
@@ -57,10 +53,9 @@ void dataGeneratorWindows::patchGenerator(void)
 }
 
 
-void dataGeneratorWindows::patchTypeGenerator(void)
+void dataGenerator::patchTypeGenerator(void)
 {
 	
-	std::cout<< "inside patchTypeGenerator" << std::endl;
 	int numPert = 10;
 	std::vector<int> patchTypeOrder;
 	patchTypeOrder.insert(patchTypeOrder.end(), numPert / 2, 2);
@@ -71,8 +66,9 @@ void dataGeneratorWindows::patchTypeGenerator(void)
 	patchTypes.insert(patchTypes.begin(), numPatches, 1);
 
 	int currentPatch = 0;
-	int startingBuffer = 20; // Number of patches before the first perturbation
-	int avgPatchesBetween = 10;
+	int startingBuffer = 2; // Number of patches before the first perturbation
+	int endingBuffer = 5; // Number of patches after the last perturbation
+	int avgPatchesBetween = 5;
 	currentPatch += startingBuffer;
 
 	
@@ -80,21 +76,20 @@ void dataGeneratorWindows::patchTypeGenerator(void)
 	for (std::vector<int>::const_iterator iter = patchTypeOrder.begin(); iter != patchTypeOrder.end(); iter++)
 	{
 		patchTypes[currentPatch] = *iter;
-		currentPatch += avgPatchesBetween - 2 + std::rand() % 5;
+		currentPatch += avgPatchesBetween - 2 + std::rand() % 3;
 	}
 
 }
 
 
 
-void dataGeneratorWindows::angleFootPosGenerator(void)
+void dataGenerator::angleFootPosGenerator(void)
 {
 
-	std::cout<< "Inside anglefootPosGenerator" << std::endl;
-	typedef std::chrono::high_resolution_clock Clock;
-	typedef std::chrono::duration<double> secDouble;
+	typedef boost::chrono::high_resolution_clock Clock;
+	typedef boost::chrono::duration<double> secDouble;
 	
-	std::chrono::high_resolution_clock timer;
+	boost::chrono::high_resolution_clock timer;
 	
 	Clock::time_point startTime = timer.now();
 	secDouble secs;
@@ -103,51 +98,50 @@ void dataGeneratorWindows::angleFootPosGenerator(void)
 	
 
 	int runLoop = 1;
+	float freqMult = 2;
 	while (runLoop)
 	{
 		secs = timer.now() - startTime;
 		
-		footPos = 45 * sin(secs.count()) + 50;
+		footPos = 45 * sin(secs.count()*freqMult) + 50;
 		
-		angles[0] = 20 * sin(secs.count()) + 20;		// Toe angle
-		angles[1] = 40 * sin(secs.count() - 1) + 40;	// Knee angle
-		angles[2] = 30 * sin(secs.count() + 0.5) -10 ;	// Hip angle
+		angles[0] = 20 * sin(secs.count()*freqMult) - 20;		// Hip angle
+		angles[1] = 40 * sin(secs.count()*freqMult - 1) + 40;	// Knee angle
+		angles[2] = 30 * sin(secs.count()*freqMult + 0.5) - 30;	// Toe angle
 		
-		angles[3] = 20 * sin(secs.count() + 3.14) + 20;		// Toe angle
-		angles[4] = 40 * sin(secs.count() - 1 + 3.14) + 40;	// Knee angle
-		angles[5] = 30 * sin(secs.count() + 0.5 + 3.14) - 10 ;	// Hip angle
+		angles[3] = 20 * sin(secs.count()*freqMult + 3.14) - 20;		// Hip angle
+		angles[4] = 40 * sin(secs.count()*freqMult - 1 + 3.14) + 40;	// Knee angle
+		angles[5] = 30 * sin(secs.count()*freqMult + 0.5 + 3.14) + 30;	// Toe angle
 		
 	}
 
 }
 
-void dataGeneratorWindows::startAngleGen(void)
+void dataGenerator::startAngleGen(void)
 {
-	
-	std::cout << "inside startAngleGen" << std::endl;
-	boost::thread t1(&dataGeneratorWindows::angleFootPosGenerator, this);
+	boost::thread t1(&dataGenerator::angleFootPosGenerator,this);
 	
 }
 
 
 
 
-vector<int> dataGeneratorWindows::getPatches(void)
+vector<int> dataGenerator::getPatches(void)
 {
 	return patches;
 }
 
-vector<int> dataGeneratorWindows::getPatchTypes(void)
+vector<int> dataGenerator::getPatchTypes(void)
 {
 	return patchTypes;
 }
 
-vector<double> dataGeneratorWindows::getAngles(void)
+vector<double> dataGenerator::getAngles(void)
 {
 	return angles;
 }
 
-double dataGeneratorWindows::getFootPos(void)
+double dataGenerator::getFootPos(void)
 {
 	return footPos;
 }

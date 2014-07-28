@@ -3,25 +3,26 @@
 #include <iostream>
 #include <vector>
 #include <boost/lexical_cast.hpp>
-
+#include <iterator>
+#include <algorithm>
 #pragma comment(lib,"ws2_32.lib") //Winsock Library
 
 
 #define PORT 27015
 
-socketManagerWindows::socketManagerWindows(int portNumber) : port(portNumber)
+socketManager::socketManager(int portNumber) : port(portNumber)
 {
 	initSocket();
 }
 
 
-socketManagerWindows::~socketManagerWindows()
+socketManager::~socketManager()
 {
 	cleanUpSocket();
 }
 
 
-void socketManagerWindows::initSocket()
+void socketManager::initSocket()
 {
 	std::cout << "Initializing socket." << std::endl;
 	
@@ -74,7 +75,7 @@ void socketManagerWindows::initSocket()
 }
 
 
-std::vector<char> socketManagerWindows::recvData(void)
+std::vector<char> socketManager::recvData(void)
 {
 	//Declare sockaddr_in struct for client
 	
@@ -99,7 +100,7 @@ std::vector<char> socketManagerWindows::recvData(void)
 
 }
 
-void socketManagerWindows::sendBuf(void)
+void socketManager::sendBuf(void)
 {
 	
 	int remLen = sizeof(remoteHost);
@@ -111,7 +112,7 @@ void socketManagerWindows::sendBuf(void)
 	}
 }
 
-void socketManagerWindows::loadIntArrayToBuf(std::vector<int> vec)
+void socketManager::loadIntArrayToBuf(std::vector<int> vec)
 {
 	// clear buffer
 	
@@ -135,7 +136,7 @@ void socketManagerWindows::loadIntArrayToBuf(std::vector<int> vec)
 	std::copy(valStr.begin(), valStr.end(), back_inserter(buf));
 }
 
-void socketManagerWindows::loadDubArrayToBuf(std::vector<double> vec)
+void socketManager::loadDubArrayToBuf(std::vector<double> vec)
 {
 
 	buf.clear();
@@ -160,7 +161,18 @@ void socketManagerWindows::loadDubArrayToBuf(std::vector<double> vec)
 
 
 }
-std::vector<char> socketManagerWindows::getBuf(void)
+
+
+void socketManager::loadIntToBuf(int integer)
+{
+
+	buf.clear();
+	std::string intStr = std::to_string(integer);
+	std::copy(intStr.begin(), intStr.end(), back_inserter(buf));
+}
+
+
+std::vector<char> socketManager::getBuf(void)
 {
 	return buf;
 }
@@ -169,7 +181,7 @@ std::vector<char> socketManagerWindows::getBuf(void)
 
 
 
-void socketManagerWindows::cleanUpSocket(void)
+void socketManager::cleanUpSocket(void)
 {
 	closesocket(sockfd);
 	WSACleanup();

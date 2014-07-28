@@ -19,18 +19,18 @@ public class UDPComm : MonoBehaviour
 	private GameObject patchManagerObj;
 	
 	private int port = 27015;
-	private string addr = "10.200.148.33";
-	
+	//private string addr = "10.200.148.33";
+	private string addr = "66.253.248.207";
 	private IPEndPoint home;
 	
 	private bool running = true;
 
 	private double[] angles;
-	private float distanceToNext;
+	private float distanceToNext = 1.0f;
 	private int[] patchArray;
 	private int[] patchTypes;
 	
-	private int pertProgress;
+	private int pertStatus = 0;
 	
 
 	void Start()
@@ -39,7 +39,7 @@ public class UDPComm : MonoBehaviour
 		receiveThread.IsBackground = true;
 		receiveThread.Start();
 		
-		patchManagerObj = GameObject.Find("Patch Manager");
+		patchManagerObj = GameObject.Find("PatchManager");
 	}
 	
 	
@@ -75,7 +75,8 @@ public class UDPComm : MonoBehaviour
 		try
 		{
 			
-			client.Connect("treadmill-OptiPlex-980",27015);
+			//client.Connect("treadmill-OptiPlex-980",27015);
+			client.Connect("Windsor",27015);
 			byte[] sendBytes = Encoding.UTF8.GetBytes("Send Patch Array");
 			client.Send(sendBytes, sendBytes.Length);
 			byte[] data = client.Receive(ref home);
@@ -105,8 +106,7 @@ public class UDPComm : MonoBehaviour
 			try
 			{				
 				// Send distance to next patch
-				float distance = getDistanceToNext();
-				string distanceStr = distance.ToString();
+				string distanceStr = distanceToNext.ToString();
 				byte[] sendBytes = Encoding.UTF8.GetBytes(distanceStr);
 				client.Send(sendBytes, sendBytes.Length);
 				// Get joint angles
@@ -114,9 +114,9 @@ public class UDPComm : MonoBehaviour
 				string angleStr = Encoding.UTF8.GetString(angleData);
 				angles = doubleParser (angleStr);
 				
-				byte[] perturbationProgress = client.Receive(ref home);
-				pertProgress = BitConverter.ToInt32(perturbationProgress,0);
-
+				// Check if next step will be stiffness change
+				byte[] pertData = client.Receive(ref home);
+				pertStatus = Convert.ToInt32(Encoding.UTF8.GetString(pertData));
 			}
 			catch(SocketException err)
 			{
@@ -170,10 +170,9 @@ public class UDPComm : MonoBehaviour
 		return patchTypes;
 	}
 	
-	public int[] getPertProgress()
+	public int getPertStatus()
 	{
-		return pertProgress;
+		return pertStatus;
 	}
-	
 	
 }

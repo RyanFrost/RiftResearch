@@ -6,11 +6,12 @@ public class patchManager : MonoBehaviour {
 	private GameObject udpObj, patchObj, playerObj, leftFootObj;
 	private List<patch> patchList;
 	
-	private int[] patchLocations, patchTypes;
+	private int[] patchLocations, patchTypes, patchSeparations;
 	
 	private int currentPatch = 0;
 	private float distanceToPatch = 1.0f;
-	private int pertProgress;
+	
+	bool pertOngoing = false;
 	
 	void Start()
 	{
@@ -37,6 +38,26 @@ public class patchManager : MonoBehaviour {
 		
 		calcDistanceToPatch(leftFootObj);
 		
+		print("patch manager side: " + udpObj.GetComponent<UDPComm>().getPertStatus());
+		if( udpObj.GetComponent<UDPComm>().getPertStatus() > 0)
+		{
+			if(pertOngoing == false)
+				print("starting patch #" + currentPatch);
+				
+			pertOngoing = true;
+		}
+		
+		if ( pertOngoing && udpObj.GetComponent<UDPComm>().getPertStatus() == 0)
+		{
+			if( patchList[currentPatch].getType() == 3)
+			{
+				patchList[currentPatch].destroyPatch();
+			}
+			print(currentPatch);
+			pertOngoing = false;
+			print("Done perting patch #" + currentPatch);
+			currentPatch++;
+		}
 		/* switch ( patchList[currentPatch].getType())
 		{
 			case 1:
@@ -53,7 +74,7 @@ public class patchManager : MonoBehaviour {
 	
 	
 	
-	private void case1()
+	private void case1() 
 	{
 	
 		distanceToPatch = patchList[currentPatch].getPatchDistance(leftFootObj);
@@ -67,12 +88,22 @@ public class patchManager : MonoBehaviour {
 	
 	private void calcDistanceToPatch(GameObject gameObj)
 	{
-		distanceToPatch = patchList[currentPatch].getPatchDistance(gameObj);
+	
+		// If type 3 perturbation, halve the distance to patch so that it perturbs halfway between previous patch and current patch
+		if ( patchList[currentPatch].getType() == 3)
+		{
+			distanceToPatch = patchList[currentPatch].getPatchDistance(gameObj) - getHalfDist();
+		}
+		else
+		{
+			distanceToPatch = patchList[currentPatch].getPatchDistance(gameObj);
+		}
 	}
 	
-	private int getPertProgress()
+	private float getHalfDist()
 	{
-		pertProgress = udpObj.getComponent<UDPComm>().getPertProgress();
+		float halfDist = (patchList[currentPatch+1].getLocationF() - patchList[currentPatch].getLocationF())/2;
+		return halfDist;
 	}
 	
 	public float getDistanceToPatch()
