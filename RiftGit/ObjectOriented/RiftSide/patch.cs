@@ -22,14 +22,9 @@ public class patch : Object
 		terrainObj = (GameObject) Object.Instantiate(patchObject, new Vector3(patchLocationF, -0.01F,0), Quaternion.identity);
 	}
 	
-	public int getType()
-	{
-		return patchType;
-	}
-	public float getLocationF()
-	{
-		return patchLocationF;
-	}
+	public int getType() { return patchType; }
+	public float getLocationF()	{ return patchLocationF; }
+	
 	public float getPatchDistance(GameObject playerObject)
 	{
 		return terrainObj.transform.position.x - playerObject.transform.position.x;

@@ -35,10 +35,10 @@ public class patchManager : MonoBehaviour {
 	
 	void Update()
 	{
-		
+		// Calculates the distance to next patch once per frame
 		calcDistanceToPatch(leftFootObj);
 		
-		print("patch manager side: " + udpObj.GetComponent<UDPComm>().getPertStatus());
+		// Waits until treadmill has started perturbing, then sets pertOngoing to true.
 		if( udpObj.GetComponent<UDPComm>().getPertStatus() > 0)
 		{
 			if(pertOngoing == false)
@@ -47,44 +47,20 @@ public class patchManager : MonoBehaviour {
 			pertOngoing = true;
 		}
 		
+		// Once treadmill has started perturbing, waits until it stops perturbing to advance
+		// to the next patch and, if type 3 pert, delete the coming patch.
 		if ( pertOngoing && udpObj.GetComponent<UDPComm>().getPertStatus() == 0)
 		{
 			if( patchList[currentPatch].getType() == 3)
 			{
 				patchList[currentPatch].destroyPatch();
 			}
-			print(currentPatch);
 			pertOngoing = false;
 			print("Done perting patch #" + currentPatch);
 			currentPatch++;
 		}
-		/* switch ( patchList[currentPatch].getType())
-		{
-			case 1:
-				
-				break;
-			case 2:
-				
-				break;
-			case 3:
-				
-				break;
-		} */
 	}
 	
-	
-	
-	private void case1() 
-	{
-	
-		distanceToPatch = patchList[currentPatch].getPatchDistance(leftFootObj);
-	
-		if(distanceToPatch <= 0)
-		{
-			
-		}
-		
-	}
 	
 	private void calcDistanceToPatch(GameObject gameObj)
 	{
@@ -106,9 +82,6 @@ public class patchManager : MonoBehaviour {
 		return halfDist;
 	}
 	
-	public float getDistanceToPatch()
-	{
-		return distanceToPatch;
-	}
+	public float getDistanceToPatch() { return distanceToPatch; }
 	
 }

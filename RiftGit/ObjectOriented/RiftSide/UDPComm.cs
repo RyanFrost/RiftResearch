@@ -19,8 +19,8 @@ public class UDPComm : MonoBehaviour
 	private GameObject patchManagerObj;
 	
 	private int port = 27015;
-	//private string addr = "10.200.148.33";
-	private string addr = "66.253.248.207";
+	private string addr = "10.200.148.33";
+	//private string addr = "66.253.248.207";
 	private IPEndPoint home;
 	
 	private bool running = true;
@@ -69,14 +69,14 @@ public class UDPComm : MonoBehaviour
 	{
 		home = new IPEndPoint(IPAddress.Parse(addr),port);
 		client = new UdpClient ();
-		client.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+		//client.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
 		//IPEndPoint treadmillIP = new IPEndPoint(1020014833,0);
 		
 		try
 		{
 			
-			//client.Connect("treadmill-OptiPlex-980",27015);
-			client.Connect("Windsor",27015);
+			client.Connect("treadmill-OptiPlex-980",27015);
+			//client.Connect("Windsor",27015);
 			byte[] sendBytes = Encoding.UTF8.GetBytes("Send Patch Array");
 			client.Send(sendBytes, sendBytes.Length);
 			byte[] data = client.Receive(ref home);
@@ -109,6 +109,7 @@ public class UDPComm : MonoBehaviour
 				string distanceStr = distanceToNext.ToString();
 				byte[] sendBytes = Encoding.UTF8.GetBytes(distanceStr);
 				client.Send(sendBytes, sendBytes.Length);
+				
 				// Get joint angles
 				byte[] angleData = client.Receive(ref home);
 				string angleStr = Encoding.UTF8.GetString(angleData);
@@ -132,10 +133,12 @@ public class UDPComm : MonoBehaviour
 		}
 	}
 	
-	private float getDistanceToNext()
-	{
-		return distanceToNext;
-	}
+	// updateDistanceToNext runs in the update function and updates distanceToNext, and getDistanceToNext returns this continually
+	// updated value. This is split into two functions because getDistance is called in the Receive thread, and accessing
+	// values from other scripts (e.g. patchManagerObj.GetComponent<patchManager>() ....) can only be done in the Update() or 
+	// Start() functions.
+	
+	private float getDistanceToNext() {	return distanceToNext; }
 	
 	private void updateDistanceToNext()
 	{
@@ -143,36 +146,27 @@ public class UDPComm : MonoBehaviour
 	}
 	
 	
+	// These two functions take in a string of comma delimited values and return either a double array or integer array.
+	
 	private double[] doubleParser(string inputStr)
 	{
-		double[] doubleArray = Array.ConvertAll<string,double>(inputStr.Split(','),Double.Parse);
-		return doubleArray;
+		return Array.ConvertAll<string,double>(inputStr.Split(','),Double.Parse);
 	}
 	
 	private int[] intParser(string inputStr)
 	{
-		int[] intArray = Array.ConvertAll<string,int>(inputStr.Split(','), Int32.Parse);
-		return intArray;
+		return Array.ConvertAll<string,int>(inputStr.Split(','), Int32.Parse);
 	}
 	
-	public double[] getAngles()
-	{
-		return angles;
-	}
 	
-	public int[] getPatchArray()
-	{
-		return patchArray;
-	}
+	// Accessors
 	
-	public int[] getPatchTypes()
-	{
-		return patchTypes;
-	}
+	public double[] getAngles()	{ return angles; }
 	
-	public int getPertStatus()
-	{
-		return pertStatus;
-	}
+	public int[] getPatchArray() { return patchArray; }
+	
+	public int[] getPatchTypes() { return patchTypes; }
+	
+	public int getPertStatus() { return pertStatus; }
 	
 }

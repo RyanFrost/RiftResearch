@@ -106,6 +106,48 @@ int main()
 	return 0;
 }
 
+
+
+void pertCycler(int stiffnessLevel, int patchType)
+{
+	
+	while (distance > 0) { if (unityRunning == false) return; }
+	std::cout << "Over patch ---- ";
+
+	// Waits until foot is moving forward and foot is behind the 75cm mark
+	while (!movingForward)
+	{
+		if (unityRunning == false) return;
+	}
+	std::cout << "moving forward ---- ";
+	// Waits until foot passes the 75cm mark
+	while (movingForward)
+	{
+		if (unityRunning == false) return;
+	}
+	std::cout << "moving backward ---- ";
+	perturb = patchType;
+	std::cout << "perturb = " << perturb << std::endl;
+	// Changes stiffness until the foot has gone through a full step to toe off, 
+	// then goes back to infinite stiffness at midstance
+	while (!movingForward)
+	{
+		if (unityRunning == false) return;
+	}
+
+	std::cout << "done with pert." << std::endl;
+	perturb = 0;
+	
+	while (distance < 0){}
+	
+}
+
+
+
+
+
+
+
 void startComm(void)
 {
 
@@ -162,39 +204,6 @@ void dataSaver()
 }
 
 
-void pertCycler(int stiffnessLevel, int patchType)
-{
-	
-	while (distance > 0) { if (unityRunning == false) return; }
-	std::cout << "Over patch ---- ";
-
-	// Waits until foot is moving forward and foot is behind the 75cm mark
-	while (!movingForward)
-	{
-		if (unityRunning == false) return;
-	}
-	std::cout << "moving forward ---- ";
-	// Waits until foot passes the 75cm mark
-	while (movingForward)
-	{
-		if (unityRunning == false) return;
-	}
-	std::cout << "moving backward ---- ";
-	perturb = patchType;
-	std::cout << "perturb = " << perturb << std::endl;
-	// Changes stiffness until the foot has gone through a full step to toe off, 
-	// then goes back to infinite stiffness at midstance
-	while (!movingForward)
-	{
-		if (unityRunning == false) return;
-	}
-
-	std::cout << "done with pert." << std::endl;
-	perturb = 0;
-	
-	while (distance < 0){}
-	
-}
 
 
 
