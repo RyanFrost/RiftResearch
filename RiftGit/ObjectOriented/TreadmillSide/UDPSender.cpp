@@ -82,6 +82,9 @@ int main()
 		
 		int nextPatchType = dataGen.getPatchTypes()[currentPatch];
 		std::cout << "next patch type: " << nextPatchType << ", next patch number: " << currentPatch << std::endl;
+		
+		
+		
 		switch (nextPatchType)
 		{
 		case 1:
@@ -97,6 +100,9 @@ int main()
 			currentPatch++;
 			break;
 		}
+		
+		while(distance < 0) {if(unityRunning == false) break; }
+		
 	}
 	
 	commThread.join();
