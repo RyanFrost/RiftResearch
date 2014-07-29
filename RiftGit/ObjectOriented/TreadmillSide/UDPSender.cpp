@@ -9,6 +9,7 @@
 #include <iostream>
 #include <iterator>
 #include <boost/thread.hpp>
+#include <unistd.h>
 
 
 void startComm(void);
@@ -72,13 +73,12 @@ int main()
 	boost::thread pastValsThread(dataSaver);
 	std::cout << "Running..." << std::endl;
 	
-	int currentPatchType = dataGen.getPatchTypes()[currentPatch];
+	//int currentPatchType = dataGen.getPatchTypes()[currentPatch];
 
 	int CHANGETHISVALUE = 1000; //This is a placeholder for the first argument of the perCycler function
 	
 	while( unityRunning )
 	{
-	
 		
 		int nextPatchType = dataGen.getPatchTypes()[currentPatch];
 		std::cout << "next patch type: " << nextPatchType << ", next patch number: " << currentPatch << std::endl;
@@ -98,42 +98,48 @@ int main()
 			break;
 		}
 	}
+	
 	commThread.join();
 	pastValsThread.join();
 	
 	sharedMemory.sdata->beep = false;
-	
 	
 	return 0;
 }
 
 void pertCycler(int stiffnessLevel, int patchType)
 {
+	
 	//Waits until the left foot has passed over the next patch (i.e. the distance to next patch is negative)
-	while ( distance > 0) { if(unityRunning == false) return;}
-	std::cout << "< Over patch -- ";
+	while ( distance > 0.0) 
+	{
+		if(unityRunning == false) return;
+		
+	}
+	
+	std::cout << "< Over patch -- " << std::flush;
 	
 	
 	// Waits until foot starts moving forward ( approximately toe-off)
 	while( !movingForward) { if(unityRunning == false) return;}
-	std::cout << "toe-off -- ";
+	std::cout << "toe-off -- " << std::flush;
 	
 	
 	// Waits until foot stops moving forward ( approximately heel-strike )
 	while(movingForward) { if(unityRunning == false) return;}
 	
 	sharedMemory.sdata->perturb = patchType; // 
-	std::cout << "perturbing: " << sharedMemory.sdata->perturb << " -- ";
-	
+	std::cout << "perturbing: " << sharedMemory.sdata->perturb << " -- " << std::flush;
+	sharedMemory.sdata->beep = true;
 	// Changes stiffness until the foot has gone through a full step to toe-off, 
 	// then goes back to infinite stiffness at toe-off
 	while(!movingForward)
 	{
-		sharedMemory.sdata->beep = true;
+		
 		if(unityRunning == false) return;
 	}
 	
-	std::cout << "done perturbing >" >> std::endl;
+	std::cout << "done perturbing >" << std::endl;
 	
 	sharedMemory.sdata->perturb = 0;
 	sharedMemory.sdata->beep = false;
@@ -150,7 +156,7 @@ void startComm(void)
 		
 		// Check if Unity has sent the "Quit" command, and if so, stop all processes by setting
 		// unityRunning to false. Otherwise, convert the byte message to a double.
-		if( charVecToStr(response) != "Quit")
+		if( charVecToStr(response) == "Quit")
 		{
 			unityRunning = false;
 			break;
@@ -159,6 +165,7 @@ void startComm(void)
 		{
 			std::string strResp = charVecToStr(response);
 			distance = std::stod(strResp);
+			//std::cout << distance << std::endl;
 		}
 		
 		// Send Joint Angles
@@ -178,8 +185,9 @@ void startComm(void)
 
 void dataSaver()
 {
+
 	std::vector<double> pastVals(5, 0.0);
-	
+
 	while( unityRunning )
 	{
 		pastVals.erase(pastVals.begin());
@@ -199,10 +207,9 @@ void dataSaver()
 			movingForward = false;
 			movingBackward = false;
 		}
+			
+		boost::this_thread::sleep( boost::posix_time::milliseconds(30) );
 	}
-	
-	boost::this_thread::sleep_for(  boost::posix_time::milliseconds(30));
-	
 }		
 
 

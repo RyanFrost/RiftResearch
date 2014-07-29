@@ -39,7 +39,7 @@ public:
 	std::vector<char> recvData(void);
 	void sendBuf();
 	
-	std::vector<char> socketManager::getBuf(void) {	return buf;}
+	std::vector<char> getBuf(void) { return buf;}
 
 
 	
