@@ -213,8 +213,11 @@ void dataSaver()
 			movingForward = false;
 			movingBackward = false;
 		}
-			
-		boost::this_thread::sleep( boost::posix_time::milliseconds(30) );
+		
+		// Sleep in between calls to foot position.
+		// This helps negate the effect of noise on foot position,
+		// which can cause a falsely reported change in direction
+		usleep(50000);
 	}
 }		
 
