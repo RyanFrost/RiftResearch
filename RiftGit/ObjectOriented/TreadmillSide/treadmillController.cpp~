@@ -33,7 +33,7 @@ treadmillController::~treadmillController()
 
 int treadmillController::initializeModbus(void)
 {
-	std::cout << "Initializing Modbus... " << std::flush;
+	std::cout << "Initializing Modbus..." << std::flush;
 	//establish connection
 	ctx = modbus_new_tcp("192.168.0.35", 502);
 	if (modbus_connect(ctx) == -1) {
@@ -59,7 +59,7 @@ int treadmillController::initializeModbus(void)
 	const uint16_t enc_res[1]={1024};
 	modbus_write_registers(ctx,984,1,enc_res);
 	
-	std::cout << "successful." << std::endl;
+	std::cout << " successful." << std::endl;
 	
 	return 0;	
 }
