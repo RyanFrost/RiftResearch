@@ -36,22 +36,20 @@ sharedMemObject::sharedMemObject()
 
 sharedMemObject::~sharedMemObject()
 {
-	free(sdata);
 	fclose(fp);
-	
 }
 
 
 
 void sharedMemObject::openFile()
 {
-	fp = fopen("mydata.txt", "w");
+	fp = fopen("jeffTest.txt", "w");
 }
 
 
 
 
-void sharedMemObject::save2file(double xfoot, bool movingBackward, bool movingForward, bool transitioning)
+void sharedMemObject::save2file(bool movingBackward, bool movingForward)
 {
 	// ensure proper spacing between 'fprintf' w/ a space after last %f
 	fprintf(fp,"%d %f %f ",sdata->motorv_int /*1*/, sdata->lcR_lbs/*2*/, sdata->lcL_lbs/*3*/);
@@ -60,14 +58,14 @@ void sharedMemObject::save2file(double xfoot, bool movingBackward, bool movingFo
 
 	fprintf(fp,"%d %d %f %f ", sdata->numEMG/*14*/,sdata->cycle/*15*/,sdata->time_vst_absolute/*16*/,sdata->zero_time_absolute/*17*/);
  
-	for (int i = 0; i<3; i++)
-	fprintf(fp,"%f ", sdata->jt_angles_l[i]); /*18-20*/ 
+	for (int i = 0; i<6; i++)
+	fprintf(fp,"%f ", sdata->joint_angles_rift[i]); /*18-23*/ 
 
-	fprintf(fp,"%f ", xfoot);/*21*/
+	fprintf(fp,"%f ", sdata->xf);/*24*/
 	
-	fprintf(fp,"%d %d %d", movingBackward/*22*/, movingForward/*23*/, transitioning/*24*/); 
+	fprintf(fp,"%d %d", movingBackward/*25*/, movingForward/*26*/);
 	
-	//fprintf(fp," %f",sdata->xf/*25*/);
+	//fprintf(fp," %f",sdata->xf/*27*/);
 
 	fprintf(fp,"\n");
 }
