@@ -67,7 +67,6 @@ int treadmillController::initializeModbus(void)
 void treadmillController::moveTreadmill(double footPos, double kDesired)
 {
 	
-	
 	if(footPos < -10) {return;}
 	
 	if(footPos < 1) { footPos = 0.26; }
@@ -76,10 +75,10 @@ void treadmillController::moveTreadmill(double footPos, double kDesired)
 	
 	xfoot = footPos;
 	Kd = kDesired;
-	
-	
+
 	treadmillController::feedForwardFunction();
 	
+
 	double u = uff;
 	
 	x[0] = u;
@@ -90,7 +89,6 @@ void treadmillController::moveTreadmill(double footPos, double kDesired)
 	x[1] = x[0];
 	xFilt[2] = xFilt[1];
 	xFilt[1] = xFilt[0];
-	
 	
 	if(kDesired > 5e5) { u = 0.01; }
 	
@@ -133,9 +131,9 @@ void treadmillController::feedForwardFunction(void)
 
 void treadmillController::moveTrack(float pos)
 {
-	
+
 	convert64to16(pos); // updates the mtp1 array
-	
+
 	if(modbus_write_registers(ctx,550,4,mtp1) < 0)
 		std::cerr << "Can't write position" << std::endl;
 	

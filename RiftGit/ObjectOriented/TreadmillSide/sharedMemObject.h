@@ -47,13 +47,18 @@ protected:
 	};
 	
 	// File saving components
+	
+	
+	
 	FILE *fp;
 		
-	void openFile();
+	void openFile(const char*);
 	
 	
 public:
-	sharedMemObject();
+	// Call constructor with desired name of file to write data to
+	// (e.g. "treadmillData.txt")
+	sharedMemObject(const char*);
 	~sharedMemObject();
 	
 	void save2file(bool, bool);

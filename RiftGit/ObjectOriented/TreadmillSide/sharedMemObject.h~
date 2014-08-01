@@ -47,16 +47,19 @@ protected:
 	};
 	
 	// File saving components
+	
+	
+	
 	FILE *fp;
 		
-	void openFile();
+	void openFile(const char*);
 	
 	
 public:
-	sharedMemObject();
+	sharedMemObject(const char*);
 	~sharedMemObject();
 	
-	void save2file(double, bool, bool, bool);
+	void save2file(bool, bool);
 	
 	sensor_data *sdata;
 };

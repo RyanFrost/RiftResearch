@@ -30,7 +30,7 @@ void dataSaver(void);
 
 socketManager sock(27015); // Creates socket object ---> opens socket on local port 27015
 dataGenerator dataGen(120); // dataGen creates the patch & patch type vectors
-sharedMemObject sharedMemory;
+sharedMemObject sharedMemory("jeffTest2.txt");
 treadmillController treadmill;
 
 std::vector<char> response;

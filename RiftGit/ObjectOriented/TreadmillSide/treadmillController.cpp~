@@ -33,7 +33,7 @@ treadmillController::~treadmillController()
 
 int treadmillController::initializeModbus(void)
 {
-	std::cout << "Initializing Modbus..." << std::flush;
+	std::cout << "Initializing Modbus... " << std::flush;
 	//establish connection
 	ctx = modbus_new_tcp("192.168.0.35", 502);
 	if (modbus_connect(ctx) == -1) {
@@ -59,7 +59,7 @@ int treadmillController::initializeModbus(void)
 	const uint16_t enc_res[1]={1024};
 	modbus_write_registers(ctx,984,1,enc_res);
 	
-	std::cout << " successful." << std::endl;
+	std::cout << "successful." << std::endl;
 	
 	return 0;	
 }
@@ -67,7 +67,7 @@ int treadmillController::initializeModbus(void)
 void treadmillController::moveTreadmill(double footPos, double kDesired)
 {
 	
-	
+	std::cout << "at beginning of move treadmill" << std::endl;
 	if(footPos < -10) {return;}
 	
 	if(footPos < 1) { footPos = 0.26; }
@@ -77,11 +77,12 @@ void treadmillController::moveTreadmill(double footPos, double kDesired)
 	xfoot = footPos;
 	Kd = kDesired;
 	
-	
+	std::cout << "set values, next is feedforward" << std::endl;
 	treadmillController::feedForwardFunction();
 	
+	std::cout << "passed feedforward" << std::endl;
 	double u = uff;
-	
+	std::cout << "setting filt values" << std::endl;
 	x[0] = u;
 	xFilt[0] = bFilt[0]*x[0] + bFilt[1]*x[1] + bFilt[2]*x[2] - aFilt[1]*xFilt[1] - aFilt[2]*xFilt[2];
 	u = xFilt[0];
@@ -90,7 +91,7 @@ void treadmillController::moveTreadmill(double footPos, double kDesired)
 	x[1] = x[0];
 	xFilt[2] = xFilt[1];
 	xFilt[1] = xFilt[0];
-	
+	std::cout << "set filt values" << std::endl;
 	
 	if(kDesired > 5e5) { u = 0.01; }
 	
@@ -98,6 +99,7 @@ void treadmillController::moveTreadmill(double footPos, double kDesired)
 	
 	if (u < 0.01) { u = 0.01; }
 	
+	std::cout << "about to move track" << std::endl;
 	treadmillController::moveTrack(u);
 	
 }
@@ -134,8 +136,11 @@ void treadmillController::feedForwardFunction(void)
 void treadmillController::moveTrack(float pos)
 {
 	
+	std::cout << "updating mtp1 array" << std::endl;
+	
 	convert64to16(pos); // updates the mtp1 array
 	
+	std::cout << "updated mtp1 array" << std::endl;
 	if(modbus_write_registers(ctx,550,4,mtp1) < 0)
 		std::cerr << "Can't write position" << std::endl;
 	
@@ -151,6 +156,7 @@ void treadmillController::moveTrack(float pos)
 	if(modbus_write_registers(ctx,544,2,mtmove) < 0)
 		std::cerr << "Can't move" << std::endl;
 	
+	std::cout << "moved track" << std::endl;
 	return;
 }
 

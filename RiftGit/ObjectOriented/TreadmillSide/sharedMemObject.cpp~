@@ -6,7 +6,7 @@
 #include <cstdlib>
 #include <cstdint>
 
-sharedMemObject::sharedMemObject(const char * fileName)
+sharedMemObject::sharedMemObject()
 {
 	int SHM_SIZE = 1024;
 	
@@ -30,7 +30,7 @@ sharedMemObject::sharedMemObject(const char * fileName)
 	}
 	
 	
-	openFile(fileName);
+	openFile();
 }
 
 
@@ -41,9 +41,9 @@ sharedMemObject::~sharedMemObject()
 
 
 
-void sharedMemObject::openFile(const char *file)
+void sharedMemObject::openFile()
 {
-	fp = fopen(file, "w");
+	fp = fopen("jeffTest.txt", "w");
 }
 
 

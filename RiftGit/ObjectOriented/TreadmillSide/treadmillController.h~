@@ -16,7 +16,7 @@ private:
 	double uff;
 	double xfoot;
 	double Kd;
-	uint16_t mtp1[4];
+	uint16_t *mtp1;
 	
 	// These three are helper functions for moveTreadmill
 	void feedForwardFunction(void);
