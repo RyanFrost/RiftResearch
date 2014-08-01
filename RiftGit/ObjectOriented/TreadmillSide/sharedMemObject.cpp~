@@ -6,7 +6,7 @@
 #include <cstdlib>
 #include <cstdint>
 
-sharedMemObject::sharedMemObject()
+sharedMemObject::sharedMemObject(const char * fileName)
 {
 	int SHM_SIZE = 1024;
 	
@@ -30,7 +30,7 @@ sharedMemObject::sharedMemObject()
 	}
 	
 	
-	openFile();
+	openFile(fileName);
 }
 
 
@@ -41,15 +41,15 @@ sharedMemObject::~sharedMemObject()
 
 
 
-void sharedMemObject::openFile()
+void sharedMemObject::openFile(const char *file)
 {
-	fp = fopen("jeffTest.txt", "w");
+	fp = fopen(file, "w");
 }
 
 
 
 
-void sharedMemObject::save2file(bool movingBackward, bool movingForward)
+void sharedMemObject::save2file(bool movingBackward, bool movingForward, double distance)
 {
 	// ensure proper spacing between 'fprintf' w/ a space after last %f
 	fprintf(fp,"%d %f %f ",sdata->motorv_int /*1*/, sdata->lcR_lbs/*2*/, sdata->lcL_lbs/*3*/);
@@ -63,7 +63,8 @@ void sharedMemObject::save2file(bool movingBackward, bool movingForward)
 
 	fprintf(fp,"%f ", sdata->xf);/*24*/
 	
-	fprintf(fp,"%d %d", movingBackward/*25*/, movingForward/*26*/);
+	fprintf(fp,"%d %d ", movingBackward/*25*/, movingForward/*26*/);
+	fprintf(fp,"%f", distance/*27*/);
 	
 	//fprintf(fp," %f",sdata->xf/*27*/);
 

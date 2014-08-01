@@ -49,7 +49,7 @@ void sharedMemObject::openFile(const char *file)
 
 
 
-void sharedMemObject::save2file(bool movingBackward, bool movingForward)
+void sharedMemObject::save2file(bool movingBackward, bool movingForward, double distance, int currentPatch, int patchType)
 {
 	// ensure proper spacing between 'fprintf' w/ a space after last %f
 	fprintf(fp,"%d %f %f ",sdata->motorv_int /*1*/, sdata->lcR_lbs/*2*/, sdata->lcL_lbs/*3*/);
@@ -63,7 +63,8 @@ void sharedMemObject::save2file(bool movingBackward, bool movingForward)
 
 	fprintf(fp,"%f ", sdata->xf);/*24*/
 	
-	fprintf(fp,"%d %d", movingBackward/*25*/, movingForward/*26*/);
+	fprintf(fp,"%d %d ", movingBackward/*25*/, movingForward/*26*/);
+	fprintf(fp,"%f %d %d", distance/*27*/, currentPatch/*28*/, patchType/*29*/);
 	
 	//fprintf(fp," %f",sdata->xf/*27*/);
 

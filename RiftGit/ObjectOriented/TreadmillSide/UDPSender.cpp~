@@ -10,7 +10,7 @@
 #include <iterator>
 #include <boost/thread.hpp>
 #include <unistd.h>
-
+#include <sys/time.h>
 
 #include <signal.h>
 
@@ -30,11 +30,12 @@ void dataSaver(void);
 
 socketManager sock(27015); // Creates socket object ---> opens socket on local port 27015
 dataGenerator dataGen(120); // dataGen creates the patch & patch type vectors
-sharedMemObject sharedMemory;
+sharedMemObject sharedMemory("jeffTest2.txt");
 treadmillController treadmill;
 
 std::vector<char> response;
 int currentPatch = 0;
+int nextPatchType = 0;
 bool movingForward;
 bool movingBackward;
 double distance = 10.0;
@@ -101,12 +102,12 @@ int main()
 	std::cout << "Running..." << std::endl;
 	
 	//int currentPatchType = dataGen.getPatchTypes()[currentPatch];
-
+	
 	
 	while( unityRunning )
 	{
 		
-		int nextPatchType = dataGen.getPatchTypes()[currentPatch];
+		nextPatchType = dataGen.getPatchTypes()[currentPatch];
 		std::cout << "next patch type: " << nextPatchType << ", next patch number: " << currentPatch << std::endl;
 		
 		
@@ -226,7 +227,12 @@ void startComm(void)
 
 void dataSaver()
 {
-
+	
+	timeval timer;
+	double time;
+	
+	
+	
 	std::vector<double> pastVals(5, 0.0);
 
 	while( unityRunning )
@@ -250,8 +256,10 @@ void dataSaver()
 			movingBackward = false;
 		}
 		
-		
-		sharedMemory.save2file(movingBackward,movingForward);
+		gettimeofday(&timer,0);
+		time = (double) (timer.tv_usec);
+		sharedMemory.sdata->time_vst_absolute = timer.tv_sec + time/1e6;
+		sharedMemory.save2file(movingBackward,movingForward,distance, currentPatch,nextPatchType);
 		
 		// Sleep in between calls to foot position.
 		// This helps negate the effect of noise on foot position,

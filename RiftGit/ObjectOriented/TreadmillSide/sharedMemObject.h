@@ -61,7 +61,7 @@ public:
 	sharedMemObject(const char*);
 	~sharedMemObject();
 	
-	void save2file(bool, bool);
+	void save2file(bool, bool, double, int, int);
 	
 	sensor_data *sdata;
 };
