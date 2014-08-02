@@ -57,8 +57,11 @@ void dataGenerator::patchGenerator(void)
 
 void dataGenerator::patchTypeGenerator(void)
 {
+	// To insert the special perturbations this function first fills a vector with half type 2 and half type 3 perturbations. Then
+	// it shuffles the vector to randomize the perturbation order and inserts each element of the vector into the patch list
+	// at random intervals.
 	
-	int numPert = 10;
+	int numPert = 20;
 	std::vector<int> patchTypeOrder;
 	patchTypeOrder.insert(patchTypeOrder.end(), numPert / 2, 2);
 	patchTypeOrder.insert(patchTypeOrder.end(), numPert / 2, 3);
@@ -68,8 +71,8 @@ void dataGenerator::patchTypeGenerator(void)
 	patchTypes.insert(patchTypes.begin(), numPatches, 1);
 
 	int currentPatch = 0;
-	int startingBuffer = 2; // Number of patches before the first perturbation
-	int avgPatchesBetween = 3;
+	int startingBuffer = 10; // Number of patches before the first special perturbation
+	int avgPatchesBetween = 6;
 	currentPatch += startingBuffer;
 
 	
