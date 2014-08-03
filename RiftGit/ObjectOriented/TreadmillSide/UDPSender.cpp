@@ -221,7 +221,9 @@ void startComm(void)
 		sock.loadIntToBuf(sharedMemory.sdata->perturb);
 		sock.sendBuf();
 		
-		
+		// Send current treadmill speed to Unity for automatic speed sync
+		sock.loadDubToBuf((sharedMemory.sdata->tspeed_desired+7)/1000); // Converts from mm/s to m/s
+		sock.sendBuf();
 	}
 }
 
