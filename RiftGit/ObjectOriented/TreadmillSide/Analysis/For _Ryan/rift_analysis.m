@@ -40,6 +40,7 @@ kneeAngleRight = A(:,22);
 ankleAngleRight = A(:,23);
 xf = A(:,24);
 
+movingForward = A(:,26);
 distance = A(:,27);
 currentPatch = A(:,28);
 patchType = A(:,29);
@@ -59,15 +60,21 @@ maxSpeedIndDown = find( tspeed_d == tspeedMax, 1, 'last'); % Last sample at max 
 
 % find minimums of xf
 % close to heel strike
-Data = xf;
-Data(Data>110 | Data < -10) = NaN;
+Data = kneeAngleLeft;
+nanInd = find(Data>110 | Data < -100);
+Data(nanInd) = NaN;
 Data(tspeed_d < tspeedMax ) = NaN;
-[Maxima,MaxIdx] = findpeaks(Data,'MINPEAKDISTANCE',30,'MINPEAKHEIGHT',mean(Data)+10);
+
+
+changes = diff(movingForward);
+hsInd = find(changes<0);
+
+[Maxima,MaxIdx] = findpeaks(Data,'MINPEAKDISTANCE',30,'MINPEAKHEIGHT',nanmean(Data)+10);
 DataInv = 1.01*max(Data) - Data;
-[~,MinIdx] = findpeaks(DataInv,'MINPEAKDISTANCE',30,'MINPEAKHEIGHT',mean(DataInv)+10);
+[~,MinIdx] = findpeaks(DataInv,'MINPEAKDISTANCE',30,'MINPEAKHEIGHT',nanmean(DataInv)+10);
 Minima = Data(MinIdx);
 
-heelStrikeInd = MinIdx; % indices where HS occurs
+heelStrikeInd = hsInd;%MinIdx; % indices where HS occurs
 
 % Don't include data before up to speed + a couple cycles
 num2remove = find(heelStrikeInd < maxSpeedIndUp,1,'last') + 2;
@@ -85,104 +92,320 @@ aveSamplesPerGaitCycle = mean(diff(heelStrikeInd));
 % plot(50*perturb,'r');
 
 %% find infinite sections
-cycles2view = 1; % how many consectuive cycles of data do you want saved?
-count = 1;
-rangePast = heelStrikeInd(1) : heelStrikeInd(1 + cycles2view);
-for i = 1:length(heelStrikeInd) - cycles2view;
-    range = heelStrikeInd(i) : heelStrikeInd(i + cycles2view);
-    if isempty( find( perturb(range) > 0,1,'first') ) % no perturbation during this cycle
-        if isempty( find( perturb(rangePast) > 0 , 1, 'first') ) % no perturbation right before
-            %if count < 50
-            inf_inds{count}(1) = range(1);
-            inf_inds{count}(2) = range(end);
-            count = count + 1;
-            %end
-        end
-    end
-    rangePast = range;
-end
-
 
 
 numCyclesBefore = 1;
-numCyclesAfter = 3;
+numCyclesAfter = 1;
 numCyclesPlot = numCyclesBefore+numCyclesAfter+1;
 num_cycles_to_view_inf = numCyclesPlot;
 count = 1;
-range_past = heel_strike_ind(1) : heel_strike_ind(1+num_cycles_to_view_inf); 
-for i = 1+numCyclesBefore:length(heel_strike_ind) - numCyclesAfter-1;
-    range = heel_strike_ind(i-numCyclesBefore) : heel_strike_ind(i+1+numCyclesAfter); % take 1 gait cycle
+range_past = heelStrikeInd(1) : heelStrikeInd(1+num_cycles_to_view_inf); 
+for i = 1+numCyclesBefore:length(heelStrikeInd) - numCyclesAfter-1;
+    range = heelStrikeInd(i-numCyclesBefore) : heelStrikeInd(i+1+numCyclesAfter); % take 1 gait cycle
     if isempty( find( perturb(range) > 0,1,'first') ) % no perturbation during this cycle
         if isempty( find( perturb(range_past) > 0 , 1, 'first') ) % no perturbation right before
-            inf_inds{count}(1) = heel_strike_ind(i);
-            inf_inds{count}(2) = heel_strike_ind(i+1);
+            inf_inds{count}(1) = heelStrikeInd(i);
+            inf_inds{count}(2) = heelStrikeInd(i+1);
             count = count + 1;
         end
     end
     range_past = range;
 end
 
+num_inf_cycs = count - 1;
+ankleAngleInf = cell(num_inf_cycs,1);
+kneeAngleInf = cell(num_inf_cycs,1);
+hipAngleInf = cell(num_inf_cycs,1);
+xx = linspace(0-numCyclesBefore*100, (1+numCyclesAfter)*100,1000 );
+xx = linspace(0, 100,1000 );
+pgc = xx; % percent gait cycle
+pgc = linspace(0-numCyclesBefore*100, (1+numCyclesAfter)*100,num_cycles_to_view_inf*1000 );
+
+clear infplots;
+
+for i = 1+numCyclesBefore:num_inf_cycs-numCyclesAfter-1
+    ind1 = inf_inds{i}(1);
+    ind2 = inf_inds{i}(2);
+
+    y_ankle = ankleAngleLeft(ind1:ind2);
+    longestAnkleNaN = max(diff(find([1,diff(y_ankle'),1])));
+    y_knee = kneeAngleLeft(ind1:ind2);
+    longestKneeNaN = max(diff(find([1,diff(y_knee'),1])));
+    y_hip = hipAngleLeft(ind1:ind2);
+    longestHipNaN = max(diff(find([1,diff(y_hip'),1])));
+    
+    longestVec = [longestAnkleNaN, longestKneeNaN, longestHipNaN];
+    cutoff = 3;
+    
+    if ( all(longestVec < cutoff) )
+    
+        % normalize each cycle over gait cycle
+        temp = ind1:ind2;
+        x = 100*(temp - min(temp)) / ( max(temp) - min(temp) );
+        ankleAngleInf{i} = spline(x,y_ankle,xx);
+        kneeAngleInf{i} = spline(x,y_knee,xx);
+        hipAngleInf{i} = spline(x,y_hip,xx);
+        %infplots(i)=plot(ankleAngleInf{i},'DisplayName',num2str(ind1));hold on;
+    end
+    clear y_ankle y_knee y_hip
+
+end
+%return
+hold off;
+
+ankleAngleInfAvg = mean(cell2mat(ankleAngleInf)); % <----- may or may not need to transpose data for finding mean.
+ankleAngleInfStd = std(cell2mat(ankleAngleInf));
+kneeAngleInfAvg = mean(cell2mat(kneeAngleInf));
+kneeAngleInfStd = std(cell2mat(kneeAngleInf));
+hipAngleInfAvg = mean(cell2mat(hipAngleInf));
+hipAngleInfStd = std(cell2mat(hipAngleInf));
+
+anklePlotInf = [];% ankleAngleInf = ankleAngleInfAvg;
+kneePlotInf = []; %kneeAngleInf = kneeAngleInfAvg;
+hipPlotInf = []; %hipAngleInf = hipAngleInfAvg;
+ankleStd = [];
+kneeStd = [];
+hipStd = [];
+
+for i = 1:(numCyclesBefore+1+numCyclesAfter)
+    anklePlotInf = [anklePlotInf, ankleAngleInfAvg];
+    ankleStd = [ankleStd, ankleAngleInfStd];
+    kneePlotInf = [kneePlotInf, kneeAngleInfAvg];
+    kneeStd = [kneeStd, kneeAngleInfStd];
+    hipPlotInf = [hipPlotInf, hipAngleInfAvg];
+    hipStd = [hipStd, hipAngleInfStd];
+end
 
 
 %% find perturbation sections
 
-clear type_w_inds
-type_w_inds = cell(10,1);
-
-for i = 1:length(heelStrikeInd) - cycles2view;
-    range = heelStrikeInd(i) : heelStrikeInd(i+cycles2view);
-    inds = range;
-    if ~isempty(find(perturb(inds) == 1, 1)) && ~isempty(find(Kd(inds) == 1e4, 1))
-        if isempty( find( perturb(rangePast) > 0 , 1, 'first') ) % no perturbation right before
-            type_w_inds{1}{end+1} = heelStrikeInd(i):heelStrikeInd(i+cycles2view);
-        end
-    elseif ~isempty(find(perturb(inds) == 2, 1)) && ~isempty(find(Kd(inds) == 1e4, 1))
-        if isempty( find( perturb(rangePast) > 0 , 1, 'first') ) % no perturbation right before
-            type_w_inds{2}{end+1} = heelStrikeInd(i):heelStrikeInd(i+cycles2view);
-        end
-    elseif ~isempty(find(perturb(inds) == 3, 1)) && ~isempty(find(Kd(inds) == 1e4, 1))
-        if isempty( find( perturb(rangePast) > 0 , 1, 'first') ) % no perturbation right before
-            type_w_inds{3}{end+1} = heelStrikeInd(i):heelStrikeInd(i+cycles2view);
-        end
-    elseif ~isempty(find(perturb(inds) == 1, 1)) && ~isempty(find(Kd(inds) == 5e4, 1))
-        if isempty( find( perturb(rangePast) > 0 , 1, 'first') ) % no perturbation right before
-            type_w_inds{4}{end+1} = heelStrikeInd(i):heelStrikeInd(i+cycles2view);
-        end
-    elseif ~isempty(find(perturb(inds) == 2, 1)) && ~isempty(find(Kd(inds) == 5e4, 1))
-        if isempty( find( perturb(rangePast) > 0 , 1, 'first') ) % no perturbation right before
-            type_w_inds{5}{end+1} = heelStrikeInd(i):heelStrikeInd(i+cycles2view);
-        end
-    elseif ~isempty(find(perturb(inds) == 3, 1)) && ~isempty(find(Kd(inds) == 5e4, 1))
-        if isempty( find( perturb(rangePast) > 0 , 1, 'first') ) % no perturbation right before
-            type_w_inds{6}{end+1} = heelStrikeInd(i):heelStrikeInd(i+cycles2view);
-        end
-    elseif ~isempty(find(perturb(inds) == 1, 1)) && ~isempty(find(Kd(inds) == 1e5, 1))
-        if isempty( find( perturb(rangePast) > 0 , 1, 'first') ) % no perturbation right before
-            type_w_inds{7}{end+1} = heelStrikeInd(i):heelStrikeInd(i+cycles2view);
-        end
-    elseif ~isempty(find(perturb(inds) == 2, 1)) && ~isempty(find(Kd(inds) == 1e5, 1))
-        if isempty( find( perturb(rangePast) > 0 , 1, 'first') ) % no perturbation right before
-            type_w_inds{8}{end+1} = heelStrikeInd(i):heelStrikeInd(i+cycles2view);
-        end
-    elseif ~isempty(find(perturb(inds) == 3, 1)) && ~isempty(find(Kd(inds) == 1e5, 1))
-        if isempty( find( perturb(rangePast) > 0 , 1, 'first') ) % no perturbation right before
-            type_w_inds{9}{end+1} = heelStrikeInd(i):heelStrikeInd(i+cycles2view);
-        end
-    else
+type_w_inds = cell(3,1);
+for cycle = 1+numCyclesBefore : length(heelStrikeInd) - numCyclesAfter -2
+    hsInd = heelStrikeInd(cycle);
+        
+    noPertRange = [heelStrikeInd(cycle-numCyclesBefore:cycle-1);heelStrikeInd(cycle+1:cycle+numCyclesAfter+2)];
+    
+    if perturb(hsInd+1) == 1 
+        
+        type_w_inds{1}{end+1} = heelStrikeInd(cycle - numCyclesBefore) : heelStrikeInd(cycle + 1 + numCyclesAfter);
+    
+    elseif perturb(hsInd+1) == 2 
+        
+        type_w_inds{2}{end+1} = heelStrikeInd(cycle - numCyclesBefore) : heelStrikeInd(cycle + 1 + numCyclesAfter);
+    
+    elseif perturb(hsInd+1) == 3 
+        
+        type_w_inds{3}{end+1} = heelStrikeInd(cycle - numCyclesBefore) : heelStrikeInd(cycle + 1 +numCyclesAfter);
+    
     end
-    clear range_past
-    rangePast = range;
-    clear range inds
 end
 
-clear temp
-temp = type_w_inds;
-clear type_w_inds
-type_w_inds{1} = temp{1};
-type_w_inds{2} = temp{4};
-type_w_inds{3} = temp{7};
-type_w_inds{4} = inf_inds;
-%%
+num_norm_perts = length(type_w_inds{1});
+num_type0_perts = length(type_w_inds{2});
+num_type1_perts = length(type_w_inds{3});
+
+
+disp(['Number of normal perturbations: ', num2str(num_norm_perts)]);
+disp(['Number of type zero perturbations: ', num2str(num_type0_perts)]);
+disp(['Number of type one perturbations: ', num2str(num_type1_perts)]);
+
+num_types_perts = 3;
+
+
+for i = 1:num_types_perts
+    figure(i+5)
+    for j = 1:length(type_w_inds{i})
+        
+        data = type_w_inds{i}{j};
+                       
+        y_ankle = ankleAngleLeft(data);
+        longestAnkleNaN = max(diff(find([1,diff(y_ankle'),1])));
+        y_knee = kneeAngleLeft(data);
+        longestKneeNaN = max(diff(find([1,diff(y_knee'),1])));
+        y_hip = hipAngleLeft(data);
+        longestHipNaN = max(diff(find([1,diff(y_hip'),1])));
+
+        
+        longestVec = [longestAnkleNaN, longestKneeNaN, longestHipNaN];
+        cutoff = 10;
+        
+        if ( all(longestVec < cutoff) )
+            x = numCyclesPlot*100*(data - min(data)) / ( max(data) - min(data) ) - 100*numCyclesBefore;
+       
+            ankleAngle{i}{j} = spline(x,y_ankle,pgc);
+            kneeAngle{i}{j} = spline(x,y_knee,pgc);
+            hipAngle{i}{j} = spline(x,y_hip,pgc);
+        
+            anklePlots(j) = plot(ankleAngle{i}{j},'DisplayName',num2str(data(1)));hold on;    
+            
+        end
+        
+    end
+    
+    clear y_ankle y_knee y_hip data
+end
+hold off;
+clear ankle knee hip
+
+
+
+
+
+
+
+for i = 1:3
+    i
+    ankle{i}(1,:) = mean(cell2mat(ankleAngle{i}')); % Note: transpose important for correct calculations.
+    ankle{i}(2,:) = std(cell2mat(ankleAngle{i}'));
+    knee{i}(1,:) = mean(cell2mat(kneeAngle{i}'));
+    knee{i}(2,:) = std(cell2mat(kneeAngle{i}'));
+    hip{i}(1,:) = mean(cell2mat(hipAngle{i}'));
+    hip{i}(2,:) = std(cell2mat(hipAngle{i}'));
+end
+
+
+
+ankle{4} = [anklePlotInf; ankleStd];
+knee{4} = [kneePlotInf; kneeStd];
+hip{4} = [hipPlotInf; hipStd];
+
+
+
+yval = -10;
+yval2 = .01;
+bws_amount = {'10','20','30'};
+HS = 'HS';
+TO = 'TO';
+type = {'mean','std'};
+loc = {'Heel Strike Pert','Mid Stance Pert','Toe Off Pert'};
+stiff = {'10k (N/m)','50k (N/m)','100k (N/m)'};
+jointStr = {'Ankle','Knee','Hip'};
+
+yAxisLow = [-30, -15, -15];
+yAxisHigh = [10, 60, 20];
+yval2 = -15;
+joints = {ankle,knee,hip};
+
+colors = [1, 0, 0; 0, 0, 1; 0, .4, 0];
+
+
+% Inline function for shading std dev
+plotVariance = @(x,lower,upper,color) set(fill([x,x(end:-1:1)],[upper,lower(end:-1:1)],color),'FaceAlpha',0.4);
+
+
+for j=1
+    
+    
+    figs(j) = figure(j+1);
+    
+    
+    mean = joints{j}{4}(1,:);
+    stdev = joints{j}{4}(2,:);
+
+    top = mean+stdev;
+    bottom = mean-stdev;
+    
+    
+    meanPlots(1) = plot(pgc,mean,'k--','LineWidth',2); hold on;
+%     plot(pgc,top,'k','LineWidth',1,'LineStyle','-');
+%     plot(pgc,bottom,'k','LineWidth',1,'LineStyle','-');
+    
+    plotVariance(pgc,bottom,top,[0,0,0]);
+    
+    for i=[1,3]
+        
+        mean = joints{j}{i}(1,:);
+        stdev = joints{j}{i}(2,:);
+
+        top = mean+stdev;
+        bottom = mean-stdev;
+        
+        meanPlots(i+1) = plot(pgc,mean,'Color',colors(i,:),'LineWidth',2);
+%         plot(pgc,top,'Color',colors(i,:),'LineWidth',1,'LineStyle','-');
+%         plot(pgc,bottom,'Color',colors(i,:),'LineWidth',1,'LineStyle','-');
+        
+        plotVariance(pgc,bottom,top,colors(i,:));
+        
+    end
+    hold off;
+    legend(meanPlots,'Unperturbed Gait','Regular Perturbation','Visual Warning, No Perturbation','Location','SouthWest');
+    
+    bigText{1} = title(jointStr{j});
+    bigText{2} = xlabel('Progress through gait cycle (%)');
+    bigText{3} = ylabel([jointStr{j} ' angle (degrees)']);
+    
+    axis_d = [-100*numCyclesBefore, 100*(1+numCyclesAfter), yAxisLow(j), yAxisHigh(j)];
+    
+    axis(axis_d);
+    
+    startCycle = -numCyclesBefore;
+    for i = startCycle:1+numCyclesAfter
+        hx = graph2d.constantline(100*i, 'LineStyle',':','color',[.7,.7,.7]);
+        changedependvar(hx,'x');
+    end
+%     hx1=graph2d.constantline(100, 'LineStyle',':', 'Color',[.7 .7 .7]);
+%     hx2=graph2d.constantline(200, 'LineStyle',':');
+%     changedependvar(hx1,'x');
+%     changedependvar(hx2,'x');
+%     hx3=graph2d.constantline(65, 'LineStyle',':', 'Color',[.7 .7 .7]);
+%     hx4=graph2d.constantline(165, 'LineStyle',':');
+%     hx5=graph2d.constantline(265, 'LineStyle',':');
+% 
+%     changedependvar(hx3,'x');
+%     changedependvar(hx4,'x');
+%     changedependvar(hx5,'x');
+%     
+    % horizontal line
+    hy = graph2d.constantline(0, 'LineStyle',':', 'Color',[.7 .7 .7]);
+    changedependvar(hy,'y');
+    
+    
+    HSTOheight = yAxisLow(j) + 2.5;
+    
+%     bigText{4} = text(100,HSTOheight,HS);
+%     bigText{5} = text(65,HSTOheight,TO);
+    
+    for iter = 1:3
+        set(bigText{iter},'fontSize',12,'fontWeight','bold')
+    end
+    
+    disp([jointStr{j} ' plotted']);
+end
+
+
+%savefig(figs,'JustinKinFigs.fig');
+figure;
+plotyy(lineNum,Data,lineNum,perturb); hold on;
+for i = 1:length(heelStrikeInd)
+    plot([heelStrikeInd(i), heelStrikeInd(i)], [10,70],'-k');
+end
+for i = 1:length(nanInd)
+    plot([nanInd(i), nanInd(i)], [10,70],'-r');
+end
+hold off;
+
+
+
+
+
+return;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 numTypesPerts = 3; % 3 different perturbation types (3 magnitudes)
 totalPerts = 0;
