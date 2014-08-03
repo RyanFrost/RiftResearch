@@ -35,6 +35,7 @@ public:
 	void loadIntArrayToBuf(std::vector<int>);
 	void loadDubArrayToBuf(std::vector<double>);
 	void loadIntToBuf(int);
+	void loadDubToBuf(double);
 	
 	std::vector<char> recvData(void);
 	void sendBuf();

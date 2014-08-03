@@ -157,6 +157,5 @@ void socketManager::loadIntToBuf(int integer)
 void socketManager::cleanUpSocket(void)
 {
 	close(sockfd);
-
-	std::cout << "Socket Destroyed." << std::endl;
+	//std::cout << "Socket Destroyed." << std::endl;
 }

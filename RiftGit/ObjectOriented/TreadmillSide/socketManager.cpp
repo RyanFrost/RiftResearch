@@ -153,6 +153,13 @@ void socketManager::loadIntToBuf(int integer)
 	std::copy(intStr.begin(), intStr.end(), back_inserter(buf));
 }
 
+void socketManager::loadDubToBuf(double dub)
+{
+	buf.clear();
+	std::string dubStr = std::to_string(dub);
+	std::copy(dubStr.begin(), dubStr.end(), back_inserter(buf));
+}
+
 
 void socketManager::cleanUpSocket(void)
 {
