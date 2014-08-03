@@ -27,6 +27,7 @@ public class UDPComm : MonoBehaviour
 
 	private double[] angles;
 	private float distanceToNext = 1.0f;
+	private float treadmillSpeed = 0.0f;
 	private int[] patchArray;
 	private int[] patchTypes;
 	
@@ -118,6 +119,9 @@ public class UDPComm : MonoBehaviour
 				// Check if next step will be stiffness change
 				byte[] pertData = client.Receive(ref home);
 				pertStatus = Convert.ToInt32(Encoding.UTF8.GetString(pertData));
+				
+				byte[] speedData = client.Receive(ref home);
+				treadmillSpeed = Convert.ToSingle(Encoding.UTF8.GetString(speedData));
 			}
 			catch(SocketException err)
 			{
@@ -168,5 +172,7 @@ public class UDPComm : MonoBehaviour
 	public int[] getPatchTypes() { return patchTypes; }
 	
 	public int getPertStatus() { return pertStatus; }
+	
+	public float getTreadmillSpeed() { return treadmillSpeed; }
 	
 }
