@@ -122,7 +122,7 @@ pgc = xx; % percent gait cycle
 pgc = linspace(0-numCyclesBefore*100, (1+numCyclesAfter)*100,num_cycles_to_view_inf*1000 );
 
 clear infplots;
-
+figure(1);
 for i = 1+numCyclesBefore:num_inf_cycs-numCyclesAfter-1
     ind1 = inf_inds{i}(1);
     ind2 = inf_inds{i}(2);
@@ -145,7 +145,7 @@ for i = 1+numCyclesBefore:num_inf_cycs-numCyclesAfter-1
         ankleAngleInf{i} = spline(x,y_ankle,xx);
         kneeAngleInf{i} = spline(x,y_knee,xx);
         hipAngleInf{i} = spline(x,y_hip,xx);
-        %infplots(i)=plot(ankleAngleInf{i},'DisplayName',num2str(ind1));hold on;
+        infplots(i)=plot(ankleAngleInf{i},'DisplayName',num2str(ind1));hold on;
     end
     clear y_ankle y_knee y_hip
 
