@@ -51,8 +51,8 @@ lineNum = 1:length(xf);
 time = VSTtime - zeroTime; % Zero time when EMG begins
 
 tspeedMax = max( tspeed_d );
-maxSpeedIndUp = find( tspeed_d == tspeedMax, 1, 'first'); % First sample at max treadmill speed
-maxSpeedIndDown = find( tspeed_d == tspeedMax, 1, 'last'); % Last sample at max treadmill speed
+maxSpeedIndUp = find( tspeed_d == 700, 1, 'first'); % First sample at max treadmill speed
+maxSpeedIndDown = find( tspeed_d == 700, 1, 'last'); % Last sample at max treadmill speed
 
 
 %% Break into gait cycles
