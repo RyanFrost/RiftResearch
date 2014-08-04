@@ -19,7 +19,7 @@ nk = 0; % samples to delay output in modeling
 
 
 
-A = load('erinData_8-1-14.txt'); % main data
+A = load('erinData_8-03-14.txt'); % main data
 %B = load('erinEmg_8-1-14.emg'); % EMG data
 
 tspeed_d = A(:,5);
@@ -312,7 +312,7 @@ for j=1
     
     plotVariance(pgc,bottom,top,[0,0,0]);
     
-    for i=[1,3]
+    for i=[2]
         
         mean = joints{j}{i}(1,:);
         stdev = joints{j}{i}(2,:);

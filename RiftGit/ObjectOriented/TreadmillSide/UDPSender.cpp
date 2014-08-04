@@ -60,8 +60,8 @@ int main()
 // 	
 	if( treadmill.initializeModbus() < 0) { exit(1); }
 // 	
-	
-	
+	std::vector<int> patchesVec = dataGen.getPatches();
+	std::vector<int> patchTypesVec = dataGen.getPatchTypes();
 	
 	
 	//Uncomment following line for automatic joint angle generation
@@ -83,7 +83,7 @@ int main()
 	printCharVec(response);
 	std::cout << "Received." << std::endl;
 
-	std::vector<int> patchesVec = dataGen.getPatches();
+	
 	sock.loadIntArrayToBuf(patchesVec);
 	printCharVec(sock.getBuf());
 	sock.sendBuf();
@@ -91,7 +91,7 @@ int main()
 	response = sock.recvData();
 	printCharVec(response);
 	
-	std::vector<int> patchTypesVec = dataGen.getPatchTypes();
+	
 	sock.loadIntArrayToBuf(patchTypesVec);
 	printCharVec(sock.getBuf());
 	sock.sendBuf();
