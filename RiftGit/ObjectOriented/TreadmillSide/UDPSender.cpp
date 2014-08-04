@@ -115,7 +115,7 @@ int main()
 		switch (nextPatchType)
 		{
 		case 1:
-			pertCycler(5e4, 1);
+			pertCycler(2e4, 1);
 			currentPatch++;
 			break;
 		case 2:
@@ -123,7 +123,7 @@ int main()
 			currentPatch++;
 			break;
 		case 3:
-			pertCycler(5e4, 3);
+			pertCycler(2e4, 3);
 			currentPatch++;
 			break;
 		}

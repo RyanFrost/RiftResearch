@@ -19,7 +19,7 @@ nk = 0; % samples to delay output in modeling
 
 
 
-A = load('erinData_8-03-14.txt'); % main data
+A = load('erinData_8-03-14_2.txt'); % main data
 %B = load('erinEmg_8-1-14.emg'); % EMG data
 
 tspeed_d = A(:,5);
