@@ -51,8 +51,11 @@ lineNum = 1:length(xf);
 time = VSTtime - zeroTime; % Zero time when EMG begins
 
 tspeedMax = max( tspeed_d );
-maxSpeedIndUp = find( tspeed_d == 700, 1, 'first'); % First sample at max treadmill speed
-maxSpeedIndDown = find( tspeed_d == 700, 1, 'last'); % Last sample at max treadmill speed
+if (tspeedMax > 500)
+    tspeedMax = 700;
+end
+maxSpeedIndUp = find( tspeed_d == tspeedMax, 1, 'first'); % First sample at max treadmill speed
+maxSpeedIndDown = find( tspeed_d == tspeedMax, 1, 'last'); % Last sample at max treadmill speed
 
 
 %% Break into gait cycles
@@ -61,7 +64,7 @@ maxSpeedIndDown = find( tspeed_d == 700, 1, 'last'); % Last sample at max treadm
 % find minimums of xf
 % close to heel strike
 Data = kneeAngleLeft;
-nanInd = find(Data>110 | Data < -100);
+nanInd = find(Data>110 | Data < -10);
 Data(nanInd) = NaN;
 Data(tspeed_d < tspeedMax ) = NaN;
 
@@ -145,12 +148,12 @@ for i = 1+numCyclesBefore:num_inf_cycs-numCyclesAfter-1
         ankleAngleInf{i} = spline(x,y_ankle,xx);
         kneeAngleInf{i} = spline(x,y_knee,xx);
         hipAngleInf{i} = spline(x,y_hip,xx);
-        infplots(i)=plot(ankleAngleInf{i},'DisplayName',num2str(ind1));hold on;
+        infplots(i)=plot(kneeAngleInf{i},'DisplayName',num2str(ind1));hold on;
     end
     clear y_ankle y_knee y_hip
 
 end
-%return
+% return
 hold off;
 
 ankleAngleInfAvg = mean(cell2mat(ankleAngleInf)); % <----- may or may not need to transpose data for finding mean.
@@ -180,10 +183,12 @@ end
 %% find perturbation sections
 
 type_w_inds = cell(3,1);
-for cycle = 1+numCyclesBefore : length(heelStrikeInd) - numCyclesAfter -2
-    hsInd = heelStrikeInd(cycle);
-        
-    noPertRange = [heelStrikeInd(cycle-numCyclesBefore:cycle-1);heelStrikeInd(cycle+1:cycle+numCyclesAfter+2)];
+perturbStartInd = find(diff(perturb)>0);
+
+
+for perturbation = 1:length(perturbStartInd)
+    hsInd = perturbStartInd(perturbation);
+    cycle = find(heelStrikeInd == hsInd)+1;
     
     if perturb(hsInd+1) == 1 
         
@@ -199,6 +204,31 @@ for cycle = 1+numCyclesBefore : length(heelStrikeInd) - numCyclesAfter -2
     
     end
 end
+    
+    
+
+
+
+
+% for cycle = 1+numCyclesBefore : length(heelStrikeInd) - numCyclesAfter -2
+%     hsInd = heelStrikeInd(cycle);
+%         
+%     noPertRange = [heelStrikeInd(cycle-numCyclesBefore:cycle-1);heelStrikeInd(cycle+1:cycle+numCyclesAfter+2)];
+%     
+%     if perturb(hsInd) == 1 
+%         
+%         type_w_inds{1}{end+1} = heelStrikeInd(cycle - numCyclesBefore) : heelStrikeInd(cycle + 1 + numCyclesAfter);
+%     
+%     elseif perturb(hsInd) == 2 
+%         
+%         type_w_inds{2}{end+1} = heelStrikeInd(cycle - numCyclesBefore) : heelStrikeInd(cycle + 1 + numCyclesAfter);
+%     
+%     elseif perturb(hsInd) == 3 
+%         
+%         type_w_inds{3}{end+1} = heelStrikeInd(cycle - numCyclesBefore) : heelStrikeInd(cycle + 1 +numCyclesAfter);
+%     
+%     end
+% end
 
 num_norm_perts = length(type_w_inds{1});
 num_type0_perts = length(type_w_inds{2});
@@ -235,8 +265,8 @@ for i = 1:num_types_perts
             ankleAngle{i}{j} = spline(x,y_ankle,pgc);
             kneeAngle{i}{j} = spline(x,y_knee,pgc);
             hipAngle{i}{j} = spline(x,y_hip,pgc);
-        
-            anklePlots(j) = plot(ankleAngle{i}{j},'DisplayName',num2str(data(1)));hold on;    
+            
+            kneePlots(j) = plot(kneeAngle{i}{j},'DisplayName',num2str(data(1)));hold on;    
             
         end
         
@@ -293,7 +323,7 @@ colors = [1, 0, 0; 0, 0, 1; 0, .4, 0];
 plotVariance = @(x,lower,upper,color) set(fill([x,x(end:-1:1)],[upper,lower(end:-1:1)],color),'FaceAlpha',0.4);
 
 
-for j=1
+for j=2
     
     
     figs(j) = figure(j+1);
@@ -312,7 +342,7 @@ for j=1
     
     plotVariance(pgc,bottom,top,[0,0,0]);
     
-    for i=[2]
+    for i=[1,2]
         
         mean = joints{j}{i}(1,:);
         stdev = joints{j}{i}(2,:);
@@ -378,9 +408,6 @@ figure;
 plotyy(lineNum,Data,lineNum,perturb); hold on;
 for i = 1:length(heelStrikeInd)
     plot([heelStrikeInd(i), heelStrikeInd(i)], [10,70],'-k');
-end
-for i = 1:length(nanInd)
-    plot([nanInd(i), nanInd(i)], [10,70],'-r');
 end
 hold off;
 
