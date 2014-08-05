@@ -2,7 +2,7 @@
 % Code to create transfer function of change in Emg over stiffness input
 %-------------------------------------------------------------------------
 clear all;
-%close all;
+close all;
 clc;
 
 %% Load in data from .txt files
@@ -20,7 +20,7 @@ nk = 0; % samples to delay output in modeling
 
 
 A = load('erinData_8-03-14_2.txt'); % main data
-%B = load('erinEmg_8-1-14.emg'); % EMG data
+%B = load('erinEmg_8-03-14_2.emg'); % EMG data
 
 tspeed_d = A(:,5);
 xd = A(:,6);
@@ -32,12 +32,12 @@ force_b = A(:,12);
 cycle = A(:,15);
 VSTtime = A(:,16);
 zeroTime = A(:,17);
-hipAngleLeft = A(:,18);
-kneeAngleLeft = A(:,19);
-ankleAngleLeft = A(:,20);
-hipAngleRight = A(:,21);
-kneeAngleRight = A(:,22);
-ankleAngleRight = A(:,23);
+hipAngleLeft = -A(:,18);
+kneeAngleLeft = -A(:,19);
+ankleAngleLeft = -A(:,20);
+hipAngleRight= A(:,21);
+kneeAngleRight= A(:,22);
+ankleAngleRight= A(:,23);
 xf = A(:,24);
 
 movingForward = A(:,26);
@@ -56,6 +56,9 @@ if (tspeedMax > 500)
 end
 maxSpeedIndUp = find( tspeed_d == tspeedMax, 1, 'first'); % First sample at max treadmill speed
 maxSpeedIndDown = find( tspeed_d == tspeedMax, 1, 'last'); % Last sample at max treadmill speed
+
+
+ankleAngleLeft(ankleAngleLeft > 20 | ankleAngleLeft < -35) = NaN;
 
 
 %% Break into gait cycles
@@ -97,8 +100,8 @@ aveSamplesPerGaitCycle = mean(diff(heelStrikeInd));
 %% find infinite sections
 
 
-numCyclesBefore = 1;
-numCyclesAfter = 1;
+numCyclesBefore = 2;
+numCyclesAfter = 4;
 numCyclesPlot = numCyclesBefore+numCyclesAfter+1;
 num_cycles_to_view_inf = numCyclesPlot;
 count = 1;
@@ -138,7 +141,7 @@ for i = 1+numCyclesBefore:num_inf_cycs-numCyclesAfter-1
     longestHipNaN = max(diff(find([1,diff(y_hip'),1])));
     
     longestVec = [longestAnkleNaN, longestKneeNaN, longestHipNaN];
-    cutoff = 3;
+    cutoff = 2;
     
     if ( all(longestVec < cutoff) )
     
@@ -148,7 +151,7 @@ for i = 1+numCyclesBefore:num_inf_cycs-numCyclesAfter-1
         ankleAngleInf{i} = spline(x,y_ankle,xx);
         kneeAngleInf{i} = spline(x,y_knee,xx);
         hipAngleInf{i} = spline(x,y_hip,xx);
-        infplots(i)=plot(kneeAngleInf{i},'DisplayName',num2str(ind1));hold on;
+        infplots(i)=plot(ankleAngleInf{i},'DisplayName',num2str(ind1));hold on;
     end
     clear y_ankle y_knee y_hip
 
@@ -184,23 +187,23 @@ end
 
 type_w_inds = cell(3,1);
 perturbStartInd = find(diff(perturb)>0);
-
+perturbStartInd(perturbStartInd == 19742 | perturbStartInd == 8178) = [];
 
 for perturbation = 1:length(perturbStartInd)
     hsInd = perturbStartInd(perturbation);
     cycle = find(heelStrikeInd == hsInd)+1;
     
-    if perturb(hsInd+1) == 1 
+    if perturb(hsInd+1) == 1 && distance(perturbStartInd(perturbation)) < -0.3
         
-        type_w_inds{1}{end+1} = heelStrikeInd(cycle - numCyclesBefore) : heelStrikeInd(cycle + 1 + numCyclesAfter);
+        type_w_inds{1}{end+1} = heelStrikeInd(cycle - numCyclesBefore -1) : heelStrikeInd(cycle + numCyclesAfter);
     
-    elseif perturb(hsInd+1) == 2 
+    elseif perturb(hsInd+1) == 2 && distance(perturbStartInd(perturbation)) < -0.3
         
-        type_w_inds{2}{end+1} = heelStrikeInd(cycle - numCyclesBefore) : heelStrikeInd(cycle + 1 + numCyclesAfter);
+        type_w_inds{2}{end+1} = heelStrikeInd(cycle - numCyclesBefore -1) : heelStrikeInd(cycle + numCyclesAfter);
     
     elseif perturb(hsInd+1) == 3 
         
-        type_w_inds{3}{end+1} = heelStrikeInd(cycle - numCyclesBefore) : heelStrikeInd(cycle + 1 +numCyclesAfter);
+        type_w_inds{3}{end+1} = heelStrikeInd(cycle - numCyclesBefore -1) : heelStrikeInd(cycle +numCyclesAfter);
     
     end
 end
@@ -257,7 +260,7 @@ for i = 1:num_types_perts
 
         
         longestVec = [longestAnkleNaN, longestKneeNaN, longestHipNaN];
-        cutoff = 10;
+        cutoff = 2;
         
         if ( all(longestVec < cutoff) )
             x = numCyclesPlot*100*(data - min(data)) / ( max(data) - min(data) ) - 100*numCyclesBefore;
@@ -266,7 +269,7 @@ for i = 1:num_types_perts
             kneeAngle{i}{j} = spline(x,y_knee,pgc);
             hipAngle{i}{j} = spline(x,y_hip,pgc);
             
-            kneePlots(j) = plot(kneeAngle{i}{j},'DisplayName',num2str(data(1)));hold on;    
+            kneePlots(j) = plot(ankleAngle{i}{j},'DisplayName',num2str(data(1)));hold on;    
             
         end
         
@@ -311,8 +314,8 @@ loc = {'Heel Strike Pert','Mid Stance Pert','Toe Off Pert'};
 stiff = {'10k (N/m)','50k (N/m)','100k (N/m)'};
 jointStr = {'Ankle','Knee','Hip'};
 
-yAxisLow = [-30, -15, -15];
-yAxisHigh = [10, 60, 20];
+yAxisLow = [-30, -90, -15];
+yAxisHigh = [10, 5, 50];
 yval2 = -15;
 joints = {ankle,knee,hip};
 
@@ -320,37 +323,37 @@ colors = [1, 0, 0; 0, 0, 1; 0, .4, 0];
 
 
 % Inline function for shading std dev
-plotVariance = @(x,lower,upper,color) set(fill([x,x(end:-1:1)],[upper,lower(end:-1:1)],color),'FaceAlpha',0.4);
+plotVariance = @(x,lower,upper,color) set(fill([x,x(end:-1:1)],[upper,lower(end:-1:1)],color),'FaceAlpha',0.3);
 
 
-for j=2
+for j=[1,2,3]
     
     
     figs(j) = figure(j+1);
     
     
-    mean = joints{j}{4}(1,:);
+    plotMean = joints{j}{4}(1,:);
     stdev = joints{j}{4}(2,:);
 
-    top = mean+stdev;
-    bottom = mean-stdev;
+    top = plotMean+stdev;
+    bottom = plotMean-stdev;
     
     
-    meanPlots(1) = plot(pgc,mean,'k--','LineWidth',2); hold on;
+    meanPlots(1) = plot(pgc,plotMean,'k--','LineWidth',2); hold on;
 %     plot(pgc,top,'k','LineWidth',1,'LineStyle','-');
 %     plot(pgc,bottom,'k','LineWidth',1,'LineStyle','-');
     
     plotVariance(pgc,bottom,top,[0,0,0]);
     
-    for i=[1,2]
+    for i=[1,3]
         
-        mean = joints{j}{i}(1,:);
+        plotMean = joints{j}{i}(1,:);
         stdev = joints{j}{i}(2,:);
 
-        top = mean+stdev;
-        bottom = mean-stdev;
+        top = plotMean+stdev;
+        bottom = plotMean-stdev;
         
-        meanPlots(i+1) = plot(pgc,mean,'Color',colors(i,:),'LineWidth',2);
+        meanPlots(i+1) = plot(pgc,plotMean,'Color',colors(i,:),'LineWidth',2);
 %         plot(pgc,top,'Color',colors(i,:),'LineWidth',1,'LineStyle','-');
 %         plot(pgc,bottom,'Color',colors(i,:),'LineWidth',1,'LineStyle','-');
         
@@ -412,10 +415,8 @@ end
 hold off;
 
 
-
-
-
 return;
+
 
 
 
@@ -442,7 +443,7 @@ end
 disp(['Total number of perturbations: ', num2str(totalPerts)]);
 %%
 
-for i = 1:numTypesPerts + 1 % for infinite at end
+for i = 1:numTypesPerts % for infinite at end
     for j = 1:length(type_w_inds{i})
         startCycleTime = time(type_w_inds{i}{j}(1));
         endCycleTime = time(type_w_inds{i}{j}(end));
@@ -453,7 +454,7 @@ for i = 1:numTypesPerts + 1 % for infinite at end
 end
 
 % Find average time per cycle
-aveTimePerCycle = mean(nonzeros(cycleDuration));
+aveTimePerCycle = sum(nonzeros(cycleDuration))/length(nonzeros(cycleDuration));
 
 save([subject,'CycleTimeVals'],'cycleTimeVals');
 
