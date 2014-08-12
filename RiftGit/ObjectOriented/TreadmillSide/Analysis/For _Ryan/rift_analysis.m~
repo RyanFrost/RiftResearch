@@ -381,7 +381,7 @@ for j=[1,2,3]
     
     disp([jointStr{j} ' plotted']);
 end
-%}
+
 
 %savefig(figs,'JustinKinFigs.fig');
 figure;
@@ -579,7 +579,7 @@ end
 
 %% Look at individual cycles
 val = 1;
-%figure(2); clf;
+figure(2); clf;
 hold all;
 for i = 1:length(taAct{val})
     plot(taAct{val}{i});
