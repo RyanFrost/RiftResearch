@@ -1,4 +1,6 @@
-
+if exist('cycArray','var')
+    cycArray(1).clearList();
+end
 clear all
 close all
 
@@ -51,11 +53,11 @@ for i = 1:length(heelStrikeInd)-1
     
 end
 
-length(cycArray)
+% length(cycArray)
 cycleAnalyzer = CycleAnalyzer(cycArray);
-
-cycleAnalyzer.plotRaw(1,3);
-shg
+% 
+cycleAnalyzer.plotRaw(1,3,[0,1,2,3],'right','knee');
+% shg
 
 
 

@@ -3,13 +3,13 @@ classdef CycleAnalyzer
     properties
         
         cycleArray;
-        
+
         type0;
         type1;
         type2;
         type3;
         
-        
+        colors;
     end
     
     
@@ -20,7 +20,7 @@ classdef CycleAnalyzer
             
             
             for i = 2:length(CA.cycleArray)
-                CA.cycleArray(i).insertAfter(CA.cycleArray(i-1));
+                cycArray(i).insertAfter(CA.cycleArray(i-1));
             end
                 
                 
@@ -28,29 +28,67 @@ classdef CycleAnalyzer
             CA.type1 = findobj(CA.cycleArray,'perturbType',1);
             CA.type2 = findobj(CA.cycleArray,'perturbType',2);
             CA.type3 = findobj(CA.cycleArray,'perturbType',3);
+            
+            CA.colors = [0, 0, 0; 1, 0, 0; 0, 0, 1; 0, 0.4, 0];
+            
         end
         
-        function plotRaw(CA,cycsBefore,cycsAfter)
+        function plotRaw(CA,cycsBefore,cycsAfter,pertType,legStr,jointStr)
+            
+            angleNum = CA.parseInputForPlotting(legStr,jointStr);
             
             xSpace = linspace(-100*cycsBefore,100*(1+cycsAfter),1000*(cycsBefore+1+cycsAfter));
             
             hold on;
                      
-            
-            for i = 1:length(CA.type0)
-                currentCyc = CA.type0(i);
-                
-                cycles = CycleCollection(currentCyc,cycsBefore,cycsAfter);
-                if cycles.isPlottable == 1
-                    plot(xSpace,cycles.angles(3,:));
+            for type = 1:length(pertType)
+                % This converts each value of pertType 
+                % to a call to the same-named property
+                % (e.g. 0 becomes CA.type0)
+                perts = CA.(['type' num2str(pertType(type))]); 
+                color = CA.colors(pertType(type)+1,:);
+                for i = 1:length(perts)
+                    currentCyc = perts(i);
+                    
+                    cycles = CycleCollection(currentCyc,cycsBefore,cycsAfter,length(CA.cycleArray));
+                    
+                    if cycles.isPlottable == 1
+                        plot(xSpace,cycles.angles(angleNum,:),'Color', color);
+                    end
                 end
             end
             hold off;
         end
         
-        function plotMeanStd(CA,type,joint)
+        function plotMeanStd(CA,cycsBefore,cycsAfter,pertType,legStr,jointStr)
             
+            angleNum = CA.parseInputForPlotting(legStr,jointStr);
             
+            xSpace = linspace(-100*cycsBefore,100*(1+cycsAfter),1000*(cycsBefore+1+cycsAfter));
+            
+            hold on;
+                     
+            for type = 1:length(pertType)
+                % This converts each value of pertType 
+                % to a call to the same-named property
+                % (e.g. 0 becomes CA.type0)
+                perts = CA.(['type' num2str(pertType(type))]); 
+                color = CA.colors(pertType(type)+1,:);
+                plottableCycs = [];
+                for i = 1:length(perts)
+                    currentCyc = perts(i);
+                    
+                    cycles = CycleCollection(currentCyc,cycsBefore,cycsAfter,length(CA.cycleArray));
+                    
+                    if cycles.isPlottable == 1
+                        plottableCycs = [plottableCycs;cycles.angles(angleNum,:)];
+                    end
+                end
+                
+                
+                
+            end
+            hold off;
             
             
         end
@@ -59,7 +97,34 @@ classdef CycleAnalyzer
     end
     
     
-    
+    methods (Access = private)
+        
+        function angleNum = parseInputForPlotting(~, leg, jointStr)
+            
+            switch leg
+                case 'left'
+                    legMult = 1;
+                case 'right'
+                    legMult = 2;
+                otherwise
+                    disp('Err in CycleAnalyzer.plotRaw -> leg must be either "left" or "right".');
+            end
+            
+            switch jointStr
+                case 'hip'
+                    joint = 1;
+                case 'knee'
+                    joint = 2;
+                case 'ankle'
+                    joint = 3;
+                otherwise
+                    disp('Err in CycleAnalyzer.plotRaw -> jointStr must be "hip", "knee", or "ankle".');
+            end
+            
+            angleNum = legMult * joint;
+            
+        end
+    end
     
     
     

@@ -5,7 +5,6 @@ classdef GaitCycle < dlnode
         indices;
         perturbType;
         lowNaNs;
-        numNaNs;
         
         footPos;
         anglesRaw;
@@ -23,11 +22,14 @@ classdef GaitCycle < dlnode
             cyc.indices = cycleIndices;
             cyc.footPos = footPositions';
             cyc = cyc.loadRawAngles(anglesArray);
-            cyc.numNaNs = max(diff(find([1,diff(anglesArray(:,1)'),1])));
+            numNaNs = zeros(1,size(anglesArray,2));
+            for i = 1:size(anglesArray,2)
+                numNaNs(i) = max(diff(find([1,diff(anglesArray(:,i)'),1])));
+            end
             
             cutoffNaN = 2;
             
-            if cyc.numNaNs < cutoffNaN
+            if all(numNaNs < cutoffNaN)
                 cyc.lowNaNs = 1;
             else
                 cyc.lowNaNs = 0;
