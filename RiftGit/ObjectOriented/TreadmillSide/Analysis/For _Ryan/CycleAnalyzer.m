@@ -37,7 +37,7 @@ classdef CycleAnalyzer
             
             angleNum = CA.parseInputForPlotting(legStr,jointStr);
             
-            xSpace = linspace(-100*cycsBefore,100*(1+cycsAfter),1000*(cycsBefore+1+cycsAfter));
+            xSpace = linspace(-100*cycsBefore,100*(1+cycsAfter),1000*(cycsBefore+1+cycsAfter))';
             
             hold on;
                      
@@ -47,24 +47,34 @@ classdef CycleAnalyzer
                 % (e.g. 0 becomes CA.type0)
                 perts = CA.(['type' num2str(pertType(type))]); 
                 color = CA.colors(pertType(type)+1,:);
+                cyclesCut = 0;
                 for i = 1:length(perts)
                     currentCyc = perts(i);
                     
                     cycles = CycleCollection(currentCyc,cycsBefore,cycsAfter,length(CA.cycleArray));
                     
                     if cycles.isPlottable == 1
-                        plot(xSpace,cycles.angles(angleNum,:),'Color', color);
+                        plot(xSpace,cycles.angles(:,angleNum),'Color', color);
+                    else
+                        cyclesCut = cyclesCut+1;
                     end
+                    
                 end
+                disp([num2str(cyclesCut) ' samples were removed from the type ' num2str(pertType(type)) ' perturbations.']);
             end
             hold off;
+            grid on;
         end
         
         function plotMeanStd(CA,cycsBefore,cycsAfter,pertType,legStr,jointStr)
             
             angleNum = CA.parseInputForPlotting(legStr,jointStr);
             
-            xSpace = linspace(-100*cycsBefore,100*(1+cycsAfter),1000*(cycsBefore+1+cycsAfter));
+            xSpace = linspace(-100*cycsBefore,100*(1+cycsAfter),1000*(cycsBefore+1+cycsAfter))';
+            
+            
+            plotVariance = @(x,lower,upper,color,opacity) set(fill([x;x(end:-1:1)],[upper,lower(end:-1:1)]',color),'FaceAlpha',opacity);
+
             
             hold on;
                      
@@ -75,21 +85,33 @@ classdef CycleAnalyzer
                 perts = CA.(['type' num2str(pertType(type))]); 
                 color = CA.colors(pertType(type)+1,:);
                 plottableCycs = [];
+                cyclesCut = 0;
                 for i = 1:length(perts)
                     currentCyc = perts(i);
                     
                     cycles = CycleCollection(currentCyc,cycsBefore,cycsAfter,length(CA.cycleArray));
                     
                     if cycles.isPlottable == 1
-                        plottableCycs = [plottableCycs;cycles.angles(angleNum,:)];
+                        plottableCycs = [plottableCycs,cycles.angles(:,angleNum)];
+                    else
+                        cyclesCut = cyclesCut+1;
                     end
                 end
+
+                meanPlot = nanmean(plottableCycs',1);
+                stdPlot = nanstd(plottableCycs',1);
+                top = meanPlot+stdPlot;
+                bottom = meanPlot-stdPlot;
+                plot(xSpace,meanPlot,'LineWidth',2,'Color',color);
+                plot(xSpace,top,'LineWidth',1,'Color',color);
                 
+                plotVariance(xSpace,bottom,top,color,0.4);
                 
+                disp([num2str(cyclesCut) ' samples were removed from the type ' num2str(pertType(type)) ' perturbations.']);
                 
             end
             hold off;
-            
+            grid on;
             
         end
         
@@ -107,7 +129,7 @@ classdef CycleAnalyzer
                 case 'right'
                     legMult = 2;
                 otherwise
-                    disp('Err in CycleAnalyzer.plotRaw -> leg must be either "left" or "right".');
+                    disp('Err in CycleAnalyzer plot input -> leg must be either "left" or "right".');
             end
             
             switch jointStr
@@ -118,7 +140,7 @@ classdef CycleAnalyzer
                 case 'ankle'
                     joint = 3;
                 otherwise
-                    disp('Err in CycleAnalyzer.plotRaw -> jointStr must be "hip", "knee", or "ankle".');
+                    disp('Err in CycleAnalyzer plot input -> jointStr must be "hip", "knee", or "ankle".');
             end
             
             angleNum = legMult * joint;

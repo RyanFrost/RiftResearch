@@ -4,11 +4,10 @@ classdef GaitCycle < dlnode
         startTime;
         indices;
         perturbType;
-        lowNaNs;
+
         
         footPos;
         anglesRaw;
-        angles;
         
     end
     
@@ -19,23 +18,16 @@ classdef GaitCycle < dlnode
             cyc.startTime = cycleStartTime;
             cyc.cycleNum = cycleNumber;
             cyc.perturbType = perturbStatus;
-            cyc.indices = cycleIndices;
-            cyc.footPos = footPositions';
-            cyc = cyc.loadRawAngles(anglesArray);
-            numNaNs = zeros(1,size(anglesArray,2));
-            for i = 1:size(anglesArray,2)
-                numNaNs(i) = max(diff(find([1,diff(anglesArray(:,i)'),1])));
-            end
+            cyc.indices = cycleIndices';
+            cyc.footPos = footPositions;
+            cyc.anglesRaw = anglesArray;
             
-            cutoffNaN = 2;
             
-            if all(numNaNs < cutoffNaN)
-                cyc.lowNaNs = 1;
-            else
-                cyc.lowNaNs = 0;
-            end
+            
+            cyc.anglesRaw(cyc.anglesRaw > 100 | cyc.anglesRaw < -100) = NaN;
             
         end
+        
         
         
         
@@ -54,7 +46,7 @@ classdef GaitCycle < dlnode
 %             cyc.anglesRaw.kneeR = anglesArray(:,5);
 %             cyc.anglesRaw.hipR = anglesArray(:,4);
             
-            cyc = cyc.upsampleAngles();
+            % = cyc.upsampleAngles();
         end
         
         
@@ -63,7 +55,8 @@ classdef GaitCycle < dlnode
             xx = linspace(0,100,1000);
              
             
-            x = 100*(cyc.indices - min(cyc.indices)) / ( max(cyc.indices) - min(cyc.indices) );
+            x = linspace(0,100,length(cyc.indices));
+            
             
             cyc.angles = spline(x,cyc.anglesRaw',xx);
             

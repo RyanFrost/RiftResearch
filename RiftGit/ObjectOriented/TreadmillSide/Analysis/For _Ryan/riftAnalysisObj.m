@@ -5,7 +5,7 @@ clear all
 close all
 
 load('erinKinematics_8-03-14_2.mat'); % main data
-load('erinEMG_8-03-14_2.mat'); % EMG data
+%load('erinEMG_8-03-14_2.mat'); % EMG data
 
 
 lineNum = 1:length(xf);
@@ -31,9 +31,9 @@ startSlowDown = find( heelStrikeInd > maxSpeedIndDown, 1, 'first' );
 heelStrikeInd(startSlowDown:end) = [ ];
 
 aveSamplesPerGaitCycle = mean(diff(heelStrikeInd));
+tic;
+cycArray = GaitCycle.empty(length(heelStrikeInd),0);
 
-
-%cycArray(length(heelStrikeInd)-1) = GaitCycle(1,1);
 for i = 1:length(heelStrikeInd)-1
     cycleNumber = i;
     
@@ -52,11 +52,11 @@ for i = 1:length(heelStrikeInd)-1
     cycArray(i) = GaitCycle(cycleNumber,cycleStartTime,indices,perturbStatus,xf(indices),angles);
     
 end
-
+toc;
 % length(cycArray)
 cycleAnalyzer = CycleAnalyzer(cycArray);
 % 
-cycleAnalyzer.plotRaw(1,3,[0,1,2,3],'right','knee');
+cycleAnalyzer.plotMeanStd(1,2,[0,1,2,3],'left','knee');
 % shg
 
 
