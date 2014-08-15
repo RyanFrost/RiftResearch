@@ -1,0 +1,1 @@
+/home/treadmill/Desktop/ArduinoCodes/Rift/RiftGit/ObjectOriented/TreadmillSide/EMG/emgJohn/CMakeFiles/EMGClient.dir

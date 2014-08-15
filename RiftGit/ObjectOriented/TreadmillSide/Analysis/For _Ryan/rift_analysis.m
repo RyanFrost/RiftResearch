@@ -9,7 +9,7 @@ clc;
 
 %---( Match w/ file )---------
 bws = 30;
-subject = 'jeremy';
+subject = 'ritch';
 
 %% Variables to change
 % overall

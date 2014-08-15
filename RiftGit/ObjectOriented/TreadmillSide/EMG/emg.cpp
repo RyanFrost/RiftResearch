@@ -133,7 +133,7 @@ int main()
 	// 3 Consecutive Channels of EMG
 	// Start with channel 2 (2,3,4)
 	// Filter data with butterworth
-	string IP = "10.200.148.198";
+	string IP = "10.200.148.23";
 
     emgServer = new EMG(3, 2, BUTTER,IP);
 

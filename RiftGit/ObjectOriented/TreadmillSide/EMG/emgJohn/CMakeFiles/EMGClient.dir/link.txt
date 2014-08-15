@@ -1,0 +1,1 @@
+/usr/bin/c++       CMakeFiles/EMGClient.dir/emg.cpp.o  -o EMGClient -rdynamic /usr/local/lib/libRealTime.a -lrt /usr/local/lib/libNDI_EMG.a -lboost_thread-mt -lpthread -lboost_filesystem-mt -lboost_system-mt 
