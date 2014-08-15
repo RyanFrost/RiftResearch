@@ -2,7 +2,7 @@
 % Code to create transfer function of change in Emg over stiffness input
 %-------------------------------------------------------------------------
 clear all;
-%close all;
+close all;
 clc;
 
 %% Load in data from .txt files
@@ -19,40 +19,46 @@ nk = 0; % samples to delay output in modeling
 
 
 
-A = load('erinData_8-03-14_2.txt'); % main data
-%B = load('erinEmg_8-1-14.emg'); % EMG data
+load('erinKinematics_8-03-14_2.mat'); % main data
+load('erinEMG_8-03-14_2.mat'); % EMG data
 
-tspeed_d = A(:,5);
-xd = A(:,6);
-perturb = A(:,8);
-theta1 = A(:,9); %encoder angle
-Kd = A(:,10);
-Kact = A(:,11);
-force_b = A(:,12);
-cycle = A(:,15);
-VSTtime = A(:,16);
-zeroTime = A(:,17);
-hipAngleLeft = A(:,18);
-kneeAngleLeft = A(:,19);
-ankleAngleLeft = A(:,20);
-hipAngleRight = A(:,21);
-kneeAngleRight = A(:,22);
-ankleAngleRight = A(:,23);
-xf = A(:,24);
-
-movingForward = A(:,26);
-distance = A(:,27);
-currentPatch = A(:,28);
-patchType = A(:,29);
+% tspeed_d = A(:,5);
+% xd = A(:,6);
+% perturb = A(:,8);
+% theta1 = A(:,9); %encoder angle
+% Kd = A(:,10);
+% Kact = A(:,11);
+% force_b = A(:,12);
+% cycle = A(:,15);
+% VSTtime = A(:,16);
+% zeroTime = A(:,17);
+% hipAngleLeft = -A(:,18);
+% kneeAngleLeft = -A(:,19);
+% ankleAngleLeft = -A(:,20);
+% hipAngleRight= A(:,21);
+% kneeAngleRight= A(:,22);
+% ankleAngleRight= A(:,23);
+% xf = A(:,24);
+% 
+% movingForward = A(:,26);
+% distance = A(:,27);
+% currentPatch = A(:,28);
+% patchType = A(:,29);
 
 
 lineNum = 1:length(xf);
 
-time = VSTtime - zeroTime; % Zero time when EMG begins
+time = VSTtime - zeroTime ; % Zero time when EMG begins
 
 tspeedMax = max( tspeed_d );
-maxSpeedIndUp = find( tspeed_d == 700, 1, 'first'); % First sample at max treadmill speed
-maxSpeedIndDown = find( tspeed_d == 700, 1, 'last'); % Last sample at max treadmill speed
+if (tspeedMax > 500)
+    tspeedMax = 700;
+end
+maxSpeedIndUp = find( tspeed_d == tspeedMax, 1, 'first'); % First sample at max treadmill speed
+maxSpeedIndDown = find( tspeed_d == tspeedMax, 1, 'last'); % Last sample at max treadmill speed
+
+
+ankleAngleLeft(ankleAngleLeft > 20 | ankleAngleLeft < -35) = NaN;
 
 
 %% Break into gait cycles
@@ -61,7 +67,7 @@ maxSpeedIndDown = find( tspeed_d == 700, 1, 'last'); % Last sample at max treadm
 % find minimums of xf
 % close to heel strike
 Data = kneeAngleLeft;
-nanInd = find(Data>110 | Data < -100);
+nanInd = find(Data>110 | Data < -10);
 Data(nanInd) = NaN;
 Data(tspeed_d < tspeedMax ) = NaN;
 
@@ -94,8 +100,8 @@ aveSamplesPerGaitCycle = mean(diff(heelStrikeInd));
 %% find infinite sections
 
 
-numCyclesBefore = 1;
-numCyclesAfter = 1;
+numCyclesBefore = 2;
+numCyclesAfter = 4;
 numCyclesPlot = numCyclesBefore+numCyclesAfter+1;
 num_cycles_to_view_inf = numCyclesPlot;
 count = 1;
@@ -122,7 +128,7 @@ pgc = xx; % percent gait cycle
 pgc = linspace(0-numCyclesBefore*100, (1+numCyclesAfter)*100,num_cycles_to_view_inf*1000 );
 
 clear infplots;
-figure(1);
+%figure(1);
 for i = 1+numCyclesBefore:num_inf_cycs-numCyclesAfter-1
     ind1 = inf_inds{i}(1);
     ind2 = inf_inds{i}(2);
@@ -135,7 +141,7 @@ for i = 1+numCyclesBefore:num_inf_cycs-numCyclesAfter-1
     longestHipNaN = max(diff(find([1,diff(y_hip'),1])));
     
     longestVec = [longestAnkleNaN, longestKneeNaN, longestHipNaN];
-    cutoff = 3;
+    cutoff = 2;
     
     if ( all(longestVec < cutoff) )
     
@@ -145,12 +151,12 @@ for i = 1+numCyclesBefore:num_inf_cycs-numCyclesAfter-1
         ankleAngleInf{i} = spline(x,y_ankle,xx);
         kneeAngleInf{i} = spline(x,y_knee,xx);
         hipAngleInf{i} = spline(x,y_hip,xx);
-        infplots(i)=plot(ankleAngleInf{i},'DisplayName',num2str(ind1));hold on;
+        %infplots(i)=plot(ankleAngleInf{i},'DisplayName',num2str(ind1));hold on;
     end
     clear y_ankle y_knee y_hip
 
 end
-%return
+% return
 hold off;
 
 ankleAngleInfAvg = mean(cell2mat(ankleAngleInf)); % <----- may or may not need to transpose data for finding mean.
@@ -180,25 +186,30 @@ end
 %% find perturbation sections
 
 type_w_inds = cell(3,1);
-for cycle = 1+numCyclesBefore : length(heelStrikeInd) - numCyclesAfter -2
-    hsInd = heelStrikeInd(cycle);
-        
-    noPertRange = [heelStrikeInd(cycle-numCyclesBefore:cycle-1);heelStrikeInd(cycle+1:cycle+numCyclesAfter+2)];
+perturbStartInd = find(diff(perturb)>0);
+perturbStartInd(perturbStartInd == 19742 | perturbStartInd == 8178) = [];
+
+for perturbation = 1:length(perturbStartInd)
+    hsInd = perturbStartInd(perturbation);
+    cycle = find(heelStrikeInd == hsInd)+1;
     
-    if perturb(hsInd+1) == 1 
+    if perturb(hsInd+1) == 1 && distance(perturbStartInd(perturbation)) < -0.3
         
-        type_w_inds{1}{end+1} = heelStrikeInd(cycle - numCyclesBefore) : heelStrikeInd(cycle + 1 + numCyclesAfter);
+        type_w_inds{1}{end+1} = heelStrikeInd(cycle - numCyclesBefore -1) : heelStrikeInd(cycle + numCyclesAfter);
     
-    elseif perturb(hsInd+1) == 2 
+    elseif perturb(hsInd+1) == 2 && distance(perturbStartInd(perturbation)) < -0.3
         
-        type_w_inds{2}{end+1} = heelStrikeInd(cycle - numCyclesBefore) : heelStrikeInd(cycle + 1 + numCyclesAfter);
+        type_w_inds{2}{end+1} = heelStrikeInd(cycle - numCyclesBefore -1) : heelStrikeInd(cycle + numCyclesAfter);
     
     elseif perturb(hsInd+1) == 3 
         
-        type_w_inds{3}{end+1} = heelStrikeInd(cycle - numCyclesBefore) : heelStrikeInd(cycle + 1 +numCyclesAfter);
+        type_w_inds{3}{end+1} = heelStrikeInd(cycle - numCyclesBefore -1) : heelStrikeInd(cycle +numCyclesAfter);
     
     end
 end
+    
+    
+
 
 num_norm_perts = length(type_w_inds{1});
 num_type0_perts = length(type_w_inds{2});
@@ -213,7 +224,7 @@ num_types_perts = 3;
 
 
 for i = 1:num_types_perts
-    figure(i+5)
+    %figure(i+5)
     for j = 1:length(type_w_inds{i})
         
         data = type_w_inds{i}{j};
@@ -227,7 +238,7 @@ for i = 1:num_types_perts
 
         
         longestVec = [longestAnkleNaN, longestKneeNaN, longestHipNaN];
-        cutoff = 10;
+        cutoff = 2;
         
         if ( all(longestVec < cutoff) )
             x = numCyclesPlot*100*(data - min(data)) / ( max(data) - min(data) ) - 100*numCyclesBefore;
@@ -235,8 +246,8 @@ for i = 1:num_types_perts
             ankleAngle{i}{j} = spline(x,y_ankle,pgc);
             kneeAngle{i}{j} = spline(x,y_knee,pgc);
             hipAngle{i}{j} = spline(x,y_hip,pgc);
-        
-            anklePlots(j) = plot(ankleAngle{i}{j},'DisplayName',num2str(data(1)));hold on;    
+            
+            %kneePlots(j) = plot(ankleAngle{i}{j},'DisplayName',num2str(data(1)));hold on;    
             
         end
         
@@ -254,7 +265,6 @@ clear ankle knee hip
 
 
 for i = 1:3
-    i
     ankle{i}(1,:) = mean(cell2mat(ankleAngle{i}')); % Note: transpose important for correct calculations.
     ankle{i}(2,:) = std(cell2mat(ankleAngle{i}'));
     knee{i}(1,:) = mean(cell2mat(kneeAngle{i}'));
@@ -281,8 +291,8 @@ loc = {'Heel Strike Pert','Mid Stance Pert','Toe Off Pert'};
 stiff = {'10k (N/m)','50k (N/m)','100k (N/m)'};
 jointStr = {'Ankle','Knee','Hip'};
 
-yAxisLow = [-30, -15, -15];
-yAxisHigh = [10, 60, 20];
+yAxisLow = [-30, -90, -15];
+yAxisHigh = [10, 5, 50];
 yval2 = -15;
 joints = {ankle,knee,hip};
 
@@ -290,37 +300,37 @@ colors = [1, 0, 0; 0, 0, 1; 0, .4, 0];
 
 
 % Inline function for shading std dev
-plotVariance = @(x,lower,upper,color) set(fill([x,x(end:-1:1)],[upper,lower(end:-1:1)],color),'FaceAlpha',0.4);
+plotVariance = @(x,lower,upper,color) set(fill([x,x(end:-1:1)],[upper,lower(end:-1:1)],color),'FaceAlpha',0.3);
 
-
-for j=1
+%{
+for j=[1,2,3]
     
     
     figs(j) = figure(j+1);
     
     
-    mean = joints{j}{4}(1,:);
+    plotMean = joints{j}{4}(1,:);
     stdev = joints{j}{4}(2,:);
 
-    top = mean+stdev;
-    bottom = mean-stdev;
+    top = plotMean+stdev;
+    bottom = plotMean-stdev;
     
     
-    meanPlots(1) = plot(pgc,mean,'k--','LineWidth',2); hold on;
+    meanPlots(1) = plot(pgc,plotMean,'k--','LineWidth',2); hold on;
 %     plot(pgc,top,'k','LineWidth',1,'LineStyle','-');
 %     plot(pgc,bottom,'k','LineWidth',1,'LineStyle','-');
     
     plotVariance(pgc,bottom,top,[0,0,0]);
     
-    for i=[2]
+    for i=[1,3]
         
-        mean = joints{j}{i}(1,:);
+        plotMean = joints{j}{i}(1,:);
         stdev = joints{j}{i}(2,:);
 
-        top = mean+stdev;
-        bottom = mean-stdev;
+        top = plotMean+stdev;
+        bottom = plotMean-stdev;
         
-        meanPlots(i+1) = plot(pgc,mean,'Color',colors(i,:),'LineWidth',2);
+        meanPlots(i+1) = plot(pgc,plotMean,'Color',colors(i,:),'LineWidth',2);
 %         plot(pgc,top,'Color',colors(i,:),'LineWidth',1,'LineStyle','-');
 %         plot(pgc,bottom,'Color',colors(i,:),'LineWidth',1,'LineStyle','-');
         
@@ -371,7 +381,7 @@ for j=1
     
     disp([jointStr{j} ' plotted']);
 end
-
+%}
 
 %savefig(figs,'JustinKinFigs.fig');
 figure;
@@ -379,16 +389,12 @@ plotyy(lineNum,Data,lineNum,perturb); hold on;
 for i = 1:length(heelStrikeInd)
     plot([heelStrikeInd(i), heelStrikeInd(i)], [10,70],'-k');
 end
-for i = 1:length(nanInd)
-    plot([nanInd(i), nanInd(i)], [10,70],'-r');
-end
 hold off;
 
 
 
 
 
-return;
 
 
 
@@ -397,8 +403,7 @@ return;
 
 
 
-
-
+%}
 
 
 
@@ -415,7 +420,7 @@ end
 disp(['Total number of perturbations: ', num2str(totalPerts)]);
 %%
 
-for i = 1:numTypesPerts + 1 % for infinite at end
+for i = 1:numTypesPerts % for infinite at end
     for j = 1:length(type_w_inds{i})
         startCycleTime = time(type_w_inds{i}{j}(1));
         endCycleTime = time(type_w_inds{i}{j}(end));
@@ -426,15 +431,15 @@ for i = 1:numTypesPerts + 1 % for infinite at end
 end
 
 % Find average time per cycle
-aveTimePerCycle = mean(nonzeros(cycleDuration));
+aveTimePerCycle = sum(nonzeros(cycleDuration))/length(nonzeros(cycleDuration));
 
 save([subject,'CycleTimeVals'],'cycleTimeVals');
 
 
 %% Get EMG at correct times from above
 
-timeEMG = B(:,1);
-taRaw   = B(:,2);
+% timeEMG = B(:,1);
+% taRaw   = B(:,2);
 
 % filter parameters
 window = .25;
@@ -442,7 +447,7 @@ Hz = 2000;
 method = 2;
 
 % filter
-taFilt  = AmplitudeEstimator( taRaw, window, Hz, method);
+taFilt  = AmplitudeEstimator( taRawLeft, window, Hz, method);
 
 % normalize between 0 and 1
 taNorm = mat2gray(taFilt);
@@ -464,18 +469,19 @@ for i = 1:4 % number of types of gait cycles (i.e. # of perturbations + 1 for in
         timingDifference = [y1 y2];
         if mean( timingDifference ) > 0.1
             disp(['Large Timing Difference at: {',num2str(i),'}{',num2str(j),'}']);
-            return
+            disp(timingDifference);
+            
         end
                 
-        % store data as function of percent gait cycle
-        taData = taNorm( beginIndex:endIndex );
-
-        temp = beginIndex:endIndex;
-        x = 100*(temp - min(temp)) / ( max(temp) - min(temp) );    
-        taAct{i}{j} = spline(x,taData,xx);
-
-        clear taData 
-        clear temp x
+%         % store data as function of percent gait cycle
+%         taData = taNorm( beginIndex:endIndex );
+% 
+%         temp = beginIndex:endIndex;
+%         x = 100*(temp - min(temp)) / ( max(temp) - min(temp) );    
+%         taAct{i}{j} = spline(x,taData,xx);
+% 
+%         clear taData 
+%         clear temp x
     end
 end
 
@@ -573,7 +579,7 @@ end
 
 %% Look at individual cycles
 val = 1;
-figure(2); clf;
+%figure(2); clf;
 hold all;
 for i = 1:length(taAct{val})
     plot(taAct{val}{i});
