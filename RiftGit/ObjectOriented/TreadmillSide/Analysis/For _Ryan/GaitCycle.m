@@ -24,7 +24,11 @@ classdef GaitCycle < dlnode
             
             
             
-            cyc.anglesRaw(cyc.anglesRaw > 100 | cyc.anglesRaw < -100) = NaN;
+            inds = find(cyc.anglesRaw > 100 | cyc.anglesRaw < -100);
+            
+            
+            
+            cyc.anglesRaw(inds) = cyc.anglesRaw(inds-1);
             
         end
         

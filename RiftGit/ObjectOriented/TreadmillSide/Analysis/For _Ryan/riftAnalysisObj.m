@@ -4,7 +4,7 @@ end
 clear all
 close all
 
-load('erinKinematics_8-03-14_2.mat'); % main data
+load('johnData.mat'); % main data
 %load('erinEMG_8-03-14_2.mat'); % EMG data
 
 
@@ -56,7 +56,7 @@ toc;
 % length(cycArray)
 cycleAnalyzer = CycleAnalyzer(cycArray);
 % 
-cycleAnalyzer.plotMeanStd(1,2,[0,1,2,3],'left','knee');
+cycleAnalyzer.plotRaw(1,2,[0,1,3],'left','ankle');
 % shg
 
 
