@@ -54,7 +54,7 @@ classdef CycleAnalyzer
                     cycles = CycleCollection(currentCyc,cycsBefore,cycsAfter,length(CA.cycleArray));
                     
                     if cycles.isPlottable == 1
-                        plot(xSpace,cycles.angles(:,angleNum),'Color', color);
+                        plot(xSpace,cycles.angles(:,angleNum),'Color', color,'DisplayName',num2str(cycles.mainCycNum));
                     else
                         cyclesCut = cyclesCut+1;
                     end
@@ -63,6 +63,7 @@ classdef CycleAnalyzer
                 disp([num2str(cyclesCut) ' samples were removed from the type ' num2str(pertType(type)) ' perturbations.']);
             end
             hold off;
+            title(jointStr);
             grid on;
         end
         
@@ -98,8 +99,8 @@ classdef CycleAnalyzer
                     end
                 end
 
-                meanPlot = nanmean(plottableCycs',1);
-                stdPlot = nanstd(plottableCycs',1);
+                meanPlot = mean(plottableCycs',1);
+                stdPlot = std(plottableCycs',1);
                 top = meanPlot+stdPlot;
                 bottom = meanPlot-stdPlot;
                 plot(xSpace,meanPlot,'LineWidth',2,'Color',color);
@@ -111,6 +112,9 @@ classdef CycleAnalyzer
                 
             end
             hold off;
+            title(jointStr);
+            xlabel('Percent Gait Cycle');
+            ylabel('Angle (degrees)');
             grid on;
             
         end
@@ -125,9 +129,9 @@ classdef CycleAnalyzer
             
             switch leg
                 case 'left'
-                    legMult = 1;
+                    legMult = 0;
                 case 'right'
-                    legMult = 2;
+                    legMult = 1;
                 otherwise
                     disp('Err in CycleAnalyzer plot input -> leg must be either "left" or "right".');
             end
@@ -143,7 +147,7 @@ classdef CycleAnalyzer
                     disp('Err in CycleAnalyzer plot input -> jointStr must be "hip", "knee", or "ankle".');
             end
             
-            angleNum = legMult * joint;
+            angleNum = legMult * 3 + joint;
             
         end
     end
