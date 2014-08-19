@@ -29,7 +29,7 @@ classdef CycleAnalyzer
             CA.type2 = findobj(CA.cycleArray,'perturbType',2);
             CA.type3 = findobj(CA.cycleArray,'perturbType',3);
             
-            CA.colors = [0, 0, 0; 1, 0, 0; 0, 0, 1; 0, 0.7, 0];
+            CA.colors = [0, 0, 0; 1, 0, 0; 0, 0, 1; 0, 0.4, 0];
             
         end
         
@@ -75,8 +75,7 @@ classdef CycleAnalyzer
             
             
             plotVariance = @(x,lower,upper,color,opacity) set(fill([x;x(end:-1:1)],[upper,lower(end:-1:1)]',color),'FaceAlpha',opacity);
-            
-            legendStrings = {'Unperturbed Gait', 'Perturbation with Visual Warning', 'Visual Warning, No Perturbation', 'Perturbation, No Visual Warning'};
+
             
             hold on;
                      
@@ -104,28 +103,20 @@ classdef CycleAnalyzer
                 stdPlot = std(plottableCycs',1);
                 top = meanPlot+stdPlot;
                 bottom = meanPlot-stdPlot;
-                legendHandle(type) = plot(xSpace,meanPlot,'LineWidth',2,'Color',color);
+                plot(xSpace,meanPlot,'LineWidth',2,'Color',color);
+                plot(xSpace,top,'LineWidth',1,'Color',color);
                 
-                if pertType(type) == 0
-                    set(legendHandle(type),'LineStyle','--');
-                end
-                plotVariance(xSpace,bottom,top,color,0.25);
+                plotVariance(xSpace,bottom,top,color,0.4);
                 
                 disp([num2str(size(plottableCycs,2)) ' of ' num2str(length(perts)) ' samples were used from the type ' num2str(pertType(type)) ' perturbations.']);
                 
             end
             hold off;
             
-            titleStr = regexprep([legStr ' ' jointStr], '(\<\w)','${upper($1)}'); % This capitalizes the first letter of each word
-            title(titleStr, 'FontSize', 15);
-            set(gca,'FontSize',12);
-            set(gcf,'Units','Normalized');
-            set(gcf,'Position', [0.05,0.05,0.9,0.9]);
-            xlabel('Percent Gait Cycle', 'FontSize', 14);%,'FontAngle','italic');
-            ylabel('Angle ({\circ})', 'FontSize', 14);%,'FontAngle','italic');
-            legend(legendHandle, legendStrings(pertType+1), 'Location', 'Best');
-            
-            
+            titleStrLeg = 
+            title([legStr ' ' jointStr]);
+            xlabel('Percent Gait Cycle');
+            ylabel('Angle (degrees)');
             grid on;
             
         end

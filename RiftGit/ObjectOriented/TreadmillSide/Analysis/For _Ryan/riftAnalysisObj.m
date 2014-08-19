@@ -4,8 +4,8 @@ end
 clear all
 close all
 
-load('johnData.mat'); % main data
-%load('erinKinematics_8-03-14_2.mat');
+%load('johnData.mat'); % main data
+load('erinKinematics_8-03-14_2.mat');
 %load('erinEMG_8-03-14_2.mat'); % EMG data
 
 
@@ -59,11 +59,30 @@ end
 toc;
 % length(cycArray)
 cycleAnalyzer = CycleAnalyzer(cycArray);
-% 
-cycleAnalyzer.plotMeanStd(1,1,[0,1,3],'right','hip');
+
+
+
+cycleAnalyzer.plotMeanStd(1,3,[0,1,2,3],'right','knee');
+
 % shg
+%{
+legStrings = {'left','right'};
+jointStrings = {'ankle','knee','hip'};
 
-
+for leg = 1:length(legStrings)
+    
+    for joint = 1:length(jointStrings)
+        k = 0;
+        while k == 0
+            k = waitforbuttonpress;
+        end
+        clf
+        cycleAnalyzer.plotMeanStd(1,1,[0,1,2,3],legStrings{leg},jointStrings{joint});
+        
+        
+    end
+end
+%}
 
 
 

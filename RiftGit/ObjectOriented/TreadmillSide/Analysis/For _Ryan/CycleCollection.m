@@ -24,7 +24,7 @@ classdef CycleCollection
             
             
             cycs = cycs.createCycArray(cycle,totalCyclesInExperiment,cyclesBefore,cyclesAfter);
-            cycs = cycs.checkOutlier(outlierArray);
+            %cycs = cycs.checkOutlier(outlierArray);
             
             if cycs.isPlottable == 0
                 return
@@ -146,7 +146,7 @@ classdef CycleCollection
         function cycs = checkPert(cycs)
             
             pertArray = [cycs.cycArray(1).Prev,cycs.cycArray,cycs.cycArray(end).Next];
-            
+            pertArray = cycs.cycArray;
             pertArray([pertArray.cycleNum] == cycs.mainCycNum) = [];
             if ~all(([pertArray.perturbType]) == 0)
                 cycs.isPlottable = 0;
@@ -164,8 +164,9 @@ classdef CycleCollection
         
         function cycs = checkDistance(cycs)
             
-            if cycs.perturbType > 0 && (cycs.distance > -0.2 || cycs.distance < -0.7)
+            if cycs.perturbType > 0 && cycs.perturbType ~= 3 && (cycs.distance > -0.2 || cycs.distance < -0.9)
                 cycs.isPlottable = 0;
+                return;
             end
             
         end
