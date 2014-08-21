@@ -19,8 +19,8 @@ nk = 0; % samples to delay output in modeling
 
 
 
-load('erinKinematics_8-03-14_2.mat'); % main data
-load('erinEMG_8-03-14_2.mat'); % EMG data
+load('johnData.mat'); % main data
+%load('erinEMG_8-03-14_2.mat'); % EMG data
 
 % tspeed_d = A(:,5);
 % xd = A(:,6);

@@ -4,7 +4,7 @@ classdef GaitCycle < dlnode
         startTime;
         indices;
         perturbType;
-
+        distance;
         
         footPos;
         anglesRaw;
@@ -13,22 +13,24 @@ classdef GaitCycle < dlnode
     
 
     methods
-        function cyc = GaitCycle(cycleNumber,cycleStartTime,cycleIndices,perturbStatus,footPositions,anglesArray)
+        function cyc = GaitCycle(cycleNumber,cycleStartTime,cycleIndices,perturbStatus,footPositions,anglesArray,distanceToPatchOnHeelstrike)
             
             cyc.startTime = cycleStartTime;
             cyc.cycleNum = cycleNumber;
             cyc.perturbType = perturbStatus;
             cyc.indices = cycleIndices';
+            cyc.distance = distanceToPatchOnHeelstrike;
             cyc.footPos = footPositions;
             cyc.anglesRaw = anglesArray;
             
             
             
-            inds = find(cyc.anglesRaw > 100 | cyc.anglesRaw < -100);
+            inds = find(cyc.anglesRaw > 100 | cyc.anglesRaw < -100 | abs(cyc.anglesRaw-12.54)<0.01);
             
             
-            
-            cyc.anglesRaw(inds) = cyc.anglesRaw(inds-1);
+            for i = 1:length(inds)
+                cyc.anglesRaw(inds(i)) = cyc.anglesRaw(inds(i)-1);
+            end
             
         end
         

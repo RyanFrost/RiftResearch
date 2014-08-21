@@ -29,7 +29,7 @@ classdef CycleAnalyzer
             CA.type2 = findobj(CA.cycleArray,'perturbType',2);
             CA.type3 = findobj(CA.cycleArray,'perturbType',3);
             
-            CA.colors = [0, 0, 0; 1, 0, 0; 0, 0, 1; 0, 0.4, 0];
+            CA.colors = [0, 0, 0; 1, 0, 0; 0, 0, 1; 0, 0.7, 0];
             
         end
         
@@ -54,7 +54,7 @@ classdef CycleAnalyzer
                     cycles = CycleCollection(currentCyc,cycsBefore,cycsAfter,length(CA.cycleArray));
                     
                     if cycles.isPlottable == 1
-                        plot(xSpace,cycles.angles(:,angleNum),'Color', color);
+                        plot(xSpace,cycles.angles(:,angleNum),'Color', color,'DisplayName',num2str(cycles.mainCycNum));
                     else
                         cyclesCut = cyclesCut+1;
                     end
@@ -63,6 +63,7 @@ classdef CycleAnalyzer
                 disp([num2str(cyclesCut) ' samples were removed from the type ' num2str(pertType(type)) ' perturbations.']);
             end
             hold off;
+            title(jointStr);
             grid on;
         end
         
@@ -74,7 +75,8 @@ classdef CycleAnalyzer
             
             
             plotVariance = @(x,lower,upper,color,opacity) set(fill([x;x(end:-1:1)],[upper,lower(end:-1:1)]',color),'FaceAlpha',opacity);
-
+            
+            legendStrings = {'Unperturbed Gait', 'Perturbation with Visual Warning', 'Visual Warning, No Perturbation', 'Perturbation, No Visual Warning'};
             
             hold on;
                      
@@ -98,19 +100,32 @@ classdef CycleAnalyzer
                     end
                 end
 
-                meanPlot = nanmean(plottableCycs',1);
-                stdPlot = nanstd(plottableCycs',1);
+                meanPlot = mean(plottableCycs',1);
+                stdPlot = std(plottableCycs',1);
                 top = meanPlot+stdPlot;
                 bottom = meanPlot-stdPlot;
-                plot(xSpace,meanPlot,'LineWidth',2,'Color',color);
-                plot(xSpace,top,'LineWidth',1,'Color',color);
+                legendHandle(type) = plot(xSpace,meanPlot,'LineWidth',2,'Color',color);
                 
-                plotVariance(xSpace,bottom,top,color,0.4);
+                if pertType(type) == 0
+                    set(legendHandle(type),'LineStyle','--');
+                end
+                plotVariance(xSpace,bottom,top,color,0.25);
                 
-                disp([num2str(cyclesCut) ' samples were removed from the type ' num2str(pertType(type)) ' perturbations.']);
+                disp([num2str(size(plottableCycs,2)) ' of ' num2str(length(perts)) ' samples were used from the type ' num2str(pertType(type)) ' perturbations.']);
                 
             end
             hold off;
+            
+            titleStr = regexprep([legStr ' ' jointStr], '(\<\w)','${upper($1)}'); % This capitalizes the first letter of each word
+            title(titleStr, 'FontSize', 15);
+            set(gca,'FontSize',12);
+            set(gcf,'Units','Normalized');
+            set(gcf,'Position', [0.05,0.05,0.9,0.9]);
+            xlabel('Percent Gait Cycle', 'FontSize', 14);%,'FontAngle','italic');
+            ylabel('Angle ({\circ})', 'FontSize', 14);%,'FontAngle','italic');
+            legend(legendHandle, legendStrings(pertType+1), 'Location', 'Best');
+            
+            
             grid on;
             
         end
@@ -125,9 +140,9 @@ classdef CycleAnalyzer
             
             switch leg
                 case 'left'
-                    legMult = 1;
+                    legMult = 0;
                 case 'right'
-                    legMult = 2;
+                    legMult = 1;
                 otherwise
                     disp('Err in CycleAnalyzer plot input -> leg must be either "left" or "right".');
             end
@@ -143,7 +158,7 @@ classdef CycleAnalyzer
                     disp('Err in CycleAnalyzer plot input -> jointStr must be "hip", "knee", or "ankle".');
             end
             
-            angleNum = legMult * joint;
+            angleNum = legMult * 3 + joint;
             
         end
     end
