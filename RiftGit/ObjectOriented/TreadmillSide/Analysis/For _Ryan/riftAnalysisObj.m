@@ -5,7 +5,8 @@ clear all
 close all
 
 %load('johnData.mat'); % main data
-load('erinKinematics_8-03-14_2.mat');
+%load('erinKinematics_8-03-14_2.mat');
+load('andrewData_8-21-14.mat');
 %load('erinEMG_8-03-14_2.mat'); % EMG data
 
 
@@ -62,7 +63,8 @@ cycleAnalyzer = CycleAnalyzer(cycArray);
 
 
 
-cycleAnalyzer.plotMeanStd(1,3,[0,1,2,3],'right','knee');
+cycleAnalyzer.plotMeanStd(1,1,[0,1,2,3],'right','hip');
+%cycleAnalyzer.plotRaw(1,1,[0,1,2,3],'right','ankle');
 
 % shg
 %{
