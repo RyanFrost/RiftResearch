@@ -164,8 +164,11 @@ classdef CycleCollection
         
         function cycs = checkDistance(cycs)
             
-            if cycs.perturbType > 0 && cycs.perturbType ~= 3 && (cycs.distance > -0.2 || cycs.distance < -0.9)
+            if cycs.perturbType > 0 && cycs.perturbType ~= 3 && (cycs.distance > -0.04 || cycs.distance < -0.8)
                 cycs.isPlottable = 0;
+                if cycs.perturbType == 2
+                    disp(cycs.distance);
+                end
                 return;
             end
             

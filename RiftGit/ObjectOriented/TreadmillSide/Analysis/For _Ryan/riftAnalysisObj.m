@@ -3,10 +3,9 @@ if exist('cycArray','var')
 end
 clear all
 close all
-
 %load('johnData.mat'); % main data
-load('erinKinematics_8-03-14_2.mat');
-%load('andrewData_8-21-14.mat');
+%load('erinKinematics_8-03-14_2.mat');
+load('andrewData_8-21-14.mat');
 
 
 lineNum = 1:length(xf);
