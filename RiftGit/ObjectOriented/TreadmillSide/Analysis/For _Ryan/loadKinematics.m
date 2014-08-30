@@ -28,6 +28,7 @@ distance = A(:,27);
 currentPatch = A(:,28);
 patchType = A(:,29);
 
+clear A;
 
 matFile = strrep(fileName,'.txt','.mat');
 save(matFile);

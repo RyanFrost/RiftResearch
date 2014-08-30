@@ -3,6 +3,7 @@ classdef GaitCycle < dlnode
         cycleNum;
         startTime;
         indices;
+        numSamples;
         perturbType;
         distance;
         
@@ -19,6 +20,7 @@ classdef GaitCycle < dlnode
             cyc.cycleNum = cycleNumber;
             cyc.perturbType = perturbStatus;
             cyc.indices = cycleIndices';
+            cyc.numSamples = length(cyc.indices);
             cyc.distance = distanceToPatchOnHeelstrike;
             cyc.footPos = footPositions;
             cyc.anglesRaw = anglesArray;
@@ -27,12 +29,14 @@ classdef GaitCycle < dlnode
             
             inds = find(cyc.anglesRaw > 100 | cyc.anglesRaw < -100 | abs(cyc.anglesRaw-12.54)<0.01);
             
+            if ~isempty(inds)
             
-            for i = 1:length(inds)
-                if i == 1
-                    cyc.anglesRaw(inds(i)) = cyc.anglesRaw(inds(i)+1);
-                else
-                    cyc.anglesRaw(inds(i)) = cyc.anglesRaw(inds(i)-1);
+                for i = 1:length(inds)
+                    if inds(i) == cyc.indices(1)
+                        cyc.anglesRaw(inds(i)) = cyc.anglesRaw(inds(i)+1);
+                    else
+                        cyc.anglesRaw(inds(i)) = cyc.anglesRaw(inds(i)-1);
+                    end
                 end
             end
             
