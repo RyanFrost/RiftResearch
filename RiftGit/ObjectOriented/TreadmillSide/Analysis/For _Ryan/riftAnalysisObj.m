@@ -3,10 +3,9 @@ if exist('cycArray','var')
 end
 clear all
 close all
-
 %load('johnData.mat'); % main data
-load('erinKinematics_8-03-14_2.mat');
-%load('erinEMG_8-03-14_2.mat'); % EMG data
+%load('erinKinematics_8-03-14_2.mat');
+load('andrewData_8-21-14.mat');
 
 
 lineNum = 1:length(xf);
@@ -32,7 +31,6 @@ startSlowDown = find( heelStrikeInd > maxSpeedIndDown, 1, 'first' );
 heelStrikeInd(startSlowDown:end) = [ ];
 
 aveSamplesPerGaitCycle = mean(diff(heelStrikeInd));
-tic;
 cycArray = GaitCycle.empty(length(heelStrikeInd),0);
 
 for i = 1:length(heelStrikeInd)-1
@@ -56,15 +54,41 @@ for i = 1:length(heelStrikeInd)-1
     cycArray(i) = GaitCycle(cycleNumber,cycleStartTime,indices,perturbStatus,xf(indices),angles,distanceOnHeelStrike);
     
 end
-toc;
-% length(cycArray)
+
+
+
 cycleAnalyzer = CycleAnalyzer(cycArray);
 
 
 
-cycleAnalyzer.plotMeanStd(1,3,[0,1,2,3],'right','knee');
 
-% shg
+%% Call cycleAnalyzer.plotMeanStd to show the mean with a shaded std dev
+% input arguments:  (cyclesBefore,cyclesAfter,perturbationTypes,leg,joint)
+% cyclesBefore: number of cycles before the perturbation to plot
+% cyclesAfter: number of cycles after " " " "
+% perturbationTypes: types of perturbations to plot. 
+    % Types:    0 -> unperturbed
+    %           1 -> perturbation with visual warning
+    %           2 -> visual warning, no perturbation
+    %           3 -> perturbation, no visual warning
+% leg: which leg to plot data for - can be 'right' or 'left'
+% joint: which joint to plot data for - can be 'hip', 'knee', or 'ankle'
+
+
+cycleAnalyzer.plotMeanStd(1,1,[0,1,2],'right','knee');
+
+
+%% Call cycleAnalyzer.plotRaw to show each individual spline
+% input arguments are the same as plotMeanStd
+
+
+%cycleAnalyzer.plotRaw(1,1,[0,1,3],'left','ankle');
+
+
+
+
+
+%% Plots all joints for each leg
 %{
 legStrings = {'left','right'};
 jointStrings = {'ankle','knee','hip'};

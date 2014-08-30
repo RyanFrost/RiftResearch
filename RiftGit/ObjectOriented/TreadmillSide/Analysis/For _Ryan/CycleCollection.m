@@ -19,9 +19,9 @@ classdef CycleCollection
     methods
         function cycs = CycleCollection(cycle,cyclesBefore,cyclesAfter,totalCyclesInExperiment)
             
-            outlierArray = [22, 98, 506, 613, 657, 584, 387];
+            %outlierArray = [22, 98, 506, 613, 657, 584, 387]; % John's
             
-            
+            %outlierArray = [202,203,204,207,445,439,235,236,149,150,155,156,171,177,178,179,496,497,453,454,191,193,119,364,271,275,127,548,550,573,565,499];  % Andrew's
             
             cycs = cycs.createCycArray(cycle,totalCyclesInExperiment,cyclesBefore,cyclesAfter);
             %cycs = cycs.checkOutlier(outlierArray);
@@ -164,8 +164,11 @@ classdef CycleCollection
         
         function cycs = checkDistance(cycs)
             
-            if cycs.perturbType > 0 && cycs.perturbType ~= 3 && (cycs.distance > -0.2 || cycs.distance < -0.9)
+            if cycs.perturbType > 0 && cycs.perturbType ~= 3 && (cycs.distance > -0.04 || cycs.distance < -0.8)
                 cycs.isPlottable = 0;
+                if cycs.perturbType == 2
+                    disp(cycs.distance);
+                end
                 return;
             end
             
