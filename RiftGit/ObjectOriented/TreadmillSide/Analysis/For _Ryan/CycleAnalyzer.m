@@ -94,7 +94,9 @@ classdef CycleAnalyzer
                     cycles = CycleCollection(currentCyc,cycsBefore,cycsAfter,length(CA.cycleArray));
                     
                     if cycles.isPlottable == 1
+                        
                         plottableCycs = [plottableCycs,cycles.angles(:,angleNum)];
+                        
                     else
                         cyclesCut = cyclesCut+1;
                     end
@@ -154,12 +156,17 @@ classdef CycleAnalyzer
                     joint = 2;
                 case 'ankle'
                     joint = 3;
+                case 'sum'
+                    joint = 0;
                 otherwise
                     disp('Err in CycleAnalyzer plot input -> jointStr must be "hip", "knee", or "ankle".');
             end
             
-            angleNum = legMult * 3 + joint;
-            
+            if joint == 0
+                angleNum = 7 + legMult;
+            else
+                angleNum = legMult * 3 + joint;
+            end
         end
     end
     
