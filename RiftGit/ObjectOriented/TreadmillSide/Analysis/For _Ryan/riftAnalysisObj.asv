@@ -37,7 +37,7 @@ for i = 1:length(heelStrikeInd)-1
     cycleNumber = i; 
     
     %perturbStatus = perturb(heelStrikeInd(i)+1);
-    distanceOnHeelStrike = distance(heelStrikeInd(i));
+    distanceOnHeelStrike = distance(heelStrikeInd(i)); 
     indices = heelStrikeInd(i):heelStrikeInd(i+1)-1;
     cycleTimes = time(indices);
     perturbStatus = mode(perturb(indices));
