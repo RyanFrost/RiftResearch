@@ -10,6 +10,7 @@ classdef CycleAnalyzer
         type3;
         
         colors;
+        
     end
     
     
@@ -74,20 +75,22 @@ classdef CycleAnalyzer
             xSpace = linspace(-100*cycsBefore,100*(1+cycsAfter),1000*(cycsBefore+1+cycsAfter))';
             
             
-            plotVariance = @(x,lower,upper,color,opacity) set(fill([x;x(end:-1:1)],[upper,lower(end:-1:1)]',color),'FaceAlpha',opacity);
+            plotVariance = @(x,mean,std,color,opacity) set(fill([x;x(end:-1:1)],[(mean+std),fliplr(mean-std)]',color),'FaceAlpha',opacity);
             
             legendStrings = {'Unperturbed Gait', 'Perturbation with Visual Warning', 'Visual Warning, No Perturbation', 'Perturbation, No Visual Warning'};
             
-            hold on;
-                     
+            
+      
             for type = 1:length(pertType)
                 % This converts each value of pertType 
                 % to a call to the same-named property
                 % (e.g. 0 becomes CA.type0)
-                perts = CA.(['type' num2str(pertType(type))]); 
+                perts = CA.(['type' num2str(pertType(type))]);
                 color = CA.colors(pertType(type)+1,:);
-                plottableCycs = [];
-                cyclesCut = 0;
+                
+                goodAngles = [];
+                goodAngVel = [];
+
                 for i = 1:length(perts)
                     currentCyc = perts(i);
                     
@@ -95,40 +98,48 @@ classdef CycleAnalyzer
                     
                     if cycles.isPlottable == 1
                         
-                        plottableCycs = [plottableCycs,cycles.angles(:,angleNum)];
-                        
-                    else
-                        cyclesCut = cyclesCut+1;
+                        goodAngles = [goodAngles,cycles.angles(:,angleNum)];
+                        goodAngVel = [goodAngVel,cycles.angVelocity(:,angleNum)];
                     end
                 end
 
-                meanPlot = mean(plottableCycs',1);
-                stdPlot = std(plottableCycs',1);
-                top = meanPlot+stdPlot;
-                bottom = meanPlot-stdPlot;
-                legendHandle(type) = plot(xSpace,meanPlot,'LineWidth',2,'Color',color);
+                meanAng = mean(goodAngles,2)';
+                stdAng = std(goodAngles,0,2)';
                 
+                meanAngVel = mean(goodAngVel,2)';
+                stdAngVel = std(goodAngVel,0,2)';
+                %reg = max(meanAng')
+                %pol = max(meanAng'*(pi/180))
+                
+                legendHandle(type) = polar(meanAng*(pi/180),meanAngVel);
+                %(meanAngVel-min(meanAngVel)+10)
+                set(legendHandle(type),'Color',color,'LineWidth',2);
+                
+                %legendHandle(type) = plot(xSpace,meanAngVel,'LineWidth',2,'Color',color);
+                
+                
+                hold on;
                 if pertType(type) == 0
                     set(legendHandle(type),'LineStyle','--');
                 end
-                plotVariance(xSpace,bottom,top,color,0.25);
+                %plotVariance(xSpace,meanAngVel,stdAngVel,color,0.25);
                 
-                disp([num2str(size(plottableCycs,2)) ' of ' num2str(length(perts)) ' samples were used from the type ' num2str(pertType(type)) ' perturbations.']);
+                disp([num2str(size(goodAngles,2)) ' of ' num2str(length(perts)) ' samples were used from the type ' num2str(pertType(type)) ' perturbations.']);
                 
             end
             hold off;
             
-            titleStr = regexprep([legStr ' ' jointStr], '(\<\w)','${upper($1)}'); % This capitalizes the first letter of each word
-            title(titleStr, 'FontSize', 15);
-            set(gca,'FontSize',12);
-            set(gcf,'Units','Normalized');
-            set(gcf,'Position', [0.05,0.05,0.9,0.9]);
-            xlabel('Percent Gait Cycle', 'FontSize', 14);%,'FontAngle','italic');
-            ylabel('Angle ({\circ})', 'FontSize', 14);%,'FontAngle','italic');
-            legend(legendHandle, legendStrings(pertType+1), 'Location', 'Best');
-            
-            
-            grid on;
+%             titleStr = regexprep([legStr ' ' jointStr], '(\<\w)','${upper($1)}'); % This capitalizes the first letter of each word
+%             title(titleStr, 'FontSize', 15);
+%             set(gca,'FontSize',12);
+%             set(gcf,'Units','Normalized');
+%             set(gcf,'Position', [0.05,0.05,0.9,0.9]);
+%             xlabel('Percent Gait Cycle', 'FontSize', 14);%,'FontAngle','italic');
+%             ylabel('Angle ({\circ})', 'FontSize', 14);%,'FontAngle','italic');
+%             legend(legendHandle, legendStrings(pertType+1), 'Location', 'Best');
+%             
+%             
+%             grid on;
             
         end
         

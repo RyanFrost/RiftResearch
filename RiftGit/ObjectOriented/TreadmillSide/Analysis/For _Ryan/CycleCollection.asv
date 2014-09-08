@@ -80,13 +80,12 @@ classdef CycleCollection
             x = linspace((-100*cyclesBefore),(100*(1+cyclesAfter)),length(vertcat(cycs.cycArray.indices)));
             
             cycs.angles = spline(x,cycs.anglesRaw',xx)';
-            for i = 1:8
-                angGrad(:,i) = gradient(cycs.anglesRaw(:,i),mean(diff(cycs.timeVec)));
-            end
+            
+            angGrad = gradient(cycs.
             
             %angDiff
-            
-            cycs.angVelocityRaw = angGrad;
+            timeDiffMat = repmat(timeDiff,1,size(angDiff,2));
+            cycs.angVelocityRaw = angDiff./timeDiffMat;
             cycs.angVelocity = spline(x,cycs.angVelocityRaw',xx)';
             
             
