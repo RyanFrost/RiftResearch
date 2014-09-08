@@ -99,9 +99,10 @@ classdef CycleAnalyzer
                         cyclesCut = cyclesCut+1;
                     end
                 end
-
-                meanPlot = mean(plottableCycs',1);
-                stdPlot = std(plottableCycs',1);
+                disp(size(diff(plottableCycs)));
+                disp(size(plottableCycs'));
+                meanPlot = mean(diff(plottableCycs),1);
+                stdPlot = std(diff(plottableCycs),1);
                 top = meanPlot+stdPlot;
                 bottom = meanPlot-stdPlot;
                 legendHandle(type) = plot(xSpace,meanPlot,'LineWidth',2,'Color',color);
@@ -120,7 +121,7 @@ classdef CycleAnalyzer
             title(titleStr, 'FontSize', 15);
             set(gca,'FontSize',12);
             set(gcf,'Units','Normalized');
-            set(gcf,'Position', [0.05,0.05,0.9,0.9]);
+            set(gcf,'Position', [0.05,0.05,0.5,0.5]);
             xlabel('Percent Gait Cycle', 'FontSize', 14);%,'FontAngle','italic');
             ylabel('Angle ({\circ})', 'FontSize', 14);%,'FontAngle','italic');
             legend(legendHandle, legendStrings(pertType+1), 'Location', 'Best');
