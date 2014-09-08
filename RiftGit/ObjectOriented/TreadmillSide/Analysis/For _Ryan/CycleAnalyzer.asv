@@ -133,12 +133,12 @@ classdef CycleAnalyzer
 
             titleStr = regexprep([legStr ' ' jointStr], '(\<\w)','${upper($1)}'); % This capitalizes the first letter of each word
             title(titleStr, 'FontSize', 15);
-            set(gca,'FontSize',14);
+            set(gca,'FontSize',12);
             set(gcf,'Units','Normalized');
             set(gcf,'Position', [0.05,0.05,0.8,0.8]);
             xlabel('Percent Gait Cycle', 'FontSize', 14);%,'FontAngle','italic');
             ylabel('Angle ({\circ})', 'FontSize', 14);%,'FontAngle','italic');
-            %ylabel('Angular Velocity ( {\circ}/sec)', 'FontSize', 14);
+            ylabel('Ang
             legend(legendHandle, legendStrings(pertType+1), 'Location', 'Best');
             
             

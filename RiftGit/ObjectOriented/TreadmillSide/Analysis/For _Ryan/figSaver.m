@@ -1,0 +1,1 @@
+h = open('knee1.fig')

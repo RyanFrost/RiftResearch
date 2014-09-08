@@ -3,10 +3,10 @@ if exist('cycArray','var')
 end
 clear all
 close all
-%load('johnData.mat'); % main data
+load('johnData.mat'); % main data
 %load('erinKinematics_8-03-14_2.mat');
 %load('andrewData_8-21-14.mat');
-load('carlosData_8-29-14.mat');
+%load('carlosData_8-29-14.mat');
 
 lineNum = 1:length(xf);
 
@@ -73,7 +73,7 @@ cycleAnalyzer = CycleAnalyzer(cycArray);
 % joint: which joint to plot data for - can be 'hip', 'knee', or 'ankle'
 
 
-cycleAnalyzer.plotMeanStd(0,0,[0,1,2,3],'right','knee');
+cycleAnalyzer.plotMeanStd(0,0,[0,1,2,3],'right','sum');
 
 
 %% Call cycleAnalyzer.plotRaw to show each individual spline
