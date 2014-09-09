@@ -15,6 +15,7 @@ classdef CycleCollection
         numCycs;
         isPlottable = 1;
         
+        toeOffLocs;
         
         
     end
@@ -37,15 +38,19 @@ classdef CycleCollection
             cycs.anglesRaw = [];
             cycs.timeVec = [];
             cycs.footPos = [];
-            
+            movingBack = [];
             
             
             
             for i = 1:length(cycs.cycArray)
                 cycs.anglesRaw = [cycs.anglesRaw; cycs.cycArray(i).anglesRaw];
                 cycs.timeVec = [cycs.timeVec; cycs.cycArray(i).timeVec];
+                movingBack = [movingBack; cycs.cycArray(i).movingBacks];
                 %cycs.footPos = [cycs.footPos; cycs.cycArray(i).footPos];
             end
+            
+            actualToeOffLocs = find(diff(movingBack) < 0);
+            
             
             cycs = cycs.checkNaNs();
             cycs = cycs.checkPert();
@@ -89,6 +94,8 @@ classdef CycleCollection
             cycs.angVelocityRaw = angGrad;
             cycs.angVelocity = spline(x,cycs.angVelocityRaw',xx)';
             
+            
+            cycs.toeOffLocs = round(actualToeOffLocs*length(xx)/length(x));
             
         end
         

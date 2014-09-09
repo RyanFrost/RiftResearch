@@ -3,7 +3,7 @@ if exist('cycArray','var')
 end
 clear all
 close all
-load('johnData.mat'); % main data
+load('johnData_8-15-14.mat'); % main data
 %load('erinKinematics_8-03-14_2.mat');
 %load('andrewData_8-21-14.mat');
 %load('carlosData_8-29-14.mat');
@@ -20,13 +20,18 @@ maxSpeedIndUp = find( tspeed_d == tspeedMax, 1, 'first'); % First sample at max 
 maxSpeedIndDown = find( tspeed_d == tspeedMax, 1, 'last'); % Last sample at max treadmill speed
 
 
-changes = diff(movingForward);
-heelStrikeInd = find(changes<0);
+hsChanges = diff(movingForward);
+heelStrikeInd = find(hsChanges<0);
 
-% Don't include data before up to speed + a couple cycles
+toChanges = diff(movingBackward);
+toeOffInd = find(toChanges>0);
+
+
+% % Don't include data before up to speed + a couple cycles
 num2remove = find(heelStrikeInd < maxSpeedIndUp,1,'last') + 2;
 heelStrikeInd( 1 : num2remove ) = [ ];
-% Don't include data after coming down from speed
+
+% % Don't include data after coming down from speed
 startSlowDown = find( heelStrikeInd > maxSpeedIndDown, 1, 'first' );
 heelStrikeInd(startSlowDown:end) = [ ];
 
@@ -41,7 +46,8 @@ for i = 1:length(heelStrikeInd)-1
     indices = heelStrikeInd(i):heelStrikeInd(i+1)-1;
     cycleTimes = time(indices);
     perturbStatus = mode(perturb(indices));
-    
+    movingBacks = movingBackward(indices);
+
     angles = [hipAngleLeft(indices), ...
             kneeAngleLeft(indices), ...
             ankleAngleLeft(indices), ...
@@ -49,7 +55,7 @@ for i = 1:length(heelStrikeInd)-1
             kneeAngleRight(indices), ...
             ankleAngleRight(indices)];
     
-    cycArray(i) = GaitCycle(cycleNumber,cycleTimes,indices,perturbStatus,xf(indices),angles,distanceOnHeelStrike);
+    cycArray(i) = GaitCycle(cycleNumber,cycleTimes,indices,perturbStatus,xf(indices),angles,distanceOnHeelStrike,movingBacks);
     
 end
 
@@ -73,7 +79,7 @@ cycleAnalyzer = CycleAnalyzer(cycArray);
 % joint: which joint to plot data for - can be 'hip', 'knee', or 'ankle'
 
 
-cycleAnalyzer.plotMeanStd(0,0,[0,1,2,3],'right','sum');
+cycleAnalyzer.plotMeanStd(0,0,[0,1,2,3],'right','knee');
 
 
 %% Call cycleAnalyzer.plotRaw to show each individual spline

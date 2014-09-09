@@ -117,12 +117,16 @@ classdef CycleAnalyzer
                 
                 legendHandle(type) = plot(xSpace,meanAngVel,'LineWidth',2,'Color',color);
                 
+                toeOffLocations = 
+                plot(xSpace,toeOffLocations,'x');
                 
                 hold on;
                 if pertType(type) == 0
                     set(legendHandle(type),'LineStyle','--');
                 end
                 plotVariance(xSpace,meanAngVel,stdAngVel,color,0.25);
+                
+                
                 
                 disp([num2str(size(goodAngles,2)) ' of ' num2str(length(perts)) ' samples were used from the type ' num2str(pertType(type)) ' perturbations.']);
                 
@@ -133,12 +137,12 @@ classdef CycleAnalyzer
 
             titleStr = regexprep([legStr ' ' jointStr], '(\<\w)','${upper($1)}'); % This capitalizes the first letter of each word
             title(titleStr, 'FontSize', 15);
-            set(gca,'FontSize',12);
+            set(gca,'FontSize',14);
             set(gcf,'Units','Normalized');
             set(gcf,'Position', [0.05,0.05,0.8,0.8]);
             xlabel('Percent Gait Cycle', 'FontSize', 14);%,'FontAngle','italic');
             ylabel('Angle ({\circ})', 'FontSize', 14);%,'FontAngle','italic');
-            ylabel('Ang
+            %ylabel('Angular Velocity ( {\circ}/sec)', 'FontSize', 14);
             legend(legendHandle, legendStrings(pertType+1), 'Location', 'Best');
             
             

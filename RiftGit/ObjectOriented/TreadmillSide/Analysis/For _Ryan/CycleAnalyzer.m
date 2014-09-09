@@ -115,14 +115,21 @@ classdef CycleAnalyzer
                 %(meanAngVel-min(meanAngVel)+10)
                 %set(legendHandle(type),'Color',color,'LineWidth',2);
                 
-                legendHandle(type) = plot(xSpace,meanAngVel,'LineWidth',2,'Color',color);
-                
-                
+                legendHandle(type) = plot(meanAng,meanAngVel,'LineWidth',2,'Color',color);
                 hold on;
+                
+                toeOffLocations = NaN(1,length(meanAngVel));
+                cycles.toeOffLocs
+                toeOffLocations(cycles.toeOffLocs) = meanAngVel(cycles.toeOffLocs);
+                plot(meanAng,toeOffLocations,'kx','MarkerSize',30);
+                
+                
                 if pertType(type) == 0
                     set(legendHandle(type),'LineStyle','--');
                 end
-                plotVariance(xSpace,meanAngVel,stdAngVel,color,0.25);
+                %plotVariance(xSpace,meanAngVel,stdAngVel,color,0.25);
+                
+                
                 
                 disp([num2str(size(goodAngles,2)) ' of ' num2str(length(perts)) ' samples were used from the type ' num2str(pertType(type)) ' perturbations.']);
                 

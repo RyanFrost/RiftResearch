@@ -22,15 +22,19 @@ hipAngleRight= A(:,21);
 kneeAngleRight= A(:,22);
 ankleAngleRight= A(:,23);
 xf = A(:,24);
-
+movingBackward = A(:,25);
 movingForward = A(:,26);
 distance = A(:,27);
 currentPatch = A(:,28);
 patchType = A(:,29);
 
-clear A;
+
 
 matFile = strrep(fileName,'.txt','.mat');
+
+clear A;
+clear fileName;
+
 save(matFile);
 end
 

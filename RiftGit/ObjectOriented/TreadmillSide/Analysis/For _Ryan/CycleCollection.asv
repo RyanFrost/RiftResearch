@@ -15,6 +15,7 @@ classdef CycleCollection
         numCycs;
         isPlottable = 1;
         
+        toeOffLocs;
         
         
     end
@@ -37,15 +38,19 @@ classdef CycleCollection
             cycs.anglesRaw = [];
             cycs.timeVec = [];
             cycs.footPos = [];
-            
+            movingBack = [];
             
             
             
             for i = 1:length(cycs.cycArray)
                 cycs.anglesRaw = [cycs.anglesRaw; cycs.cycArray(i).anglesRaw];
                 cycs.timeVec = [cycs.timeVec; cycs.cycArray(i).timeVec];
+                movingBack = [movingBack; cycs.cycArray(i).movingBacks];
                 %cycs.footPos = [cycs.footPos; cycs.cycArray(i).footPos];
             end
+            
+            actualToeOffLocs = find(diff(movingBack) > 0);
+            
             
             cycs = cycs.checkNaNs();
             cycs = cycs.checkPert();
@@ -80,14 +85,17 @@ classdef CycleCollection
             x = linspace((-100*cyclesBefore),(100*(1+cyclesAfter)),length(vertcat(cycs.cycArray.indices)));
             
             cycs.angles = spline(x,cycs.anglesRaw',xx)';
-            
-            angGrad = gradient(cycs.
+            for i = 1:8
+                angGrad(:,i) = gradient(cycs.anglesRaw(:,i),mean(diff(cycs.timeVec)));
+            end
             
             %angDiff
-            timeDiffMat = repmat(timeDiff,1,size(angDiff,2));
-            cycs.angVelocityRaw = angDiff./timeDiffMat;
+            
+            cycs.angVelocityRaw = angGrad;
             cycs.angVelocity = spline(x,cycs.angVelocityRaw',xx)';
             
+            
+            cycs.toeOffLocs = round(actualToeOffLocs*length(xx)/length(x));
             
         end
         
@@ -176,9 +184,6 @@ classdef CycleCollection
             
             if cycs.perturbType > 0 && cycs.perturbType ~= 3 && (cycs.distance > -0.04 || cycs.distance < -0.8)
                 cycs.isPlottable = 0;
-                if cycs.perturbType == 2
-                    disp(cycs.distance);
-                end
                 return;
             end
             
