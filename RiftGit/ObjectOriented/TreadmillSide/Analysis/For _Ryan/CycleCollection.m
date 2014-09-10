@@ -49,7 +49,7 @@ classdef CycleCollection
                 %cycs.footPos = [cycs.footPos; cycs.cycArray(i).footPos];
             end
             
-            actualToeOffLocs = find(diff(movingBack) < 0);
+            actualToeOffLocs = [1,(find(diff(movingBack) < 0))];
             
             
             cycs = cycs.checkNaNs();

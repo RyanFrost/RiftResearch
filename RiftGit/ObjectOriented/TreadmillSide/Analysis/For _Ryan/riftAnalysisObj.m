@@ -2,7 +2,7 @@ if exist('cycArray','var')
     cycArray(1).clearList();
 end
 clear all
-close all
+figure
 load('johnData_8-15-14.mat'); % main data
 %load('erinKinematics_8-03-14_2.mat');
 %load('andrewData_8-21-14.mat');
@@ -50,10 +50,10 @@ for i = 1:length(heelStrikeInd)-1
 
     angles = [hipAngleLeft(indices), ...
             kneeAngleLeft(indices), ...
-            ankleAngleLeft(indices), ...
+            -ankleAngleLeft(indices), ...
             hipAngleRight(indices), ...
             kneeAngleRight(indices), ...
-            ankleAngleRight(indices)];
+            -ankleAngleRight(indices)];
     
     cycArray(i) = GaitCycle(cycleNumber,cycleTimes,indices,perturbStatus,xf(indices),angles,distanceOnHeelStrike,movingBacks);
     
