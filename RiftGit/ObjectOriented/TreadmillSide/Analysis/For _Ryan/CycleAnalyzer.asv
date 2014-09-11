@@ -115,16 +115,30 @@ classdef CycleAnalyzer
                 %(meanAngVel-min(meanAngVel)+10)
                 %set(legendHandle(type),'Color',color,'LineWidth',2);
                 
-                legendHandle(type) = plot(xSpace,meanAngVel,'LineWidth',2,'Color',color);
-                
-                toeOffLocations = 
-                plot(xSpace,toeOffLocations,'x');
-                
+                %legendHandle(type) = plot(meanAng,meanAngVel,'LineWidth',2,'Color',color);
+                legendHandle(type) = plot(xSpace,meanAng,'LineWidth',2,'Color',color);
                 hold on;
+                
+                % Toeoff for left leg
+                
+                toeOffLocationsLeft = NaN(1,length(meanAngVel));
+                toeOffLocationsLeft(cycles.toeOffLocsLeft) = meanAngVel(cycles.toeOffLocsLeft);
+                plot(meanAng,toeOffLocationsLeft,'kx','MarkerSize',30);
+                
+                
+                % Toeoff for right leg
+                toeOffLocationsRight = NaN(1,length(meanAngVel));
+                toeOffLocationsRight(cycles.toeOffLocsRight) = meanAngVel(cycles.toeOffLocsRight);
+                plot(meanAng,toeOffLocationsRight,'ko','MarkerSize',30);
+                
+                % Heelstrike for right leg
+                heelStrikeLocationsRight = NaN(1,length(meanAngVel));
+                heelStrikeLocationsRight(cycles.heelStrikeLocsRight) = meanAngVel(cycles.heelStrikeLocsRight);
+                plot(meanAng,
                 if pertType(type) == 0
                     set(legendHandle(type),'LineStyle','--');
                 end
-                plotVariance(xSpace,meanAngVel,stdAngVel,color,0.25);
+                %plotVariance(xSpace,meanAngVel,stdAngVel,color,0.25);
                 
                 
                 
@@ -140,8 +154,8 @@ classdef CycleAnalyzer
             set(gca,'FontSize',14);
             set(gcf,'Units','Normalized');
             set(gcf,'Position', [0.05,0.05,0.8,0.8]);
-            xlabel('Percent Gait Cycle', 'FontSize', 14);%,'FontAngle','italic');
-            ylabel('Angle ({\circ})', 'FontSize', 14);%,'FontAngle','italic');
+            xlabel('Joint Angle ({\circ})', 'FontSize', 14);%,'FontAngle','italic');
+            ylabel('Angular Velocity ( {\circ}/sec)', 'FontSize', 14);%,'FontAngle','italic');
             %ylabel('Angular Velocity ( {\circ}/sec)', 'FontSize', 14);
             legend(legendHandle, legendStrings(pertType+1), 'Location', 'Best');
             

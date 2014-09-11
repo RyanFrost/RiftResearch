@@ -108,6 +108,10 @@ classdef CycleAnalyzer
                 
                 meanAngVel = mean(goodAngVel,2)';
                 stdAngVel = std(goodAngVel,0,2)';
+                
+                assignin('base',['meanAnglesJoint' num2str(angleNum) 'Type' num2str(pertType(type))], meanAng);
+                assignin('base',['meanAngVelocityJoint' num2str(angleNum) 'Type' num2str(pertType(type))], meanAngVel);
+                
                 %reg = max(meanAng')
                 %pol = max(meanAng'*(pi/180))
                 
@@ -115,13 +119,26 @@ classdef CycleAnalyzer
                 %(meanAngVel-min(meanAngVel)+10)
                 %set(legendHandle(type),'Color',color,'LineWidth',2);
                 
+                %legendHandle(type) = plot(meanAng,meanAngVel,'LineWidth',2,'Color',color);
                 legendHandle(type) = plot(meanAng,meanAngVel,'LineWidth',2,'Color',color);
                 hold on;
                 
-                toeOffLocations = NaN(1,length(meanAngVel));
-                cycles.toeOffLocs
-                toeOffLocations(cycles.toeOffLocs) = meanAngVel(cycles.toeOffLocs);
-                plot(meanAng,toeOffLocations,'kx','MarkerSize',30);
+                % Toeoff for left leg
+                
+                toeOffLocationsLeft = NaN(1,length(meanAngVel));
+                toeOffLocationsLeft(cycles.toeOffLocsLeft) = meanAngVel(cycles.toeOffLocsLeft);
+                plot(meanAng,toeOffLocationsLeft,'kx','MarkerSize',30,'LineWidth',2);
+                
+                
+                % Toeoff for right leg
+                toeOffLocationsRight = NaN(1,length(meanAngVel));
+                toeOffLocationsRight(cycles.toeOffLocsRight) = meanAngVel(cycles.toeOffLocsRight);
+                plot(meanAng,toeOffLocationsRight,'ko','MarkerSize',30,'LineWidth',2);
+                
+                % Heelstrike for right leg
+                heelStrikeLocationsRight = NaN(1,length(meanAngVel));
+                heelStrikeLocationsRight(cycles.heelStrikeLocsRight) = meanAngVel(cycles.heelStrikeLocsRight);
+                plot(meanAng,heelStrikeLocationsRight,'ro','MarkerSize',30,'LineWidth',2);
                 
                 
                 if pertType(type) == 0
@@ -139,12 +156,12 @@ classdef CycleAnalyzer
 
 
             titleStr = regexprep([legStr ' ' jointStr], '(\<\w)','${upper($1)}'); % This capitalizes the first letter of each word
-            title(titleStr, 'FontSize', 15);
-            set(gca,'FontSize',14);
+            title(titleStr, 'FontSize', 24);
+            set(gca,'FontSize',24);
             set(gcf,'Units','Normalized');
             set(gcf,'Position', [0.05,0.05,0.8,0.8]);
-            xlabel('Percent Gait Cycle', 'FontSize', 14);%,'FontAngle','italic');
-            ylabel('Angle ({\circ})', 'FontSize', 14);%,'FontAngle','italic');
+            xlabel('Joint Angle ({\circ})', 'FontSize', 24);%,'FontAngle','italic');
+            ylabel('Angular Velocity ( {\circ}/sec)', 'FontSize', 24);%,'FontAngle','italic');
             %ylabel('Angular Velocity ( {\circ}/sec)', 'FontSize', 14);
             legend(legendHandle, legendStrings(pertType+1), 'Location', 'Best');
             

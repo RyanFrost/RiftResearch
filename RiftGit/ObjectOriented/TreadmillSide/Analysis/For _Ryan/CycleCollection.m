@@ -15,7 +15,9 @@ classdef CycleCollection
         numCycs;
         isPlottable = 1;
         
-        toeOffLocs;
+        toeOffLocsLeft;
+        toeOffLocsRight;
+        heelStrikeLocsRight;
         
         
     end
@@ -94,8 +96,9 @@ classdef CycleCollection
             cycs.angVelocityRaw = angGrad;
             cycs.angVelocity = spline(x,cycs.angVelocityRaw',xx)';
             
-            
-            cycs.toeOffLocs = round(actualToeOffLocs*length(xx)/length(x));
+            [~,cycs.toeOffLocsRight] = max(cycs.angles(:,6));
+            [~,cycs.heelStrikeLocsRight] = max(cycs.angles(:,8));
+            cycs.toeOffLocsLeft = round(actualToeOffLocs*length(xx)/length(x));
             
         end
         

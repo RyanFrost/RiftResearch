@@ -2,9 +2,10 @@ if exist('cycArray','var')
     cycArray(1).clearList();
 end
 clear all
-figure
+close all
+
 load('johnData_8-15-14.mat'); % main data
-%load('erinKinematics_8-03-14_2.mat');
+%load('erinData_8-03-14_2.mat');
 %load('andrewData_8-21-14.mat');
 %load('carlosData_8-29-14.mat');
 
@@ -78,9 +79,15 @@ cycleAnalyzer = CycleAnalyzer(cycArray);
 % leg: which leg to plot data for - can be 'right' or 'left'
 % joint: which joint to plot data for - can be 'hip', 'knee', or 'ankle'
 
-
+figure
+cycleAnalyzer.plotMeanStd(0,0,[0,1,2,3],'right','hip');
+figure
 cycleAnalyzer.plotMeanStd(0,0,[0,1,2,3],'right','knee');
+figure
+cycleAnalyzer.plotMeanStd(0,0,[0,1,2,3],'right','ankle');
 
+
+savefig(findobj('Type','figure'),'rightLegPhasePlots.fig');
 
 %% Call cycleAnalyzer.plotRaw to show each individual spline
 % input arguments are the same as plotMeanStd
