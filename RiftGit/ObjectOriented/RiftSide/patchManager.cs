@@ -39,11 +39,14 @@ public class patchManager : MonoBehaviour {
 		calcDistanceToPatch(leftFootObj);
 		
 		// Waits until treadmill has started perturbing, then sets pertOngoing to true.
-		if( udpObj.GetComponent<UDPComm>().getPertStatus() > 0)
+		if( int pertStatus = udpObj.GetComponent<UDPComm>().getPertStatus() > 0)
 		{
 			if(pertOngoing == false)
+			{
 				print("starting patch #" + currentPatch);
+				if ( pertStatus < 3 )
 				
+			}
 			pertOngoing = true;
 		}
 		

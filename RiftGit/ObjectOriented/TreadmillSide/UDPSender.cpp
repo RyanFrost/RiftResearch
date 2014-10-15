@@ -145,10 +145,13 @@ void pertCycler(int stiffnessLevel, int patchType)
 	
 	//Waits until the left foot has passed over the next patch (i.e. the distance to next patch is negative)
 	
-	while ( distance > 0.0) { if(unityRunning == false) return;}
+	while ( distance > 0.86) { if(unityRunning == false) return;}
 	
+	sharedMemory.sdata->perturb = patchType; // Sets perturb to current perturbation type for data analysis
 	std::cout << "< Over patch -- " << std::flush;
 	
+	while( !movingForward) { if(unityRunning == false) return;}
+	while(  movingForward) { if(unityRunning == false) return;}
 	
 	// Waits until foot is moving forward ( approximately toe-off)
 	
@@ -162,7 +165,7 @@ void pertCycler(int stiffnessLevel, int patchType)
 	
 	while(movingForward) { if(unityRunning == false) return;}
 	
-	sharedMemory.sdata->perturb = patchType; // Sets perturb to current perturbation type for data analysis
+	
 	std::cout << "perturbing: " << sharedMemory.sdata->perturb << " -- " << std::flush;
 
 	

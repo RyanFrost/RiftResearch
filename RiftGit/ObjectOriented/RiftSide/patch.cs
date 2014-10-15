@@ -30,6 +30,11 @@ public class patch : Object
 		return terrainObj.transform.position.x - playerObject.transform.position.x;
 	}
 	
+	public void changeColor()
+	{
+		terrainObj.light.color.black();
+	}
+	
 	public void destroyPatch()
 	{
 		Destroy(terrainObj);
