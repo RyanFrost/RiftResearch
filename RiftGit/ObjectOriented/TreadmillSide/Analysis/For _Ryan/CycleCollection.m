@@ -17,6 +17,7 @@ classdef CycleCollection
         
         toeOffLocsLeft;
         toeOffLocsRight;
+        heelStrikeLocsLeft;
         heelStrikeLocsRight;
         
         
@@ -48,10 +49,11 @@ classdef CycleCollection
                 cycs.anglesRaw = [cycs.anglesRaw; cycs.cycArray(i).anglesRaw];
                 cycs.timeVec = [cycs.timeVec; cycs.cycArray(i).timeVec];
                 movingBack = [movingBack; cycs.cycArray(i).movingBacks];
+                
                 %cycs.footPos = [cycs.footPos; cycs.cycArray(i).footPos];
             end
             
-            actualToeOffLocs = [1,(find(diff(movingBack) < 0))];
+            leftToeOffLocs = [(find(diff(movingBack) < 0))];
             
             
             cycs = cycs.checkNaNs();
@@ -98,7 +100,8 @@ classdef CycleCollection
             
             [~,cycs.toeOffLocsRight] = max(cycs.angles(:,6));
             [~,cycs.heelStrikeLocsRight] = max(cycs.angles(:,8));
-            cycs.toeOffLocsLeft = round(actualToeOffLocs*length(xx)/length(x));
+            cycs.toeOffLocsLeft = round(leftToeOffLocs*length(xx)/length(x));
+            cycs.heelStrikeLocsLeft = 1:1000:1000*cycs.numCycs;
             
         end
         

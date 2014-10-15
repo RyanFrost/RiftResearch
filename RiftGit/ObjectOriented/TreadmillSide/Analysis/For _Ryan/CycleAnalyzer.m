@@ -120,37 +120,45 @@ classdef CycleAnalyzer
                 %set(legendHandle(type),'Color',color,'LineWidth',2);
                 
                 %legendHandle(type) = plot(meanAng,meanAngVel,'LineWidth',2,'Color',color);
-                legendHandle(type) = plot(meanAng,meanAngVel,'LineWidth',2,'Color',color);
+                legendHandle(type) = plot(xSpace,meanAng,'LineWidth',2,'Color',color);
                 hold on;
                 
                 % Toeoff for left leg
                 
                 toeOffLocationsLeft = NaN(1,length(meanAngVel));
-                toeOffLocationsLeft(cycles.toeOffLocsLeft) = meanAngVel(cycles.toeOffLocsLeft);
-                plot(meanAng,toeOffLocationsLeft,'kx','MarkerSize',30,'LineWidth',2);
+                toeOffLocationsLeft(cycles.toeOffLocsLeft) = meanAng(cycles.toeOffLocsLeft);
+                %plot(xSpace,toeOffLocationsLeft,'kx','MarkerSize',30,'LineWidth',2);
                 
+                % Heelstrike for left leg
+                
+                heelStrikeLocationsLeft = NaN(1,length(meanAngVel));
+                heelStrikeLocationsLeft(cycles.heelStrikeLocsLeft) = meanAng(cycles.heelStrikeLocsLeft);
+                %plot(xSpace,heelStrikeLocationsLeft,'ko','MarkerSize',30,'LineWidth',2);
                 
                 % Toeoff for right leg
                 toeOffLocationsRight = NaN(1,length(meanAngVel));
-                toeOffLocationsRight(cycles.toeOffLocsRight) = meanAngVel(cycles.toeOffLocsRight);
-                plot(meanAng,toeOffLocationsRight,'ko','MarkerSize',30,'LineWidth',2);
+                toeOffLocationsRight(cycles.toeOffLocsRight) = meanAng(cycles.toeOffLocsRight);
+                %plot(xSpace,toeOffLocationsRight,'rx','MarkerSize',30,'LineWidth',2);
                 
                 % Heelstrike for right leg
                 heelStrikeLocationsRight = NaN(1,length(meanAngVel));
-                heelStrikeLocationsRight(cycles.heelStrikeLocsRight) = meanAngVel(cycles.heelStrikeLocsRight);
-                plot(meanAng,heelStrikeLocationsRight,'ro','MarkerSize',30,'LineWidth',2);
+                heelStrikeLocationsRight(cycles.heelStrikeLocsRight) = meanAng(cycles.heelStrikeLocsRight);
+                %plot(xSpace,heelStrikeLocationsRight,'ro','MarkerSize',30,'LineWidth',2);
                 
                 
                 if pertType(type) == 0
                     set(legendHandle(type),'LineStyle','--');
                 end
-                %plotVariance(xSpace,meanAngVel,stdAngVel,color,0.25);
+                plotVariance(xSpace,meanAng,stdAng,color,0.25);
+                
                 
                 
                 
                 disp([num2str(size(goodAngles,2)) ' of ' num2str(length(perts)) ' samples were used from the type ' num2str(pertType(type)) ' perturbations.']);
                 
             end
+            pertLineY = min(get(legendHandle(2),'YData'))-5;
+            plot([0,70],[pertLineY,pertLineY],'-m','LineWidth',5,'MarkerFaceColor','r','MarkerSize',18);
             hold off;
             
 
@@ -167,6 +175,8 @@ classdef CycleAnalyzer
             
             
             grid on;
+            
+            
            
         end
         
