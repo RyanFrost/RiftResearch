@@ -128,7 +128,7 @@ int main()
 			break;
 		}
 		
-		while(distance < 0) {if(unityRunning == false) break; }
+		while(distance < 1) {if(unityRunning == false) break; }
 		
 	}
 	
@@ -145,14 +145,15 @@ void pertCycler(int stiffnessLevel, int patchType)
 	
 	//Waits until the left foot has passed over the next patch (i.e. the distance to next patch is negative)
 	
-	while ( distance > 0.86) { if(unityRunning == false) return;}
+	while ( distance > 1) { if(unityRunning == false) return;}
 	
-	sharedMemory.sdata->perturb = patchType; // Sets perturb to current perturbation type for data analysis
+	
 	std::cout << "< Over patch -- " << std::flush;
 	
-	while( !movingForward) { if(unityRunning == false) return;}
+	//while( !movingForward) { if(unityRunning == false) return;}
 	while(  movingForward) { if(unityRunning == false) return;}
-	
+	usleep(500000);
+	sharedMemory.sdata->perturb = patchType; // Sets perturb to current perturbation type for data analysis
 	// Waits until foot is moving forward ( approximately toe-off)
 	
 	while( !movingForward) { if(unityRunning == false) return;}
@@ -177,7 +178,7 @@ void pertCycler(int stiffnessLevel, int patchType)
 	{
 		
 		if(unityRunning == false) return;
-		treadmill.moveTreadmill(sharedMemory.sdata->xf, stiffnessLevel);
+		//treadmill.moveTreadmill(sharedMemory.sdata->xf, stiffnessLevel);
 		usleep(50000);
 	}
 	
@@ -193,7 +194,7 @@ void pertCycler(int stiffnessLevel, int patchType)
 
 void startComm(void)
 {
-
+	dataGen.startAngleGen();
 	while ( unityRunning )
 	{
 		response = sock.recvData(); // This will usually be the distance to the next perturbation
@@ -213,8 +214,8 @@ void startComm(void)
 		}
 		
 		// Send Joint Angles
-		sock.loadDubArrayToBuf( arrayToVec(sharedMemory.sdata->joint_angles_rift) );
-		//sock.loadDubArrayToBuf(dataGen.getAngles());
+		//sock.loadDubArrayToBuf( arrayToVec(sharedMemory.sdata->joint_angles_rift) );
+		sock.loadDubArrayToBuf(dataGen.getAngles());
 		sock.sendBuf();
 		
 		// Send perturbation status
@@ -243,8 +244,8 @@ void dataSaver()
 	while( unityRunning )
 	{
 		pastVals.erase(pastVals.begin());
-		pastVals.push_back(sharedMemory.sdata->xf);
-		//pastVals.push_back(dataGen.getFootPos());
+		//pastVals.push_back(sharedMemory.sdata->xf);
+		pastVals.push_back(dataGen.getFootPos());
 		if(is_sorted(pastVals.begin(),pastVals.end()))
 		{
 			movingForward = false;
