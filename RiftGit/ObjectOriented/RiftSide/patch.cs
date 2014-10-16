@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Net;
-
+using System.Threading;
 
 public class patch : Object
 {
@@ -30,9 +30,23 @@ public class patch : Object
 		return terrainObj.transform.position.x - playerObject.transform.position.x;
 	}
 	
-	public void changeColor()
+	/* public void changeColorSlow(float intensity, float durationSeconds)
 	{
-		terrainObj.light.color.black();
+		float currentIntensity = terrainObj.light.intensity;
+		int numSteps = 100;
+		int currentStep = 0;
+		float stepSize = (intensity - currentIntensity)/numSteps;
+		while ( currentStep < numSteps )
+		{
+			terrainObj.light.intensity += stepSize;
+			currentStep++;
+		}
+		
+	} */
+	
+	public void changeColor(float intensity)
+	{
+		terrainObj.light.intensity = intensity;
 	}
 	
 	public void destroyPatch()

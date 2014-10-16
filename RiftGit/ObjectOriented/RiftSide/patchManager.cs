@@ -37,14 +37,17 @@ public class patchManager : MonoBehaviour {
 	{
 		// Calculates the distance to next patch once per frame
 		calcDistanceToPatch(leftFootObj);
-		
+		print(distanceToPatch);
 		// Waits until treadmill has started perturbing, then sets pertOngoing to true.
-		if( int pertStatus = udpObj.GetComponent<UDPComm>().getPertStatus() > 0)
+		if( udpObj.GetComponent<UDPComm>().getPertStatus() > 0)
 		{
 			if(pertOngoing == false)
 			{
 				print("starting patch #" + currentPatch);
-				if ( pertStatus < 3 )
+				if ( udpObj.GetComponent<UDPComm>().getPertStatus()  < 3 )
+				{
+					patchList[currentPatch].changeColor(5.0f);
+				}
 				
 			}
 			pertOngoing = true;
@@ -59,6 +62,7 @@ public class patchManager : MonoBehaviour {
 				patchList[currentPatch].destroyPatch();
 			}
 			pertOngoing = false;
+			patchList[currentPatch].changeColor(0.0f);
 			print("Done perting patch #" + currentPatch);
 			currentPatch++;
 		}
