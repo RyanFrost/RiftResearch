@@ -47,6 +47,7 @@ public class patchManager : MonoBehaviour {
 				if ( udpObj.GetComponent<UDPComm>().getPertStatus()  < 3 )
 				{
 					patchList[currentPatch].changeColor(5.0f);
+                    audio.PlayOneShot(beep);
 				}
 				
 			}
