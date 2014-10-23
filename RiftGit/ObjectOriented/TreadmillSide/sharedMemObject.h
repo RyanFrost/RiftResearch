@@ -23,6 +23,7 @@ protected:
 		float xd; // Linear track desired position wrt the home position in cm
 		float xact; // Linear track actual position wrt the home position in cm
 		int perturb; // (T/F) perturb this cycle?
+		int perturbWaring; // Sent to rift when heelstrike before perturbation
 		int cycle; // number of gait cycles
 		double angle_enc; // angle from encoder (deg)
 		double Kd; // Desired stiffness
@@ -31,7 +32,7 @@ protected:
 		double elapsed; // Time elapsed each iteration of VST for loop
 		bool start_EMG; // Tells to start collecting EMG data
 		bool get_EMG; // Tells when to get EMG
-		bool experiment; // Tells wheather to do experiment or stop it.
+		bool experiment; // Tells whether to do experiment or stop it.
 		int numEMG; // Number of EMG electrodes used in experiment
 		bool beep; // Causes beep
 		double time_vst_absolute; // Timestamp for each iteration of vst code in absolute computer time

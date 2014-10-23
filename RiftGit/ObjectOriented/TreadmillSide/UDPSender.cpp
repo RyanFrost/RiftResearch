@@ -107,7 +107,7 @@ int main()
 	while( unityRunning )
 	{
 		
-		nextPatchType = dataGen.getPatchTypes()[currentPatch];
+		nextPatchType = patchesTypesVec[currentPatch];
 		std::cout << "next patch type: " << nextPatchType << ", next patch number: " << currentPatch << std::endl;
 		
 		
@@ -153,7 +153,7 @@ void pertCycler(int stiffnessLevel, int patchType)
 	//while( !movingForward) { if(unityRunning == false) return;}
 	while(  movingForward) { if(unityRunning == false) return;}
 	usleep(500000);
-	sharedMemory.sdata->perturb = patchType; // Sets perturb to current perturbation type for data analysis
+	sharedMemory.sdata->perturbWarning = patchType; // Sets perturbWarning to current perturbation type to send to unity
 	// Waits until foot is moving forward ( approximately toe-off)
 	
 	while( !movingForward) { if(unityRunning == false) return;}
@@ -166,7 +166,7 @@ void pertCycler(int stiffnessLevel, int patchType)
 	
 	while(movingForward) { if(unityRunning == false) return;}
 	
-	
+	sharedMemory.sdata->perturb = patchType; // Sets perturb to perturbation type for data analysis
 	std::cout << "perturbing: " << sharedMemory.sdata->perturb << " -- " << std::flush;
 
 	
@@ -187,6 +187,7 @@ void pertCycler(int stiffnessLevel, int patchType)
  	treadmill.infStiffness();
 	
 	sharedMemory.sdata->perturb = 0;
+	sharedMemory.sdata->perturbWarning = 0;
 	sharedMemory.sdata->beep = false;
 }
 	
