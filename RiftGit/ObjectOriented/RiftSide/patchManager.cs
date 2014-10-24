@@ -6,7 +6,7 @@ public class patchManager : MonoBehaviour {
 	private GameObject udpObj, patchObj, playerObj, leftFootObj;
 	private List<patch> patchList;
 	
-	private AudioClip beepNoise;
+	public AudioClip beepNoise;
 	
 	private int[] patchLocations, patchTypes, patchSeparations;
 	
@@ -49,7 +49,7 @@ public class patchManager : MonoBehaviour {
 				if ( udpObj.GetComponent<UDPComm>().getPertStatus()  < 3 )
 				{
 					patchList[currentPatch].changeColor(5.0f);
-                    audio.PlayOneShot(beepNoise);
+                    playerObj.audio.PlayOneShot(beepNoise,0.7f);
 				}
 				
 			}
