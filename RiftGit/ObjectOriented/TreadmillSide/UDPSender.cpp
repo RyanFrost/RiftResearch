@@ -107,7 +107,7 @@ int main()
 	while( unityRunning )
 	{
 		
-		nextPatchType = patchesTypesVec[currentPatch];
+		nextPatchType = patchTypesVec[currentPatch];
 		std::cout << "next patch type: " << nextPatchType << ", next patch number: " << currentPatch << std::endl;
 		
 		
@@ -145,14 +145,14 @@ void pertCycler(int stiffnessLevel, int patchType)
 	
 	//Waits until the left foot has passed over the next patch (i.e. the distance to next patch is negative)
 	
-	while ( distance > 1) { if(unityRunning == false) return;}
+	while ( distance > 0.9) { if(unityRunning == false) return;}
 	
-	
+	std::cout << distance << std::endl;
 	std::cout << "< Over patch -- " << std::flush;
 	
 	//while( !movingForward) { if(unityRunning == false) return;}
 	while(  movingForward) { if(unityRunning == false) return;}
-	usleep(500000);
+	usleep(125000);
 	sharedMemory.sdata->perturbWarning = patchType; // Sets perturbWarning to current perturbation type to send to unity
 	// Waits until foot is moving forward ( approximately toe-off)
 	
@@ -223,7 +223,7 @@ void startComm(void)
 		// This will send either a 0 for not perturbing, or {1, 2, 3} for the type of perturbation.
 		// This lets Unity know when it starts perturbing, stops perturbing, and also if it
 		// is a type 3 perturbation lets Unity destroy the following patch.
-		sock.loadIntToBuf(sharedMemory.sdata->perturb);
+		sock.loadIntToBuf(sharedMemory.sdata->perturbWarning);
 		sock.sendBuf();
 		
 		// Send current treadmill speed to Unity for automatic speed sync

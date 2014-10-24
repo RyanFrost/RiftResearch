@@ -45,7 +45,6 @@ protected:
 		double jt_angles_l[3];					// joint angles left leg
 		double xf;								// foot position x only (average of both foot makers in x)
 		double joint_angles_rift[6];	// joint angles in vector charactor form
-		int perturbWarning;
 	};
 	
 	// File saving components
