@@ -152,7 +152,7 @@ void pertCycler(int stiffnessLevel, int patchType)
 	
 	//while( !movingForward) { if(unityRunning == false) return;}
 	while(  movingForward) { if(unityRunning == false) return;}
-	usleep(125000);
+	usleep(200000);
 	sharedMemory.sdata->perturbWarning = patchType; // Sets perturbWarning to current perturbation type to send to unity
 	// Waits until foot is moving forward ( approximately toe-off)
 	
@@ -178,7 +178,8 @@ void pertCycler(int stiffnessLevel, int patchType)
 	{
 		
 		if(unityRunning == false) return;
-		//treadmill.moveTreadmill(sharedMemory.sdata->xf, stiffnessLevel);
+		//std::cout << dataGen.getFootPos() << std::endl;
+		treadmill.moveTreadmill(sharedMemory.sdata->xf, stiffnessLevel);
 		usleep(50000);
 	}
 	
@@ -195,7 +196,7 @@ void pertCycler(int stiffnessLevel, int patchType)
 
 void startComm(void)
 {
-	dataGen.startAngleGen();
+
 	while ( unityRunning )
 	{
 		response = sock.recvData(); // This will usually be the distance to the next perturbation
@@ -215,8 +216,9 @@ void startComm(void)
 		}
 		
 		// Send Joint Angles
-		//sock.loadDubArrayToBuf( arrayToVec(sharedMemory.sdata->joint_angles_rift) );
-		sock.loadDubArrayToBuf(dataGen.getAngles());
+		
+		sock.loadDubArrayToBuf( arrayToVec(sharedMemory.sdata->joint_angles_rift) );
+		//sock.loadDubArrayToBuf(dataGen.getAngles());
 		sock.sendBuf();
 		
 		// Send perturbation status
@@ -245,8 +247,8 @@ void dataSaver()
 	while( unityRunning )
 	{
 		pastVals.erase(pastVals.begin());
-		//pastVals.push_back(sharedMemory.sdata->xf);
-		pastVals.push_back(dataGen.getFootPos());
+		pastVals.push_back(sharedMemory.sdata->xf);
+		//pastVals.push_back(dataGen.getFootPos());
 		if(is_sorted(pastVals.begin(),pastVals.end()))
 		{
 			movingForward = false;
