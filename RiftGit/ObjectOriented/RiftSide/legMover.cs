@@ -39,7 +39,7 @@ public class legMover : MonoBehaviour {
 		for(int ang = 0; ang<numAng;ang++)
 		{
 			
-			anglesF[ang]= (float)angles[ang];
+			anglesF[ang]= -(float)angles[ang];
 		}
 		
 		if (numAng == 6)
