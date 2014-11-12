@@ -3,12 +3,13 @@ CC = g++
 DEBUG = -g
 CXXFLAGS = -Wall -Wextra -c -std=c++0x $(DEBUG)
 LFLAGS = -Wall -lboost_thread -lmodbus $(DEBUG)
+OBJ_SRC_FOLDER = ../../../../SharedMemory
 
 udpSender : $(OBJS)
 	$(CC) $(OBJS) -o udpSender $(LFLAGS)
 
 UDPSender.o : UDPSender.cpp
-	$(CC) $(CXXFLAGS) UDPSender.cpp
+	$(CC) $(CXXFLAGS) UDPSender.cpp -I$(OBJ_SRC_FOLDER)
 
 socketManager.o : socketManager.h socketManager.cpp
 	$(CC) $(CXXFLAGS) socketManager.cpp
@@ -16,8 +17,8 @@ socketManager.o : socketManager.h socketManager.cpp
 dataGenerator.o : dataGenerator.h dataGenerator.cpp
 	$(CC) $(CXXFLAGS) dataGenerator.cpp
 
-sharedMemObject.o : sharedMemObject.h sharedMemObject.cpp
-	$(CC) $(CXXFLAGS) sharedMemObject.cpp
+sharedMemObject.o : $(OBJ_SRC_FOLDER)/sharedMemObject.h $(OBJ_SRC_FOLDER)/sharedMemObject.cpp
+	$(CC) $(CXXFLAGS) $(OBJ_SRC_FOLDER)/sharedMemObject.cpp
 	
 treadmillController.o : treadmillController.h treadmillController.cpp
 	$(CC) $(CXXFLAGS) treadmillController.cpp
