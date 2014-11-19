@@ -103,24 +103,21 @@ cycleAnalyzer.plotMeanStd(0,0,[0,1,2,3],'right','knee');
 
 
 %% Plots all joints for each leg
-%{
+
 legStrings = {'left','right'};
 jointStrings = {'ankle','knee','hip'};
 
 for leg = 1:length(legStrings)
     
     for joint = 1:length(jointStrings)
-        k = 0;
-        while k == 0
-            k = waitforbuttonpress;
-        end
+        
         clf
-        cycleAnalyzer.plotMeanStd(1,1,[0,1,2,3],legStrings{leg},jointStrings{joint});
+        ang(:,joint+3*(leg-1)) = cycleAnalyzer.plotMeanStd(0,0,[0],legStrings{leg},jointStrings{joint});
         
         
     end
 end
-%}
+
 
 
 
