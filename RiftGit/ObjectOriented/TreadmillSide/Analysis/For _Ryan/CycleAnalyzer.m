@@ -108,6 +108,8 @@ classdef CycleAnalyzer
 
                 meanAng = mean(goodAngles,2)';
                 stdAng = std(goodAngles,0,2)';
+                size(xSpace)
+                size(goodAngles)
                 angss = meanAng;
                 meanAngVel = mean(goodAngVel,2)';
                 stdAngVel = std(goodAngVel,0,2)';
