@@ -11,6 +11,7 @@ classdef CycleAnalyzer
         
         colors;
         
+        
     end
     
     
@@ -68,7 +69,7 @@ classdef CycleAnalyzer
             grid on;
         end
         
-        function plotMeanStd(CA,cycsBefore,cycsAfter,pertType,legStr,jointStr)
+        function angss = plotMeanStd(CA,cycsBefore,cycsAfter,pertType,legStr,jointStr)
             
             angleNum = CA.parseInputForPlotting(legStr,jointStr);
             
@@ -102,10 +103,14 @@ classdef CycleAnalyzer
                         goodAngVel = [goodAngVel,cycles.angVelocity(:,angleNum)];
                     end
                 end
+                
+                
 
                 meanAng = mean(goodAngles,2)';
                 stdAng = std(goodAngles,0,2)';
-                
+                size(xSpace)
+                size(goodAngles)
+                angss = meanAng;
                 meanAngVel = mean(goodAngVel,2)';
                 stdAngVel = std(goodAngVel,0,2)';
                 
@@ -157,9 +162,9 @@ classdef CycleAnalyzer
                 disp([num2str(size(goodAngles,2)) ' of ' num2str(length(perts)) ' samples were used from the type ' num2str(pertType(type)) ' perturbations.']);
                 
             end
-            pertLineY = min(get(legendHandle(2),'YData'))-5;
-            plot([0,70],[pertLineY,pertLineY],'-m','LineWidth',5,'MarkerFaceColor','r','MarkerSize',18);
-            hold off;
+%             pertLineY = min(get(legendHandle(2),'YData'))-5;
+%             plot([0,70],[pertLineY,pertLineY],'-m','LineWidth',5,'MarkerFaceColor','r','MarkerSize',18);
+%             hold off;
             
 
 

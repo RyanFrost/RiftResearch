@@ -61,13 +61,16 @@ void dataGenerator::patchTypeGenerator(void)
 	// it shuffles the vector to randomize the perturbation order and inserts each element of the vector into the patch list
 	// at random intervals.
 	
-	int numPert = 14;
+	int numPert = 20;
 	std::vector<int> patchTypeOrder;
 	patchTypeOrder.insert(patchTypeOrder.end(), numPert / 2, 2);
 	patchTypeOrder.insert(patchTypeOrder.end(), numPert / 2, 3);
-
-	std::random_shuffle(patchTypeOrder.begin(), patchTypeOrder.end());
-
+	
+	for (int i = 0; i < 5; i++)
+	{
+		std::random_shuffle(patchTypeOrder.begin(), patchTypeOrder.end());
+	}
+	
 	patchTypes.insert(patchTypes.begin(), numPatches, 1);
 
 	int currentPatch = 0;
