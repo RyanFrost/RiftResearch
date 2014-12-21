@@ -40,7 +40,7 @@ int main()
 	{
 		secs = timer.now() - startTime;
 		timeIndex = (int) std::round( secs.count() / diff );
-		if ( prevValue == timeIndex )
+		if ( prevValue != timeIndex )
 		{
 			std::cout << '\r' << timeIndex;
 			prevValue = timeIndex;
