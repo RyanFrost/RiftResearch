@@ -11,6 +11,7 @@ classdef CycleAnalyzer
         
         colors;
         
+        
     end
     
     
@@ -68,7 +69,7 @@ classdef CycleAnalyzer
             grid on;
         end
         
-        function plotMeanStd(CA,cycsBefore,cycsAfter,pertType,legStr,jointStr)
+        function angss = plotMeanStd(CA,cycsBefore,cycsAfter,pertType,legStr,jointStr)
             
             angleNum = CA.parseInputForPlotting(legStr,jointStr);
             
@@ -102,12 +103,20 @@ classdef CycleAnalyzer
                         goodAngVel = [goodAngVel,cycles.angVelocity(:,angleNum)];
                     end
                 end
+                
+                
 
                 meanAng = mean(goodAngles,2)';
                 stdAng = std(goodAngles,0,2)';
-                
+                size(xSpace)
+                size(goodAngles)
+                angss = meanAng;
                 meanAngVel = mean(goodAngVel,2)';
                 stdAngVel = std(goodAngVel,0,2)';
+                
+                assignin('base',['meanAnglesJoint' num2str(angleNum) 'Type' num2str(pertType(type))], meanAng);
+                assignin('base',['meanAngVelocityJoint' num2str(angleNum) 'Type' num2str(pertType(type))], meanAngVel);
+                
                 %reg = max(meanAng')
                 %pol = max(meanAng'*(pi/180))
                 
@@ -115,41 +124,64 @@ classdef CycleAnalyzer
                 %(meanAngVel-min(meanAngVel)+10)
                 %set(legendHandle(type),'Color',color,'LineWidth',2);
                 
-                legendHandle(type) = plot(meanAng,meanAngVel,'LineWidth',2,'Color',color);
+                %legendHandle(type) = plot(meanAng,meanAngVel,'LineWidth',2,'Color',color);
+                legendHandle(type) = plot(xSpace,meanAng,'LineWidth',2,'Color',color);
                 hold on;
                 
-                toeOffLocations = NaN(1,length(meanAngVel));
-                cycles.toeOffLocs
-                toeOffLocations(cycles.toeOffLocs) = meanAngVel(cycles.toeOffLocs);
-                plot(meanAng,toeOffLocations,'kx','MarkerSize',30);
+                % Toeoff for left leg
+                
+                toeOffLocationsLeft = NaN(1,length(meanAngVel));
+                toeOffLocationsLeft(cycles.toeOffLocsLeft) = meanAng(cycles.toeOffLocsLeft);
+                %plot(xSpace,toeOffLocationsLeft,'kx','MarkerSize',30,'LineWidth',2);
+                
+                % Heelstrike for left leg
+                
+                heelStrikeLocationsLeft = NaN(1,length(meanAngVel));
+                heelStrikeLocationsLeft(cycles.heelStrikeLocsLeft) = meanAng(cycles.heelStrikeLocsLeft);
+                %plot(xSpace,heelStrikeLocationsLeft,'ko','MarkerSize',30,'LineWidth',2);
+                
+                % Toeoff for right leg
+                toeOffLocationsRight = NaN(1,length(meanAngVel));
+                toeOffLocationsRight(cycles.toeOffLocsRight) = meanAng(cycles.toeOffLocsRight);
+                %plot(xSpace,toeOffLocationsRight,'rx','MarkerSize',30,'LineWidth',2);
+                
+                % Heelstrike for right leg
+                heelStrikeLocationsRight = NaN(1,length(meanAngVel));
+                heelStrikeLocationsRight(cycles.heelStrikeLocsRight) = meanAng(cycles.heelStrikeLocsRight);
+                %plot(xSpace,heelStrikeLocationsRight,'ro','MarkerSize',30,'LineWidth',2);
                 
                 
                 if pertType(type) == 0
                     set(legendHandle(type),'LineStyle','--');
                 end
-                %plotVariance(xSpace,meanAngVel,stdAngVel,color,0.25);
+                plotVariance(xSpace,meanAng,stdAng,color,0.25);
+                
                 
                 
                 
                 disp([num2str(size(goodAngles,2)) ' of ' num2str(length(perts)) ' samples were used from the type ' num2str(pertType(type)) ' perturbations.']);
                 
             end
-            hold off;
+%             pertLineY = min(get(legendHandle(2),'YData'))-5;
+%             plot([0,70],[pertLineY,pertLineY],'-m','LineWidth',5,'MarkerFaceColor','r','MarkerSize',18);
+%             hold off;
             
 
 
             titleStr = regexprep([legStr ' ' jointStr], '(\<\w)','${upper($1)}'); % This capitalizes the first letter of each word
-            title(titleStr, 'FontSize', 15);
-            set(gca,'FontSize',14);
+            title(titleStr, 'FontSize', 24);
+            set(gca,'FontSize',24);
             set(gcf,'Units','Normalized');
             set(gcf,'Position', [0.05,0.05,0.8,0.8]);
-            xlabel('Percent Gait Cycle', 'FontSize', 14);%,'FontAngle','italic');
-            ylabel('Angle ({\circ})', 'FontSize', 14);%,'FontAngle','italic');
+            xlabel('Joint Angle ({\circ})', 'FontSize', 24);%,'FontAngle','italic');
+            ylabel('Angular Velocity ( {\circ}/sec)', 'FontSize', 24);%,'FontAngle','italic');
             %ylabel('Angular Velocity ( {\circ}/sec)', 'FontSize', 14);
             legend(legendHandle, legendStrings(pertType+1), 'Location', 'Best');
             
             
             grid on;
+            
+            
            
         end
         

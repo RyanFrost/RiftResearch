@@ -6,6 +6,8 @@ public class patchManager : MonoBehaviour {
 	private GameObject udpObj, patchObj, playerObj, leftFootObj;
 	private List<patch> patchList;
 	
+	public AudioClip beepNoise;
+	
 	private int[] patchLocations, patchTypes, patchSeparations;
 	
 	private int currentPatch = 0;
@@ -37,13 +39,20 @@ public class patchManager : MonoBehaviour {
 	{
 		// Calculates the distance to next patch once per frame
 		calcDistanceToPatch(leftFootObj);
-		
+		print(distanceToPatch);
 		// Waits until treadmill has started perturbing, then sets pertOngoing to true.
 		if( udpObj.GetComponent<UDPComm>().getPertStatus() > 0)
 		{
 			if(pertOngoing == false)
+			{
 				print("starting patch #" + currentPatch);
+				if ( udpObj.GetComponent<UDPComm>().getPertStatus()  < 3 )
+				{
+					patchList[currentPatch].changeColor(5.0f);
+                    playerObj.audio.PlayOneShot(beepNoise,0.7f);
+				}
 				
+			}
 			pertOngoing = true;
 		}
 		
@@ -56,6 +65,7 @@ public class patchManager : MonoBehaviour {
 				patchList[currentPatch].destroyPatch();
 			}
 			pertOngoing = false;
+			patchList[currentPatch].changeColor(0.0f);
 			print("Done perting patch #" + currentPatch);
 			currentPatch++;
 		}

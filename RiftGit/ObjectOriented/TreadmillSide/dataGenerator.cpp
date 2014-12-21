@@ -8,6 +8,8 @@
 #include <math.h>
 #include <vector>
 #include <algorithm>
+#include <fstream>
+#include <sstream>
 
 #include <boost/lexical_cast.hpp>
 #include <boost/thread.hpp>
@@ -103,6 +105,22 @@ void dataGenerator::patchSeparationGenerator(void)
 void dataGenerator::angleFootPosGenerator(void)
 {
 
+	std::ifstream fileInput("testData.txt");
+	int numLines = 37695;
+	std::vector<std::vector<double> > dataVec(numLines, std::vector<double> (7, 0));
+	std::string line;
+	int lineNum = 0;
+	while( std::getline(fileInput, line))
+	{
+		std::istringstream ss(line);
+		for (int i = 0; i < 7; i++)
+		{
+			ss >> dataVec[lineNum][i];
+		}
+		lineNum++;
+	}
+
+	
 	typedef std::chrono::high_resolution_clock Clock;
 	typedef std::chrono::duration<double> secDouble;
 	

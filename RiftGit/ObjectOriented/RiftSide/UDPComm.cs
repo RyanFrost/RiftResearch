@@ -19,7 +19,7 @@ public class UDPComm : MonoBehaviour
 	private GameObject patchManagerObj;
 	
 	private int port = 27015;
-	private string addr = "10.200.148.33";
+	private string addr = "10.200.148.182";
 	//private string addr = "66.253.248.207";
 	private IPEndPoint home;
 	
