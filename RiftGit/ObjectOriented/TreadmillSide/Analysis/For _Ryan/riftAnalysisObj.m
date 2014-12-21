@@ -4,7 +4,7 @@ end
 clear all
 figure
 load('johnData_8-15-14.mat'); % main data
-%load('erinKinematics_8-03-14_2.mat');
+%load('erinData_8-03-14_2.mat');
 %load('andrewData_8-21-14.mat');
 %load('carlosData_8-29-14.mat');
 
