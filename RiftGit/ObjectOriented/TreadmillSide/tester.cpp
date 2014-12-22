@@ -22,6 +22,7 @@ int main()
         std::vector<std::vector<double> > dataVec(numLines, std::vector<double> (8, 0));
         int lineNum = 0;
 	double startingTime;
+
         while( std::getline(fileInput, line))
         {
                 std::istringstream iss(line);
@@ -36,10 +37,9 @@ int main()
 		dataVec[lineNum][0] -= startingTime;
                 lineNum++;
         }
-	std::cout << dataVec[numLines-1][0] << " " << dataVec[0][0] << std::endl;
-	double diff = (dataVec[numLines-1][0] - dataVec[0][0])/((double) numLines);
-	std::cout << "Total diff = " << diff << ", small diff = " << diff/numLines << std::endl;
-        
+
+
+	double diff = (dataVec[numLines-1][0] - dataVec[0][0])/(numLines);
 
         typedef std::chrono::high_resolution_clock Clock;
         typedef std::chrono::duration<double> secDouble;
@@ -51,15 +51,23 @@ int main()
 	int timeIndex = 0;
 	int prevValue = 0;
 
-
+	std::vector<double> angles;
+	angles.resize(6);
 	while( true )
 	{
 		secs = timer.now() - startTime;
-		timeIndex = (int) std::round( secs.count() / diff );
+		timeIndex =  std::round( secs.count() / diff );
 		if (timeIndex != prevValue)
 		{
-			std::cout << '\r' << dataVec[timeIndex][7];
-	
+
+			angles.assign(dataVec[timeIndex].begin() + 1, dataVec[timeIndex].end() - 1);
+			
+			std::cout << '\r';
+			for ( int i = 0; i < 6; i++)
+			{
+				std::cout << angles[i] << ", ";
+			}
+
 			std::cout << std::flush;	
 			prevValue = timeIndex;
 		}
