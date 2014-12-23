@@ -216,11 +216,7 @@ void startComm(void)
 		}
 		
 		// Send Joint Angles
-		for (int i = 0; i < 6; i++)
-		{
-			std::cout << sharedMemory.sdata->joint_angles_rift[i] << ", ";
-		}
-		std::cout << "\r" << std::flush;
+		
 		sock.loadDubArrayToBuf( arrayToVec(sharedMemory.sdata->joint_angles_rift) );
 		//sock.loadDubArrayToBuf(dataGen.getAngles());
 		sock.sendBuf();

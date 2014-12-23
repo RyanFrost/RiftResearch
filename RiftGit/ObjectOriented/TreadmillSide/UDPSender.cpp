@@ -65,7 +65,7 @@ int main()
 	
 	
 	//Uncomment following line for automatic joint angle generation
-	//dataGen.startAngleGen();
+	dataGen.startAngleGen();
 
 // 	while(true)
 // 	{
@@ -217,8 +217,8 @@ void startComm(void)
 		
 		// Send Joint Angles
 		
-		sock.loadDubArrayToBuf( arrayToVec(sharedMemory.sdata->joint_angles_rift) );
-		//sock.loadDubArrayToBuf(dataGen.getAngles());
+		//sock.loadDubArrayToBuf( arrayToVec(sharedMemory.sdata->joint_angles_rift) );
+		sock.loadDubArrayToBuf(dataGen.getAngles());
 		sock.sendBuf();
 		
 		// Send perturbation status
@@ -247,8 +247,8 @@ void dataSaver()
 	while( unityRunning )
 	{
 		pastVals.erase(pastVals.begin());
-		pastVals.push_back(sharedMemory.sdata->xf);
-		//pastVals.push_back(dataGen.getFootPos());
+		//pastVals.push_back(sharedMemory.sdata->xf);
+		pastVals.push_back(dataGen.getFootPos());
 		if(is_sorted(pastVals.begin(),pastVals.end()))
 		{
 			movingForward = false;

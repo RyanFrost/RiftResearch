@@ -54,13 +54,15 @@ void sharedMemObject::save2file(bool movingBackward, bool movingForward, double 
 	// ensure proper spacing between 'fprintf' w/ a space after last %f
 	fprintf(fp,"%d %f %f ",sdata->motorv_int /*1*/, sdata->lcR_lbs/*2*/, sdata->lcL_lbs/*3*/);
 
-	fprintf(fp,"%f %f %f %f %d %f %f %f %f %f ", sdata->time /*4*/,sdata->tspeed_desired/*5*/, sdata->xd/*6*/, sdata->xact/*7*/,\
-		sdata->perturb/*8*/,sdata->angle_enc/*9*/, sdata->Kd/*10*/, sdata->Kact/*11*/, sdata->force_b/*12*/, sdata->elapsed/*13*/);
+	fprintf(fp,"%f %f %f %f %d %f %f %f %f %f ", sdata->time /*4*/,sdata->tspeed_desired/*5*/, sdata->xd_raw/*6*/, sdata->xact/*7*/,\
+		sdata->perturb/*8*/,sdata->angle_enc/*9*/, sdata->Kd/*10*/, sdata->Kact/*11*/, sdata->Fb_raw/*12*/, sdata->elapsed/*13*/);
 
 	fprintf(fp,"%d %d %f %f ", sdata->numEMG/*14*/,sdata->cycle/*15*/,sdata->time_vst_absolute/*16*/,sdata->zero_time_absolute/*17*/);
  
 	for (int i = 0; i<6; i++)
-	fprintf(fp,"%f ", sdata->joint_angles_rift[i]); /*18-23*/ 
+	{
+		fprintf(fp,"%f ", sdata->joint_angles_rift[i]); /*18-23*/ 
+	}
 
 	fprintf(fp,"%f ", sdata->xf);/*24*/
 	

@@ -12,7 +12,7 @@ UDPSender.o : UDPSender.cpp
 	$(CC) $(CXXFLAGS) UDPSender.cpp -I$(OBJ_SRC_FOLDER)
 
 socketManager.o : socketManager.h socketManager.cpp
-	$(CC) $(CXXFLAGS) socketManager.cpp
+	$(CC) $(CXXFLAGS) socketManager.cpp 
 
 dataGenerator.o : dataGenerator.h dataGenerator.cpp
 	$(CC) $(CXXFLAGS) dataGenerator.cpp
