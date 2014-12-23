@@ -106,7 +106,7 @@ void dataGenerator::angleFootPosGenerator(void)
 {
 
 	std::ifstream fileInput("testData.txt");
-	std::size_t numLines = 0;
+	int numLines = 0;
         std::string line;
 	while ( std::getline(fileInput,line) )
 	{
@@ -158,7 +158,7 @@ void dataGenerator::angleFootPosGenerator(void)
 	while( timeIndex < numLines )
 	{
 		secs = timer.now() - startTime;
-		timeIndex =  std::round( secs.count() / diff );
+		timeIndex =  std::round( secs.count() /(diff) );
 		if (timeIndex != prevValue)
 		{
 			footPos = dataVec[timeIndex][7];	

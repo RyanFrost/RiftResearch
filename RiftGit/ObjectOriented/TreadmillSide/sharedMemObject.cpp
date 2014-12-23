@@ -60,7 +60,9 @@ void sharedMemObject::save2file(bool movingBackward, bool movingForward, double 
 	fprintf(fp,"%d %d %f %f ", sdata->numEMG/*14*/,sdata->cycle/*15*/,sdata->time_vst_absolute/*16*/,sdata->zero_time_absolute/*17*/);
  
 	for (int i = 0; i<6; i++)
-	fprintf(fp,"%f ", sdata->joint_angles_rift[i]); /*18-23*/ 
+	{
+		fprintf(fp,"%f ", sdata->joint_angles_rift[i]); /*18-23*/ 
+	}
 
 	fprintf(fp,"%f ", sdata->xf);/*24*/
 	
