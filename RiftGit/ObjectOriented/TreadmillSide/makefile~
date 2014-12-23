@@ -9,10 +9,10 @@ udpSender : $(OBJS)
 	$(CC) $(OBJS) -o udpSender $(LFLAGS)
 
 UDPSender.o : UDPSender.cpp
-	$(CC) $(CXXFLAGS) UDPSender.cpp -I$(OBJ_SRC_FOLDER)
+	$(CC) $(CXXFLAGS) UDPSender.cpp 
 
 socketManager.o : socketManager.h socketManager.cpp
-	$(CC) $(CXXFLAGS) socketManager.cpp 
+	$(CC) $(CXXFLAGS) socketManager.cpp -I$(OBJ_SRC_FOLDER)
 
 dataGenerator.o : dataGenerator.h dataGenerator.cpp
 	$(CC) $(CXXFLAGS) dataGenerator.cpp

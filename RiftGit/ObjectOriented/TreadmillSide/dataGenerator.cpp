@@ -8,6 +8,8 @@
 #include <math.h>
 #include <vector>
 #include <algorithm>
+#include <fstream>
+#include <sstream>
 
 #include <boost/lexical_cast.hpp>
 #include <boost/thread.hpp>
@@ -103,6 +105,41 @@ void dataGenerator::patchSeparationGenerator(void)
 void dataGenerator::angleFootPosGenerator(void)
 {
 
+	std::ifstream fileInput("testData.txt");
+	std::size_t numLines = 0;
+        std::string line;
+	while ( std::getline(fileInput,line) )
+	{
+		numLines++;
+	}
+
+	// Go back to beginning of file to read data
+	fileInput.clear();
+	fileInput.seekg(0,fileInput.beg);
+
+        std::vector<std::vector<double> > dataVec(numLines, std::vector<double> (8, 0));
+        int lineNum = 0;
+	double startingTime;
+
+
+        while( std::getline(fileInput, line))
+        {
+                std::istringstream iss(line);
+                for (int i = 0; i < 8; i++)
+                {
+                        iss >> dataVec[lineNum][i];
+                }
+		if ( lineNum == 0 )
+		{
+			startingTime = dataVec[0][0];
+		}
+		dataVec[lineNum][0] -= startingTime;
+                lineNum++;
+        }
+
+	
+	double diff = (dataVec[numLines-1][0] - dataVec[0][0])/((double) numLines);
+
 	typedef std::chrono::high_resolution_clock Clock;
 	typedef std::chrono::duration<double> secDouble;
 	
@@ -111,26 +148,28 @@ void dataGenerator::angleFootPosGenerator(void)
 	Clock::time_point startTime = timer.now();
 	secDouble secs;
 
+
+	int timeIndex = 0;
+	int prevValue = 0;
+
+
 	angles.resize(6);
 	
-
-	int runLoop = 1;
-	float freqMult = 2;
-	while (runLoop)
+	while( timeIndex < numLines )
 	{
 		secs = timer.now() - startTime;
-		
-		footPos = 45 * sin(secs.count()*freqMult) + 50;
-		
-		angles[0] = 20 * sin(secs.count()*freqMult) - 20;		// Hip angle
-		angles[1] = 40 * sin(secs.count()*freqMult - 1) + 40;	// Knee angle
-		angles[2] = 30 * sin(secs.count()*freqMult + 0.5) - 30;	// Toe angle
-		
-		angles[3] = 20 * sin(secs.count()*freqMult + 3.14) - 20;		// Hip angle
-		angles[4] = 40 * sin(secs.count()*freqMult - 1 + 3.14) + 40;	// Knee angle
-		angles[5] = 30 * sin(secs.count()*freqMult + 0.5 + 3.14) + 30;	// Toe angle
+		timeIndex =  std::round( secs.count() / diff );
+		if (timeIndex != prevValue)
+		{
+			footPos = dataVec[timeIndex][7];	
+			angles.assign(dataVec[timeIndex].begin() + 1, dataVec[timeIndex].end() - 1);
+			prevValue = timeIndex;
+		}
+
 		
 	}
+
+	
 
 }
 

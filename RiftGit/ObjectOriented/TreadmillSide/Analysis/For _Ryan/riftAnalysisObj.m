@@ -2,12 +2,14 @@ if exist('cycArray','var')
     cycArray(1).clearList();
 end
 clear all
+figure
 close all
 
-load('johnData_8-15-14.mat'); % main data
+%load('johnData_8-15-14.mat'); % main data
 %load('erinData_8-03-14_2.mat');
 %load('andrewData_8-21-14.mat');
 %load('carlosData_8-29-14.mat');
+load('JeremyNewData.mat');
 
 lineNum = 1:length(xf);
 
@@ -15,7 +17,7 @@ time = VSTtime - zeroTime; % Zero time when EMG begins
 
 tspeedMax = max( tspeed_d );
 if (tspeedMax > 500)
-    tspeedMax = 700;
+    tspeedMax = 750;
 end
 maxSpeedIndUp = find( tspeed_d == tspeedMax, 1, 'first'); % First sample at max treadmill speed
 maxSpeedIndDown = find( tspeed_d == tspeedMax, 1, 'last'); % Last sample at max treadmill speed
@@ -80,7 +82,7 @@ cycleAnalyzer = CycleAnalyzer(cycArray);
 % joint: which joint to plot data for - can be 'hip', 'knee', or 'ankle'
 
 
-cycleAnalyzer.plotMeanStd(0,0,[0,1,2,3],'right','knee');
+%cycleAnalyzer.plotMeanStd(0,0,[0,1,2,3],'right','knee');
 
 % figure
 % cycleAnalyzer.plotMeanStd(0,0,[0,1,2,3],'right','hip');
@@ -103,24 +105,21 @@ cycleAnalyzer.plotMeanStd(0,0,[0,1,2,3],'right','knee');
 
 
 %% Plots all joints for each leg
-%{
+
 legStrings = {'left','right'};
 jointStrings = {'ankle','knee','hip'};
 
 for leg = 1:length(legStrings)
     
     for joint = 1:length(jointStrings)
-        k = 0;
-        while k == 0
-            k = waitforbuttonpress;
-        end
-        clf
-        cycleAnalyzer.plotMeanStd(1,1,[0,1,2,3],legStrings{leg},jointStrings{joint});
+        
+        figure
+        ang(:,joint+3*(leg-1)) = cycleAnalyzer.plotMeanStd(1,1,[0,1],legStrings{leg},jointStrings{joint});
         
         
     end
 end
-%}
+
 
 
 
