@@ -145,7 +145,7 @@ void pertCycler(int stiffnessLevel, int patchType)
 	
 	//Waits until the left foot has passed over the next patch (i.e. the distance to next patch is negative)
 	
-	while ( distance > 0.9) { if(unityRunning == false) return;}
+	while ( distance > 0.7) { if(unityRunning == false) return;}
 	
 	std::cout << distance << std::endl;
 	std::cout << "< Over patch -- " << std::flush;
