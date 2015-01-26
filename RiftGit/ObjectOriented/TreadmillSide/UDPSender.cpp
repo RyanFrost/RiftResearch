@@ -30,7 +30,7 @@ void dataSaver(void);
 
 socketManager sock(27015); // Creates socket object ---> opens socket on local port 27015
 dataGenerator dataGen(120); // dataGen creates the patch & patch type vectors
-sharedMemObject sharedMemory("jeffTest2.txt");
+sharedMemObject sharedMemory("jeffTestNew.txt");
 treadmillController treadmill;
 
 std::vector<char> response;
@@ -180,7 +180,7 @@ void pertCycler(int stiffnessLevel, int patchType)
 		if(unityRunning == false) return;
 		//std::cout << dataGen.getFootPos() << std::endl;
 		treadmill.moveTreadmill(sharedMemory.sdata->xf, stiffnessLevel);
-		usleep(50000);
+		usleep(30000);
 	}
 	
 	std::cout << "done perturbing >" << std::endl;
