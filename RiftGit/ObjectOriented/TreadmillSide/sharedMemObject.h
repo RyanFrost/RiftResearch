@@ -34,7 +34,7 @@ protected:
 		double elapsed; // Time elapsed each iteration of VST for loop
 		bool start_EMG; // Tells to start collecting EMG data
 		bool get_EMG; // Tells when to get EMG
-		bool experiment; // Tells whether to do experiment or stop it.
+		bool experiment; // Tells wheather to do experiment or stop it.
 		int numEMG; // Number of EMG electrodes used in experiment
 		bool beep; // Causes beep
 		double time_vst_absolute; // Timestamp for each iteration of vst code in absolute computer time
