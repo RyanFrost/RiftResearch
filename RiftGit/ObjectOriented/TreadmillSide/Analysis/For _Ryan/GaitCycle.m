@@ -35,7 +35,7 @@ classdef GaitCycle < dlnode
             if ~isempty(inds)
             
                 for i = 1:length(inds)
-                    if inds(i) == cyc.indices(1)
+                    if inds(i) == 1
                         cyc.anglesRaw(inds(i)) = cyc.anglesRaw(inds(i)+1);
                     else
                         cyc.anglesRaw(inds(i)) = cyc.anglesRaw(inds(i)-1);

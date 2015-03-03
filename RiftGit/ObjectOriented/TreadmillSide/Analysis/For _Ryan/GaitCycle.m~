@@ -1,11 +1,13 @@
 classdef GaitCycle < dlnode
     properties
         cycleNum;
-        startTime;
+        timeVec;
+        duration;
         indices;
         numSamples;
         perturbType;
         distance;
+        movingBacks;
         
         footPos;
         anglesRaw;
@@ -14,9 +16,10 @@ classdef GaitCycle < dlnode
     
 
     methods
-        function cyc = GaitCycle(cycleNumber,cycleStartTime,cycleIndices,perturbStatus,footPositions,anglesArray,distanceToPatchOnHeelstrike)
+        function cyc = GaitCycle(cycleNumber,cycleTimes,cycleIndices,perturbStatus,footPositions,anglesArray,distanceToPatchOnHeelstrike,movingBack)
             
-            cyc.startTime = cycleStartTime;
+            cyc.timeVec = cycleTimes;
+            cyc.duration = cyc.timeVec(end)-cyc.timeVec(1);
             cyc.cycleNum = cycleNumber;
             cyc.perturbType = perturbStatus;
             cyc.indices = cycleIndices';
@@ -24,24 +27,26 @@ classdef GaitCycle < dlnode
             cyc.distance = distanceToPatchOnHeelstrike;
             cyc.footPos = footPositions;
             cyc.anglesRaw = anglesArray;
-            
+            cyc.movingBacks = movingBack;
             
             
             inds = find(cyc.anglesRaw > 100 | cyc.anglesRaw < -100 | abs(cyc.anglesRaw-12.54)<0.01);
-            
+            inds 
             if ~isempty(inds)
             
                 for i = 1:length(inds)
                     if inds(i) == cyc.indices(1)
                         cyc.anglesRaw(inds(i)) = cyc.anglesRaw(inds(i)+1);
                     else
+                        inds(i)
+                        cyc.indices
                         cyc.anglesRaw(inds(i)) = cyc.anglesRaw(inds(i)-1);
                     end
                 end
             end
             
-            cyc.anglesRaw(:,7) = sum(cyc.anglesRaw(:,2:),2);
-            cyc.anglesRaw(:,8) = sum(cyc.anglesRaw(:,4:5),2);
+            cyc.anglesRaw(:,7) = sum(cyc.anglesRaw(:,1:3),2);
+            cyc.anglesRaw(:,8) = sum(cyc.anglesRaw(:,4:6),2);
             
         end
         

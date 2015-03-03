@@ -30,6 +30,7 @@ patchType = A(:,29);
 
 
 
+
 matFile = strrep(fileName,'.txt','.mat');
 
 clear A;
