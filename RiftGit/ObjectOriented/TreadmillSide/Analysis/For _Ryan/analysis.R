@@ -11,10 +11,10 @@ dat[,direction := 4*forward+3*back]
 dat[,ind := 1:.N]
 perted <- dat[perturb != 0,]
 
-region <- dat[23000:26000,]
+region <- dat[24000:26000,]
 
 p <- ggplot(region) +
-  geom_point(aes(x=ind,y=distance,colour=factor(perturb))) +
-  geom_line(aes(x=ind,y=(xf+10)/50)) 
+  geom_line(aes(x=ind,y=distance,group=1,colour=factor(pnum)),size=1.5) +
+  geom_line(aes(x=ind,y=(xf+10)/50,group=1,colour=factor(perturb)),size=1.5) 
 
 print(p)
