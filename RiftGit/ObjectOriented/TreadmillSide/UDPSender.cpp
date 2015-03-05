@@ -188,6 +188,8 @@ void pertCycler(int stiffnessLevel, int patchType)
 	sharedMemory.sdata->perturb = 0;
 	sharedMemory.sdata->perturbWarning = 0;
 	sharedMemory.sdata->beep = false;
+
+	usleep(50000); // Wait so that unity has time to update distance to next patch
 }
 	
 	
