@@ -75,10 +75,10 @@ public class patchManager : MonoBehaviour {
 	private void calcDistanceToPatch(GameObject gameObj)
 	{
 	
-		// If type 3 perturbation, halve the distance to patch so that it perturbs halfway between previous patch and current patch
+		// If type 3 perturbation, remove one third of the distance to patch so that it perturbs two-thirds of the way between previous patch and current patch
 		if ( patchList[currentPatch].getType() == 3)
 		{
-			distanceToPatch = patchList[currentPatch].getPatchDistance(gameObj) - getHalfDist();
+			distanceToPatch = patchList[currentPatch].getPatchDistance(gameObj) - getThirdDist();
 		}
 		else
 		{
@@ -92,6 +92,11 @@ public class patchManager : MonoBehaviour {
 		return halfDist;
 	}
 	
+	private float getThirdDist()
+	{
+		float thirdDist = (patchList[currentPatch+1].getLocationF() - patchList[currentPatch].getLocationF())/3;
+		return thirdDist;
+	}
 	public float getDistanceToPatch() { return distanceToPatch; }
 	
 }

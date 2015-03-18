@@ -49,7 +49,7 @@ void dataGenerator::patchGenerator(void)
 
 	for (int i = 0; i<numPatches; i++)
 	{
-		int separation = std::rand() % 3 + 5;
+		int separation = std::rand() % 3 + 6;
 		pLocation += separation;
 		patches.push_back(pLocation);
 	}
@@ -63,7 +63,7 @@ void dataGenerator::patchTypeGenerator(void)
 	// it shuffles the vector to randomize the perturbation order and inserts each element of the vector into the patch list
 	// at random intervals.
 	
-	int numPert = 20;
+	int numPert = 40;
 	std::vector<int> patchTypeOrder;
 	patchTypeOrder.insert(patchTypeOrder.end(), numPert / 2, 2);
 	patchTypeOrder.insert(patchTypeOrder.end(), numPert / 2, 3);
@@ -77,7 +77,7 @@ void dataGenerator::patchTypeGenerator(void)
 
 	int currentPatch = 0;
 	int startingBuffer = 10; // Number of patches before the first special perturbation
-	int avgPatchesBetween = 6;
+	int avgPatchesBetween = 4;
 	currentPatch += startingBuffer;
 
 	
