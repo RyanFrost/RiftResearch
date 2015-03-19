@@ -44,13 +44,13 @@ public class legMover : MonoBehaviour {
 		
 		if (numAng == 6)
 		{
-			rightHip.localRotation = Quaternion.Euler(-anglesF[3],0,0);
-			rightKnee.localRotation = Quaternion.Euler (-anglesF[4], 0, 0);
-			rightAnkle.localRotation = Quaternion.Euler (-anglesF[5],0, 0);
+			rightHip.localRotation = Quaternion.Euler(anglesF[3],0,0);
+			rightKnee.localRotation = Quaternion.Euler (anglesF[4], 0, 0);
+			rightAnkle.localRotation = Quaternion.Euler (anglesF[5],0, 0);
 		}
-		leftHip.localRotation = Quaternion.Euler(anglesF[0],0,0);
-		leftKnee.localRotation = Quaternion.Euler (anglesF[1], 0, 0);
-		leftAnkle.localRotation = Quaternion.Euler (anglesF[2],0, 0);
+		leftHip.localRotation = Quaternion.Euler(-anglesF[0],0,0);
+		leftKnee.localRotation = Quaternion.Euler (-anglesF[1], 0, 0);
+		leftAnkle.localRotation = Quaternion.Euler (-anglesF[2],0, 0);
 	
 	
 	}
