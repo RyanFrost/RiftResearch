@@ -77,7 +77,8 @@ void dataGenerator::patchTypeGenerator(void)
 
 	int currentPatch = 0;
 	int startingBuffer = 10; // Number of patches before the first special perturbation
-	int avgPatchesBetween = 4;
+	int avgPatchesBetween = 3;
+	
 	currentPatch += startingBuffer;
 
 	
@@ -85,7 +86,7 @@ void dataGenerator::patchTypeGenerator(void)
 	for (std::vector<int>::const_iterator iter = patchTypeOrder.begin(); iter != patchTypeOrder.end(); iter++)
 	{
 		patchTypes[currentPatch] = *iter;
-		currentPatch += avgPatchesBetween - 2 + std::rand() % 5;
+		currentPatch += avgPatchesBetween - 1 + std::rand() % 3;
 	}
 
 }
@@ -162,6 +163,10 @@ void dataGenerator::angleFootPosGenerator(void)
 		if (timeIndex != prevValue)
 		{
 			footPos = dataVec[timeIndex][7];	
+			for(std::vector<double>::iterator iter = dataVec[timeIndex].begin(); iter != dataVec[timeIndex].end(); iter++)
+			{
+				*iter = -*iter;
+			}
 			angles.assign(dataVec[timeIndex].begin() + 1, dataVec[timeIndex].end() - 1);
 			prevValue = timeIndex;
 		}
