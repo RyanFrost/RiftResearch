@@ -2,19 +2,66 @@ rm(list=ls())
 library(data.table)
 library(ggplot2)
 
-dat <- fread("jeffTestNew_fail2.txt")
+dat <- fread("erinData3_22_15.txt")
+dat[,V54:=NULL]
+setnames(dat, c(
+"motorv_int",
+"lcR_lbs",
+"lcL_lbs",
+"time",
+"tspeed_desired",
+"xd_raw",
+"xact",
+"perturb",
+"angle_enc",
+"Kd",
+"Kact",
+"Fb_raw",
+"elapsed",
+"numEMG",
+"cycle",
+"time_vst_absolute",
+"zero_time_absolute",
+"joint_angles1",
+"joint_angles2",
+"joint_angles3",
+"joint_angles4",
+"joint_angles5",
+"joint_angles6",
+"xf",
+"movingBackward",
+"movingForward",
+"distance",
+"currentPatch",
+"patchType",
+"marker_x_l_1",
+"marker_x_l_2",
+"marker_x_l_3",
+"marker_x_l_4",
+"marker_x_l_5",
+"marker_x_l_6",
+"marker_y_l_1",
+"marker_y_l_2",
+"marker_y_l_3",
+"marker_y_l_4",
+"marker_y_l_5",
+"marker_y_l_6",
+"marker_x_r_1",
+"marker_x_r_2",
+"marker_x_r_3",
+"marker_x_r_4",
+"marker_x_r_5",
+"marker_x_r_6",
+"marker_y_r_1",
+"marker_y_r_2",
+"marker_y_r_3",
+"marker_y_r_4",
+"marker_y_r_5",
+"marker_y_r_6"))
 
-setnames(dat,c("V8","V15","V27","V24","V29","V28","V25","V26"),c("perturb","cycle","distance","xf","type","pnum","back","forward"))
 
-dat[,direction := 4*forward+3*back]
 
-dat[,ind := 1:.N]
-perted <- dat[perturb != 0,]
-
-region <- dat[24000:26000,]
-
-p <- ggplot(region) +
-  geom_line(aes(x=ind,y=distance,group=1,colour=factor(pnum)),size=1.5) +
-  geom_line(aes(x=ind,y=(xf+10)/50,group=1,colour=factor(perturb)),size=1.5) 
+p <-ggplot(dat[perturb>0],aes(x=perturb)) +
+  geom_histogram()
 
 print(p)
