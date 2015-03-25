@@ -110,9 +110,8 @@ classdef CycleAnalyzer
                 stdAng = std(goodAngles,0,2)';
                 size(xSpace)
                 size(goodAngles)
-                angss(1,:,type) = meanAng';
+                angss( = meanAng;
                 meanAngVel = mean(goodAngVel,2)';
-                angss(2,:,type) = meanAngVel';
                 stdAngVel = std(goodAngVel,0,2)';
                 
                 assignin('base',['meanAnglesJoint' num2str(angleNum) 'Type' num2str(pertType(type))], meanAng);

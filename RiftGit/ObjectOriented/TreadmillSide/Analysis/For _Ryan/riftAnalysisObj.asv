@@ -85,9 +85,9 @@ cycleAnalyzer = CycleAnalyzer(cycArray);
 %cycleAnalyzer.plotMeanStd(0,0,[0,1,2,3],'right','knee');
 
  figure
-angss = cycleAnalyzer.plotMeanStd(0,0,[0,1,2,3],'right','hip');
+ cycleAnalyzer.plotMeanStd(0,0,[0,1,2,3],'right','hip');
  figure
-cycleAnalyzer.plotMeanStd(0,0,[0,1,2,3],'right','knee');
+angss= cycleAnalyzer.plotMeanStd(0,0,[0,1,2,3],'right','knee');
 % figure
 % cycleAnalyzer.plotMeanStd(0,0,[0,1,2,3],'right','ankle');
 % 
@@ -122,34 +122,17 @@ jointStrings = {'ankle','knee','hip'};
 
 meanAngs=squeeze(angss(1,:,:));
 meanAngVels=squeeze(angss(2,:,:));
-meanAngs = (meanAngs-min(meanAngs(:)))./(max(meanAngs(:))-min(meanAngs(:)))-0.5;
-meanAngVels = (meanAngVels-min(meanAngVels(:)))./(max(meanAngVels(:))-min(meanAngVels(:)))-0.5;
-    
-for i = 2:4
+for i = 1:4
     %meanAngs(:,i)=(meanAngs(:,i)-min(meanAngs(:,i)))./(max(meanAngs(:,i))-min(meanAngs(:,i)));
     %meanAngVels(:,i)=(meanAngVels(:,i)-min(meanAngVels(:,i)))./(max(meanAngVels(:,i))-min(meanAngVels(:,i)));
-    A = [meanAngs(:,i)-meanAngs(:,1),meanAngVels(:,i)-meanAngVels(:,1)];
-    s = sum(A.^2,2);
-    mag(:,i-1)=sqrt(sum(A.^2,2));
-    if (i > 1)
-        %dist(:,i-1) = mag(:,i)-mag(:,1);
-    end
+    meanAngs = (meanAngs-min(meanAngs))./(max(meanAngs)-min(meanAngs))
+    me
 end
 
-
-%%
 figure
-plot(linspace(0,mean([cycArray.duration]),1000),mag,'LineWidth',2)
-title('Normalized Phase-Space Distance from Unperturbed', 'FontSize', 24)
-xlabel('Time (s)');
-ylabel('Normalized Distance');
-legend('VP','VO','PO')
+plot(meanAngs,meanAngVels)
 
-            set(gca,'FontSize',24);
-            set(gcf,'Units','Normalized');
-            set(gcf,'Position', [0.05,0.05,0.8,0.8]);
-
-
+legend('Unperturbed','VP','VO','PO')
 
 
 
