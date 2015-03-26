@@ -56,7 +56,8 @@ classdef CycleAnalyzer
                     cycles = CycleCollection(currentCyc,cycsBefore,cycsAfter,length(CA.cycleArray));
                     
                     if cycles.isPlottable == 1
-                        plot(xSpace,cycles.angles(:,angleNum),'Color', color,'DisplayName',num2str(cycles.mainCycNum));
+                       %plot(xSpace,cycles.angles(:,angleNum),'Color',color,'DisplayName',num2str(cycles.mainCycNum)); 
+                        plot(cycles.angles(:,angleNum),cycles.angVelocity(:,angleNum),'Color', color,'DisplayName',num2str(cycles.mainCycNum));
                     else
                         cyclesCut = cyclesCut+1;
                     end
@@ -108,6 +109,11 @@ classdef CycleAnalyzer
 
                 meanAng = mean(goodAngles,2)';
                 stdAng = std(goodAngles,0,2)';
+                meanPlus = meanAng+stdAng;
+                meanMinus= meanAng-stdAng;
+                lowerVel = gradient(meanMinus,1.1583/1000);
+                upperVel = gradient(meanPlus,1.1583/1000);
+                angV = gradient(meanAng,1.1583/1000);
                 size(xSpace)
                 size(goodAngles)
                 angss(1,:,type) = meanAng';
@@ -125,10 +131,13 @@ classdef CycleAnalyzer
                 %(meanAngVel-min(meanAngVel)+10)
                 %set(legendHandle(type),'Color',color,'LineWidth',2);
                 
-                legendHandle(type) = plot(meanAng,meanAngVel,'LineWidth',2,'Color',color);
+                legendHandle(type) = plot(meanAng,angV,'LineWidth',2,'Color',color);
+                
                 %legendHandle(type) = plot(xSpace,meanAng,'LineWidth',2,'Color',color);
                 hold on;
-                
+                plot(meanAng,meanAngVel,'LineWidth',1,'Color',color);
+                %plot(meanPlus,upperVel,'Linewidth',1,'Color',color);
+                %plot(meanMinus,lowerVel,'LineWidth',1,'Color',color);
                 % Toeoff for left leg
                 
                 toeOffLocationsLeft = NaN(1,length(meanAngVel));

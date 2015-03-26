@@ -87,7 +87,7 @@ cycleAnalyzer = CycleAnalyzer(cycArray);
  figure
 angss = cycleAnalyzer.plotMeanStd(0,0,[0,1,2,3],'right','hip');
  figure
-cycleAnalyzer.plotMeanStd(0,0,[0,1,2,3],'right','knee');
+%cycleAnalyzer.plotRaw(0,0,[0,1,2,3],'right','knee');
 % figure
 % cycleAnalyzer.plotMeanStd(0,0,[0,1,2,3],'right','ankle');
 % 
