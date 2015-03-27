@@ -109,24 +109,18 @@ classdef CycleAnalyzer
 
                 meanAng = mean(goodAngles,2)';
                 stdAng = std(goodAngles,0,2)';
-                
-                
-                
                 meanPlus = meanAng+stdAng;
                 meanMinus= meanAng-stdAng;
                 lowerVel = gradient(meanMinus,1.1583/1000);
                 upperVel = gradient(meanPlus,1.1583/1000);
                 angV = gradient(meanAng,1.1583/1000);
-                [a,b] = butter(2,(6/1.1583)/500,'low');
-                angV = filter(a,b,angV);
-                
+                [a,b] = butter(2,1)
                 size(xSpace)
                 size(goodAngles)
                 angss(1,:,type) = meanAng';
                 meanAngVel = mean(goodAngVel,2)';
                 angss(2,:,type) = meanAngVel';
                 stdAngVel = std(goodAngVel,0,2)';
-       
                 
                 assignin('base',['meanAnglesJoint' num2str(angleNum) 'Type' num2str(pertType(type))], meanAng);
                 assignin('base',['meanAngVelocityJoint' num2str(angleNum) 'Type' num2str(pertType(type))], meanAngVel);
@@ -138,14 +132,11 @@ classdef CycleAnalyzer
                 %(meanAngVel-min(meanAngVel)+10)
                 %set(legendHandle(type),'Color',color,'LineWidth',2);
                 
-                %legendHandle(type) = plot(meanAng,angV,'LineWidth',2,'Color',color);
-                legendHandle(type) = plot(xSpace,meanAngVel,'LineWidth',2,'Color',color);
+                legendHandle(type) = plot(meanAng,angV,'LineWidth',2,'Color',color);
                 
+                %legendHandle(type) = plot(xSpace,meanAng,'LineWidth',2,'Color',color);
                 hold on;
-                legendHandle(type) = plot(xSpace,angV,'LineWidth',1,'Color',color);
-                
-                
-                %plot(meanAng,meanAngVel,'LineWidth',1,'Color',color);
+                plot(meanAng,meanAngVel,'LineWidth',1,'Color',color);
                 %plot(meanPlus,upperVel,'Linewidth',1,'Color',color);
                 %plot(meanMinus,lowerVel,'LineWidth',1,'Color',color);
                 % Toeoff for left leg
