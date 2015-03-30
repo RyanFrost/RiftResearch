@@ -59,9 +59,26 @@ setnames(dat, c(
 "marker_y_r_5",
 "marker_y_r_6"))
 
+dat[,time:=time_vst_absolute-dat$time_vst_absolute[1]]
+
+heelstrike <- c(0,diff(dat$movingForward))
+heelstrike[heelstrike==1] <- 0
+
+dat[,cycle:=cumsum(-heelstrike)]
+
+dat[,perturb:=as.integer(median(perturb)),by=cycle]
 
 
-p <-ggplot(dat[perturb>0],aes(x=perturb)) +
-  geom_histogram()
+splines <- dat[,spline(x=time,y=xf,xmin=0,xmax=100,n=1000),by=list(cycle)]
 
-print(p)
+avgs <- splines[,list(mean(y),sd(y)),by=list(x)]
+
+xfmax <- dat[,max(xf),by=perturb]
+dat <- dat[xf>(-10000)][tspeed_desired==700]
+p <-ggplot(dat[cycle%in%c(630)],aes(x=time,y=xf)) +
+    geom_point(aes(colour=factor(perturb)))
+
+p2 <- ggplot(splines) +
+    geom_boxplot(aes(x=x,y=y,colour=perturb))
+
+print(p2)
