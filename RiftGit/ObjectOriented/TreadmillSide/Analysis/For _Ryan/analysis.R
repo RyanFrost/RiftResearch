@@ -1,5 +1,7 @@
 rm(list=ls())
 library(data.table)
+library(tidyr)
+library(dplyr)
 library(ggplot2)
 
 dat <- fread("erinData3_22_15.txt")
@@ -22,12 +24,12 @@ setnames(dat, c(
 "cycle",
 "time_vst_absolute",
 "zero_time_absolute",
-"joint_angles1",
-"joint_angles2",
-"joint_angles3",
-"joint_angles4",
-"joint_angles5",
-"joint_angles6",
+"hip_left",
+"knee_left",
+"ankle_left",
+"hip_right",
+"knee_right",
+"ankle_right",
 "xf",
 "movingBackward",
 "movingForward",
@@ -59,6 +61,28 @@ setnames(dat, c(
 "marker_y_r_5",
 "marker_y_r_6"))
 
+dat[,motorv_int:=NULL]
+dat[,numEMG := NULL]
+dat[,xd_raw := NULL]
+dat[,angle_enc:=NULL]
+dat[,Fb_raw:=NULL]
+dat[,xact:=NULL]
+dat[,Kd:=NULL]
+dat[,Kact:=NULL]
+dat[,elapsed:=NULL]
+dat[,distance:=NULL]
+
+dat <- gather(dat,jointleg,angle,c(hip_left,
+                                   knee_left,
+                                   ankle_left,
+                                   hip_right,
+                                   knee_right,
+                                   ankle_right)) %>%
+    separate(jointleg,c("joint","leg"),sep="_") %>%
+    gather(directionlegmarker,markerPos,starts_with("marker")) %>%
+    separate(directionlegmarker,c("m","direction","leg","marker"))
+
+
 dat[,time:=time_vst_absolute-dat$time_vst_absolute[1]]
 
 heelstrike <- c(0,diff(dat$movingForward))
@@ -66,25 +90,40 @@ heelstrike[heelstrike==1] <- 0
 
 dat[,cycle:=cumsum(-heelstrike)]
 
-dat[,perturb:=as.integer(median(perturb)),by=cycle]
+dat[,perturb:= as.integer(median(perturb)),by=cycle]
 dat2<-dat
 dat2[,time:=time-min(time),by=cycle]
 
 myfunc <- function(x,y,sequence)
 {
-    y=spline(x=x,y=y,xmin=0,xmax=100,xout=sequence,method="natural")$y
-    list(x=seq(0,100,length.out=1000),y=spline(x=time,y=xf,xmin=0,xmax=100,n=1000,method="natural")$y)
+    
+    y=spline(x=x,y=y,xout=sequence,method="natural")$y
+    list(y=y,x=sequence)
 }
 
 
 
-splines <- dat2[,,by=cycle]
+splines <- dat2[cycle >600 & cycle < 1000,
+                list(cycle,
+                     perturb,
+                     time,
+                     xf)][,myfunc(time,
+                                  marker_y_r_6,
+                                  seq(0,max(time),length.out=1000)),by=list(cycle,perturb)]
+splines[,pgc:=seq(0,100,length.out=1000)]
 
-avgs <- splines[,list(mean(y),sd(y))]
+
+avgs <- splines[,list(mn=mean(y),std=sd(y)),by=list(pgc,perturb)]
 
 xfmax <- dat[,max(xf),by=perturb]
-dat <- dat[xf>(-10000)][tspeed_desired==700]
-p <-ggplot(dat[cycle%in%c(630)],aes(x=time,y=xf)) +
-    geom_point(aes(colour=factor(perturb)))
+#dat <- dat[xf>(-10000)][tspeed_desired==700]
+
+
+print(summary(avgs))
+
+p <- ggplot(avgs,aes(x=pgc,y=mn,colour=factor(perturb))) +
+    geom_line() +
+    geom_ribbon(aes(ymin=mn-std,ymax=mn+std,fill=factor(perturb),),alpha=0.2)
+
 
 print(p)
