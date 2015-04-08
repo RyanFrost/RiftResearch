@@ -67,18 +67,24 @@ heelstrike[heelstrike==1] <- 0
 dat[,cycle:=cumsum(-heelstrike)]
 
 dat[,perturb:=as.integer(median(perturb)),by=cycle]
+dat2<-dat
+dat2[,time:=time-min(time),by=cycle]
+
+myfunc <- function(x,y,sequence)
+{
+    y=spline(x=x,y=y,xmin=0,xmax=100,xout=sequence,method="natural")$y
+    list(x=seq(0,100,length.out=1000),y=spline(x=time,y=xf,xmin=0,xmax=100,n=1000,method="natural")$y)
+}
 
 
-splines <- dat[,spline(x=time,y=xf,xmin=0,xmax=100,n=1000),by=list(cycle)]
 
-avgs <- splines[,list(mean(y),sd(y)),by=list(x)]
+splines <- dat2[,,by=cycle]
+
+avgs <- splines[,list(mean(y),sd(y))]
 
 xfmax <- dat[,max(xf),by=perturb]
 dat <- dat[xf>(-10000)][tspeed_desired==700]
 p <-ggplot(dat[cycle%in%c(630)],aes(x=time,y=xf)) +
     geom_point(aes(colour=factor(perturb)))
 
-p2 <- ggplot(splines) +
-    geom_boxplot(aes(x=x,y=y,colour=perturb))
-
-print(p2)
+print(p)

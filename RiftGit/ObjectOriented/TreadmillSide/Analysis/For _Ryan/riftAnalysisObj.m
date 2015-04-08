@@ -85,7 +85,7 @@ cycleAnalyzer = CycleAnalyzer(cycArray);
 %cycleAnalyzer.plotMeanStd(0,0,[0,1,2,3],'right','knee');
 
 figure
-angss = cycleAnalyzer.plotMeanStd(0,0,[0,1,2],'right','hip');
+angss = cycleAnalyzer.plotMeanStd(0,0,[0,1,2,3],'right','hip');
 %cycleAnalyzer.plotRaw(0,0,[0,1,2,3],'right','knee');
 % figure
 % cycleAnalyzer.plotMeanStd(0,0,[0,1,2,3],'right','ankle');
@@ -137,16 +137,16 @@ end
 
 
 %%
-%figure
-%plot(linspace(0,mean([cycArray.duration]),1000),mag,'LineWidth',2)
-% title('Normalized Phase-Space Distance from Unperturbed', 'FontSize', 24)
-% xlabel('Time (s)');
-% ylabel('Normalized Distance');
-% legend('VP','VO','PO')
+figure
+plot(linspace(0,mean([cycArray.duration]),1000),mag,'LineWidth',2)
+ title('Normalized Phase-Space Distance from Unperturbed', 'FontSize', 24)
+ xlabel('Time (s)');
+ ylabel('Normalized Distance');
+ legend('VP','VO','PO')
 % 
-%             set(gca,'FontSize',24);
-%             set(gcf,'Units','Normalized');
-%             set(gcf,'Position', [0.05,0.05,0.8,0.8]);
+             set(gca,'FontSize',24);
+             set(gcf,'Units','Normalized');
+             set(gcf,'Position', [0.05,0.05,0.8,0.8]);
 
 
 

@@ -146,18 +146,18 @@ classdef CycleAnalyzer
                 %(meanAngVel-min(meanAngVel)+10)
                 %set(legendHandle(type),'Color',color,'LineWidth',2);
                 
-                legendHandle(type) = plot(meanAng,angV,'LineWidth',2,'Color',color);
-                %legendHandle(type) = plot(xSpace,angV,'LineWidth',2,'Color',color);
+                %legendHandle(type) = plot(meanAng,meanAngVel,'LineWidth',2,'Color',color);
+                legendHandle(type) = plot(xSpace,meanAng,'LineWidth',2,'Color',color);
                 
                 hold on;
                 %plot(xSpace,angV,'LineWidth',1,'Color',color);
                 for cycle=1:size(goodAngles,1)
-                    error_ellipse(squeeze(covmat(:,:,cycle)),meanAng(cycle),meanAngVel(cycle),color);
+                    %error_ellipse(squeeze(covmat(:,:,cycle)),meanAng(cycle),meanAngVel(cycle),color);
                 end
                 
                 %plot(meanAng,angV,'LineWidth',1,'Color',color);
-                plot(meanPlus,upperVel,'Linewidth',1,'Color',color);
-                plot(meanMinus,lowerVel,'LineWidth',1,'Color',color);
+                %plot(meanPlus,upperVel,'Linewidth',1,'Color',color);
+                %plot(meanMinus,lowerVel,'LineWidth',1,'Color',color);
                 % Toeoff for left leg
                 
                 toeOffLocationsLeft = NaN(1,length(meanAngVel));
@@ -184,8 +184,8 @@ classdef CycleAnalyzer
                 if pertType(type) == 0
                     set(legendHandle(type),'LineStyle','--');
                 end
-                %plotVariance(xSpace,meanAng,stdAng,color,0.25);
-                
+                %plotVariance(xSpace,meanAngVel,stdAngVel,color,0.25);
+                plotVariance(xSpace,meanAng,stdAng,color,0.25);
                 
                 
                 

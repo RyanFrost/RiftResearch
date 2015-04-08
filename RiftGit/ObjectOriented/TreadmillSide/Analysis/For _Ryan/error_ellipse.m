@@ -30,7 +30,7 @@ end
 
 
 % Get the 95% confidence interval error ellipse
-chisquare_val = 1.79;
+chisquare_val = 1.8;
 theta_grid = linspace(0,2*pi);
 phi = angle;
 
