@@ -1,6 +1,3 @@
-
-
-
 dat[,time:=time_vst_absolute-dat$time_vst_absolute[1]]
 
 heelstrike <- c(0,diff(dat$movingForward))
@@ -21,12 +18,12 @@ myfunc <- function(x,y,sequence)
 
 
 
-splines <- dat2[cycle >600 & cycle < 1000,
+splines <- dat2[tspeed_desired==700,
                 list(cycle,
                      perturb,
                      time,
-                     xf)][,myfunc(time,
-                                  marker_y_r_6,
+                     xf,xfr)][,myfunc(time,
+                                  xfr,
                                   seq(0,max(time),length.out=1000)),by=list(cycle,perturb)]
 splines[,pgc:=seq(0,100,length.out=1000)]
 
@@ -36,12 +33,17 @@ avgs <- splines[,list(mn=mean(y),std=sd(y)),by=list(pgc,perturb)]
 xfmax <- dat[,max(xf),by=perturb]
 #dat <- dat[xf>(-10000)][tspeed_desired==700]
 
+#avgs[,stdDiff:=]
 
 print(summary(avgs))
 
+
+
 p <- ggplot(avgs,aes(x=pgc,y=mn,colour=factor(perturb))) +
     geom_line() +
-    geom_ribbon(aes(ymin=mn-std,ymax=mn+std,fill=factor(perturb),),alpha=0.2)
+    geom_ribbon(data=avgs[perturb==1],aes(ymin=mn-std,ymax=mn+std,fill=factor(perturb)),alpha=0.3,colour=NA)
+
+
 
 
 print(p)
