@@ -1,3 +1,4 @@
+rm(list=ls())
 library(data.table)
 library(tidyr)
 library(dplyr)
@@ -71,12 +72,13 @@ dat[,Kact:=NULL]
 dat[,elapsed:=NULL]
 dat[,distance:=NULL]
 
-dat <- gather(dat,jointleg,angle,c(hip_left,
+dat3 <- dat %>% gather(jointleg,angle,c(hip_left,
                                    knee_left,
                                    ankle_left,
                                    hip_right,
                                    knee_right,
                                    ankle_right)) %>%
-  separate(jointleg,c("joint","leg"),sep="_") %>%
-  gather(directionlegmarker,markerPos,starts_with("marker")) %>%
-  separate(directionlegmarker,c("m","direction","leg","marker"))
+  separate(jointleg,c("joint","leg"),sep="_")
+
+dat[,xfr:=(marker_y_r_6+marker_y_r_5)/2]
+

@@ -8,6 +8,10 @@ dat[,cycle:=cumsum(-heelstrike)]
 dat[,perturb:= as.integer(median(perturb)),by=cycle]
 dat2<-dat
 dat2[,time:=time-min(time),by=cycle]
+dat2 <- dat2[hip_right < 1000]
+
+nSpline <- 1000
+
 
 myfunc <- function(x,y,sequence)
 {
@@ -22,28 +26,60 @@ splines <- dat2[tspeed_desired==700,
                 list(cycle,
                      perturb,
                      time,
-                     xf,xfr)][,myfunc(time,
-                                  xfr,
-                                  seq(0,max(time),length.out=1000)),by=list(cycle,perturb)]
-splines[,pgc:=seq(0,100,length.out=1000)]
+                     xf,hip_right)][,myfunc(time,
+                                  hip_right,
+                                  seq(0,max(time),length.out=nSpline)),by=list(cycle,perturb)]
+splines[,pgc:=seq(0,100,length.out=nSpline)]
 
 
-avgs <- splines[,list(mn=mean(y),std=sd(y)),by=list(pgc,perturb)]
-
+avgs <- splines[,list(mn=mean(y),std=sd(y),sse=sum((y-mean(y))^2)),by=list(pgc,perturb)]
+avgs[,variance:=std^2]
 xfmax <- dat[,max(xf),by=perturb]
-#dat <- dat[xf>(-10000)][tspeed_desired==700]
 
-#avgs[,stdDiff:=]
+nSamples <- table(splines$perturb)/nSpline
+n0 <- unname(nSamples[names(nSamples)=='0'])
+n1 <- unname(nSamples[names(nSamples)=='1'])
+n2 <- unname(nSamples[names(nSamples)=='2'])
+n3 <- unname(nSamples[names(nSamples)=='3'])
 
+
+
+nh02 <- 2/(1/n0+1/n2)
+df02 <- (n0+n2)/2
+
+diffStd_0_2 <- avgs[perturb %in% c(0,2)][,dm:=diff(mn),by=pgc][,s:=sqrt(2*sum(sse)/df02/nh02),by=pgc]
+setkey(diffStd_0_2,s)
+diffStd_0_2 <- unique(diffStd_0_2)
+
+tcrit <- qt(0.99,df02)
+
+diffStd_0_2[,upper:=dm+s*tcrit][,lower:=dm-s*tcrit]
+
+
+
+
+
+probs <- pt(diffStd_0_2$dm/diffStd_0_2$s,df02)
 print(summary(avgs))
 
+probsCorrected <- p.adjust(sort(probs),method="BH")
 
 
-p <- ggplot(avgs,aes(x=pgc,y=mn,colour=factor(perturb))) +
+
+
+
+p <- ggplot(avgs[perturb %in% c(0,2)],aes(x=pgc,y=mn,colour=factor(perturb))) +
     geom_line() +
-    geom_ribbon(data=avgs[perturb==1],aes(ymin=mn-std,ymax=mn+std,fill=factor(perturb)),alpha=0.3,colour=NA)
+    geom_ribbon(aes(ymin=mn-std,ymax=mn+std,fill=factor(perturb)),alpha=0.3,colour=NA)
 
+p2 <- ggplot(diffStd_0_2,aes(x=pgc,y=dm)) +
+  geom_line() +
+  geom_ribbon(aes(ymin=lower,ymax=upper),fill="gray",alpha=0.3,colour=NA)
 
+p3 <- ggplot(,aes(x=1:nSpline,y=probsCorrected)) +
+  geom_point()
 
+p4 <- ggplot(splines[perturb %in% c(0,2)],aes(x=pgc,y=y)) +
+  geom_point()
 
-print(p)
+print(p3)
