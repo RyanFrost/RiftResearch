@@ -10,7 +10,7 @@ dat2<-dat
 dat2[,time:=time-min(time),by=cycle]
 dat2 <- dat2[hip_right < 1000]
 
-nSpline <- 1000
+nSpline <- 100
 
 
 myfunc <- function(x,y,sequence)
@@ -33,7 +33,7 @@ splines[,pgc:=seq(0,100,length.out=nSpline)]
 
 
 avgs <- splines[,list(mn=mean(y),std=sd(y),sse=sum((y-mean(y))^2)),by=list(pgc,perturb)]
-avgs[,variance:=std^2]
+
 xfmax <- dat[,max(xf),by=perturb]
 
 nSamples <- table(splines$perturb)/nSpline
@@ -47,7 +47,8 @@ n3 <- unname(nSamples[names(nSamples)=='3'])
 nh02 <- 2/(1/n0+1/n2)
 df02 <- (n0+n2)/2
 
-diffStd_0_2 <- avgs[perturb %in% c(0,2)][,dm:=diff(mn),by=pgc][,s:=sqrt(2*sum(sse)/df02/nh02),by=pgc]
+tmp <- avgs[perturb %in% c(0,2)][,dm:=diff(mn),by=pgc][,s:=sqrt(2*sum(sse)/df02/nh02),by=pgc]
+diffStd_0_2 <- tmp[,list(pgc,dm,s)]
 setkey(diffStd_0_2,s)
 diffStd_0_2 <- unique(diffStd_0_2)
 
@@ -62,7 +63,7 @@ diffStd_0_2[,upper:=dm+s*tcrit][,lower:=dm-s*tcrit]
 probs <- pt(diffStd_0_2$dm/diffStd_0_2$s,df02)
 print(summary(avgs))
 
-probsCorrected <- p.adjust(sort(probs),method="BH")
+probsCorrected <- p.adjust(sort(probs),method="hommel")
 
 
 
@@ -74,12 +75,12 @@ p <- ggplot(avgs[perturb %in% c(0,2)],aes(x=pgc,y=mn,colour=factor(perturb))) +
 
 p2 <- ggplot(diffStd_0_2,aes(x=pgc,y=dm)) +
   geom_line() +
-  geom_ribbon(aes(ymin=lower,ymax=upper),fill="gray",alpha=0.3,colour=NA)
+  geom_ribbon(aes(ymin=lower,ymax=upper),fill="gray",alpha=0.4,colour=NA)
 
 p3 <- ggplot(,aes(x=1:nSpline,y=probsCorrected)) +
   geom_point()
 
-p4 <- ggplot(splines[perturb %in% c(0,2)],aes(x=pgc,y=y)) +
-  geom_point()
+p4 <- ggplot(splines[perturb %in% c(0,2)],aes(x=pgc,y=y,colour=factor(perturb))) +
+  geom_line()
 
 print(p3)
