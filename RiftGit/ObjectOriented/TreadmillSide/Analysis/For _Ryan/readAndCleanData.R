@@ -3,6 +3,7 @@ library(data.table)
 library(tidyr)
 library(dplyr)
 library(ggplot2)
+library(TSclust)
 
 dat <- fread("erinData3_22_15.txt")
 dat[,V54:=NULL]

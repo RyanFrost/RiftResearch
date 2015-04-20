@@ -10,7 +10,7 @@ dat2<-dat
 dat2[,time:=time-min(time),by=cycle]
 dat2 <- dat2[hip_right < 1000]
 
-nSpline <- 100
+nSpline <- 50
 
 
 myfunc <- function(x,y,sequence)
@@ -26,10 +26,18 @@ splines <- dat2[tspeed_desired==700,
                 list(cycle,
                      perturb,
                      time,
-                     xf,hip_right)][,myfunc(time,
+                     xf,
+                     hip_right,
+                     knee_right,
+                     ankle_right,
+                     hip_left,
+                     knee_left,
+                     ankle_left)][cycle > 60,myfunc(time,
                                   hip_right,
                                   seq(0,max(time),length.out=nSpline)),by=list(cycle,perturb)]
 splines[,pgc:=seq(0,100,length.out=nSpline)]
+
+
 
 
 avgs <- splines[,list(mn=mean(y),std=sd(y),sse=sum((y-mean(y))^2)),by=list(pgc,perturb)]
@@ -52,7 +60,7 @@ diffStd_0_2 <- tmp[,list(pgc,dm,s)]
 setkey(diffStd_0_2,s)
 diffStd_0_2 <- unique(diffStd_0_2)
 
-tcrit <- qt(0.99,df02)
+tcrit <- qt(0.975,df02)
 
 diffStd_0_2[,upper:=dm+s*tcrit][,lower:=dm-s*tcrit]
 
@@ -61,15 +69,23 @@ diffStd_0_2[,upper:=dm+s*tcrit][,lower:=dm-s*tcrit]
 
 
 probs <- pt(diffStd_0_2$dm/diffStd_0_2$s,df02)
-print(summary(avgs))
-
-probsCorrected <- p.adjust(sort(probs),method="hommel")
+probsCorrected <- p.adjust(sort(probs),method="none")
 
 
+mins <- splines[,list(lowpt=min(y)),by=list(perturb,cycle)]
+mins2 <- mins[,list(lowmn=mean(lowpt),lowsd=sd(lowpt)),by=list(perturb)]
 
+maxs <- splines[,list(highpt=max(y)),by=list(perturb,cycle)]
+maxs2 <- maxs[,list(highmn=mean(highpt),highsd=sd(highpt)),by=list(perturb)]
 
+min0 <- mins[perturb==0,lowpt]
+min1 <- mins[perturb==1,lowpt]
+min2 <- mins[perturb==2,lowpt]
+min3 <- mins[perturb==3,lowpt]
 
-p <- ggplot(avgs[perturb %in% c(0,2)],aes(x=pgc,y=mn,colour=factor(perturb))) +
+fit <- lm(lowpt~factor(perturb)+cycle,mins[perturb%in%c(0,1,2,3)])
+print(anova(fit))
+p <- ggplot(avgs[perturb %in% c(0,1,2)],aes(x=pgc,y=mn,colour=factor(perturb))) +
     geom_line() +
     geom_ribbon(aes(ymin=mn-std,ymax=mn+std,fill=factor(perturb)),alpha=0.3,colour=NA)
 
@@ -80,7 +96,13 @@ p2 <- ggplot(diffStd_0_2,aes(x=pgc,y=dm)) +
 p3 <- ggplot(,aes(x=1:nSpline,y=probsCorrected)) +
   geom_point()
 
-p4 <- ggplot(splines[perturb %in% c(0,2)],aes(x=pgc,y=y,colour=factor(perturb))) +
+p4 <- ggplot(splines[perturb %in% c(0,2)],aes(x=pgc,y=y,colour=factor(perturb),group=cycle)) +
   geom_line()
 
-print(p3)
+p5 <- ggplot(mins,aes(lowpt,fill=as.factor(perturb))) +
+    geom_density(alpha=0.5)
+
+p6 <- ggplot(mins,aes(x=cycle,y=lowpt,colour=factor(perturb))) +
+    geom_point() +
+    geom_smooth(method="lm")
+print(p6)
