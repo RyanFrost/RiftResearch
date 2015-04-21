@@ -10,7 +10,7 @@ dat2<-dat
 dat2[,time:=time-min(time),by=cycle]
 dat2 <- dat2[hip_right < 1000]
 
-nSpline <- 50
+nSpline <- 100
 
 
 myfunc <- function(x,y,sequence)
@@ -27,14 +27,17 @@ splines <- dat2[tspeed_desired==700,
                      perturb,
                      time,
                      xf,
+                     xfr,
                      hip_right,
                      knee_right,
                      ankle_right,
                      hip_left,
                      knee_left,
-                     ankle_left)][cycle > 60,myfunc(time,
-                                  hip_right,
-                                  seq(0,max(time),length.out=nSpline)),by=list(cycle,perturb)]
+                     ankle_left)][cycle > 60,
+                                  myfunc(time,
+                                         xf,
+                                         seq(0,max(time),length.out=nSpline)),
+                                  by=list(cycle,perturb)]
 splines[,pgc:=seq(0,100,length.out=nSpline)]
 
 
@@ -78,13 +81,14 @@ mins2 <- mins[,list(lowmn=mean(lowpt),lowsd=sd(lowpt)),by=list(perturb)]
 maxs <- splines[,list(highpt=max(y)),by=list(perturb,cycle)]
 maxs2 <- maxs[,list(highmn=mean(highpt),highsd=sd(highpt)),by=list(perturb)]
 
-min0 <- mins[perturb==0,lowpt]
-min1 <- mins[perturb==1,lowpt]
-min2 <- mins[perturb==2,lowpt]
-min3 <- mins[perturb==3,lowpt]
+extrema <- splines[,list(low=min(y),high=max(y)),by=list(perturb,cycle)] %>%
+  gather(extreme,value,high,low)
+extrema2 <- extrema[,list(mn=mean(value),std=sd(value)),by=list(perturb,extreme)]
 
-fit <- lm(lowpt~factor(perturb)+cycle,mins[perturb%in%c(0,1,2,3)])
+
+fit <- lm(lowpt~factor(perturb)+cycle,mins[perturb%in%c(0,1,2)])
 print(anova(fit))
+print(summary(fit))
 p <- ggplot(avgs[perturb %in% c(0,1,2)],aes(x=pgc,y=mn,colour=factor(perturb))) +
     geom_line() +
     geom_ribbon(aes(ymin=mn-std,ymax=mn+std,fill=factor(perturb)),alpha=0.3,colour=NA)
@@ -104,5 +108,11 @@ p5 <- ggplot(mins,aes(lowpt,fill=as.factor(perturb))) +
 
 p6 <- ggplot(mins,aes(x=cycle,y=lowpt,colour=factor(perturb))) +
     geom_point() +
-    geom_smooth(method="lm")
-print(p6)
+    stat_smooth(method="lm")
+
+p7 <- ggplot(extrema,aes(x=cycle,y=value,colour=factor(perturb)))+
+  geom_point() +
+  stat_smooth(method="lm") +
+  facet_grid(extreme~.,scales="free_y")
+
+print(p7)
