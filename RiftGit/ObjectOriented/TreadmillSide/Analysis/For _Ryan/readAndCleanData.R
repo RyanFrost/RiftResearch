@@ -1,3 +1,4 @@
+setwd(dirname(parent.frame(2)$ofile))
 rm(list=ls())
 library(data.table)
 library(tidyr)
@@ -80,5 +81,5 @@ dat3 <- dat %>% gather(jointleg,angle,c(hip_left,
                                    ankle_right)) %>%
   separate(jointleg,c("joint","leg"),sep="_")
 
-dat[,xfr:=(marker_y_r_6+marker_y_r_5)/2]
+dat[,xfr:=(marker_y_r_5+marker_y_r_6)/2]
 

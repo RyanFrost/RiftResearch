@@ -35,7 +35,7 @@ splines <- dat2[tspeed_desired==700,
                      knee_left,
                      ankle_left)][cycle > 60,
                                   myfunc(time,
-                                         hip_right,
+                                         xfr,
                                          seq(0,max(time),length.out=nSpline)),
                                   by=list(cycle,perturb)]
 splines[,pgc:=seq(0,100,length.out=nSpline)]
@@ -58,7 +58,7 @@ n3 <- unname(nSamples[names(nSamples)=='3'])
 nh02 <- 2/(1/n0+1/n2)
 df02 <- (n0+n2)/2
 
-tmp <- avgs[perturb %in% c(0,1)][,dm:=diff(mn),by=pgc][,s:=sqrt(2*sum(sse)/df02/nh02),by=pgc]
+tmp <- avgs[perturb %in% c(0,2)][,dm:=diff(mn),by=pgc][,s:=sqrt(2*sum(sse)/df02/nh02),by=pgc]
 diffStd_0_2 <- tmp[,list(pgc,dm,s)]
 setkey(diffStd_0_2,s)
 diffStd_0_2 <- unique(diffStd_0_2)
@@ -87,6 +87,7 @@ extrema2 <- extrema[,list(mn=mean(value),std=sd(value)),by=list(perturb,extreme)
 
 #fit <- lm(value~factor(extreme)+factor(perturb)+cycle,extrema[perturb%in%c(0,1,2)])
 fit <- lm(lowpt~factor(perturb)+(cycle),mins[perturb%in%c(0,2)])
+
 print(anova(fit))
 print(summary(fit))
 p <- ggplot(avgs[perturb %in% c(0,1,2)],aes(x=pgc,y=mn,colour=factor(perturb))) +
