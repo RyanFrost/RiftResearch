@@ -5,7 +5,7 @@ library(tidyr)
 library(dplyr)
 library(ggplot2)
 
-gaitData <- fread("erinData3_22_15.txt")
+gaitData <- fread("../Data/erinData3_22_15.txt")
 gaitData[,V54:=NULL]
 setnames(gaitData, c(
   "motorv_int",
