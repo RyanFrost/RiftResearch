@@ -53,16 +53,20 @@ upToSpeed <- gaitData[tspeed_desired==700,
 
 splines <- upToSpeed[cycle > 60 & cycle < 1003,
                      makeSpline(time,
-                                xf,
+                                xfr,
                                 seq(0,max(time),length.out=nSpline)),
                      by=list(cycle,perturb)]
 
 
 splines[,pgc:=seq(0,100,length.out=nSpline)]
 
+
+# Separate post-perturbation cycles - cycles after perturbation are given 
+# perturb value of 3 plus the perturb value of the previous cycle
 postPertCycs <- unique(splines[perturb > 0,list(cyc=cycle+1,pert=perturb)])
 splines[cycle %in% postPertCycs[,cyc],perturb := postPertCycs[cyc==cycle,pert] +3 ]
-
+postPertCycs <- unique(splines[perturb > 0,list(cyc=cycle+1,pert=perturb)])
+splines[cycle %in% postPertCycs[,cyc],perturb := postPertCycs[cyc==cycle,pert] +3 ]
 
 
 avgs <- splines[,
@@ -124,6 +128,8 @@ extremaMeans <- extrema[,list(mnTime=mean(time),sdTime=sd(time),mn=mean(value),s
 
 strideLength <- splines[pgc %in% c(0,100),list(time=max(x),val=y),by=list(perturb,cycle,point=pgc/100)]
 strideLength1 <- strideLength[,list(time=max(time),diffVal=diff(val)),by=list(perturb,cycle)]
+strideLength1[,strideLen:=time*70+diffVal]
+
 setkey(strideLength1,perturb)
 strideLength2 <- strideLength1[,list(numSamples=.N,mnTime=mean(time),sdTime=sd(time),mnVal=mean(diffVal),sdVal=sd(diffVal)),by=list(perturb)]
 
@@ -141,7 +147,7 @@ fit <- lm(lowpt~factor(perturb)+(cycle),mins[perturb%in%c(0,2)])
 
 
 
-t <- t.test(strideLength1[perturb==0,diffVal],strideLength1[perturb==5,diffVal])
+t <- t.test(strideLength1[perturb==0,diffVal],strideLength1[perturb==2,diffVal])
 
 
 print(t)
@@ -175,7 +181,7 @@ p7 <- ggplot(extrema,aes(x=cycle,y=value,colour=factor(perturb)))+
 p8 <- ggplot(strideLength1,aes(x=diffVal)) +
   geom_density(aes(fill=factor(perturb)),alpha=0.3)
 
-p9 <- ggplot(strideLength1,aes(x=cycle,y=diffVal,colour=factor(perturb))) +
+p9 <- ggplot(strideLength1[perturb < 4,],aes(x=cycle,y=strideLen,colour=factor(perturb))) +
   geom_point(size=3) +
   geom_smooth(aes(fill=factor(perturb)),method="lm")
 
