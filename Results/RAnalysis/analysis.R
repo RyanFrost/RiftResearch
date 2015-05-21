@@ -35,7 +35,7 @@ makeSpline <- function(x,y,sequence)
 
 
 
-nSpline <- 50  # Number of points to fit each spline to
+nSpline <- 100  # Number of points to fit each spline to
 
 upToSpeed <- gaitData[tspeed_desired==700,
                       list(cycle,
@@ -63,10 +63,14 @@ splines[,pgc:=seq(0,100,length.out=nSpline)]
 
 # Separate post-perturbation cycles - cycles after perturbation are given 
 # perturb value of 3 plus the perturb value of the previous cycle
+
 postPertCycs <- unique(splines[perturb > 0,list(cyc=cycle+1,pert=perturb)])
-splines[cycle %in% postPertCycs[,cyc],perturb := postPertCycs[cyc==cycle,pert] +3 ]
+splines[cycle %in% postPertCycs[,cyc],
+        perturb := postPertCycs[cyc==cycle,pert] + as.integer(3) ]
+
 postPertCycs <- unique(splines[perturb > 0,list(cyc=cycle+1,pert=perturb)])
-splines[cycle %in% postPertCycs[,cyc],perturb := postPertCycs[cyc==cycle,pert] +3 ]
+splines[cycle %in% postPertCycs[,cyc],
+        perturb := postPertCycs[cyc==cycle,pert] + as.integer(3) ]
 
 
 avgs <- splines[,
@@ -108,11 +112,11 @@ tcrit <- qt(0.975,df02)
 diffStd_0_2[,upper:=dm+s*tcrit][,lower:=dm-s*tcrit]
 
 
-
-
-
 probs <- pt(diffStd_0_2$dm/diffStd_0_2$s,df02)
 probsCorrected <- p.adjust(sort(probs),method="bonferroni")
+
+
+
 
 
 mins <- splines[,list(lowpt=min(y)),by=list(perturb,cycle)]
@@ -124,6 +128,28 @@ maxs2 <- maxs[,list(highmn=mean(highpt),highsd=sd(highpt)),by=list(perturb)]
 extrema <- splines[,list(time=max(x),low=min(y),high=max(y)),by=list(perturb,cycle)] %>%
   gather(extreme,value,high,low)
 extremaMeans <- extrema[,list(mnTime=mean(time),sdTime=sd(time),mn=mean(value),std=sd(value)),by=list(perturb,extreme)]
+
+ex <- unique(extrema[,list(time,rng=-diff(value)),by=list(perturb,cycle)])
+
+ex2 <- spread(extrema,extreme,value)
+
+
+
+prop <- lapply(0:3,
+               function(x) propagate(expression(high-low),
+                                     ex2[perturb==x,list(high,low)],
+                                     type="raw",
+                                     dist.sim="t",
+                                     nsim=100000))
+
+
+prop0 <- prop[[1]]
+prop2 <- prop[[3]]
+
+dtprop <- data.table("0"=prop0$datPROP,"1"=prop2$datPROP) %>%
+  gather(perturb,rng,1,2)
+
+propLogit <- glm(as.double(perturb)~rng,data=dtprop)
 
 
 strideLength <- splines[pgc %in% c(0,100),list(time=max(x),val=y),by=list(perturb,cycle,point=pgc/100)]
@@ -148,9 +174,9 @@ fit <- lm(lowpt~factor(perturb)+(cycle),mins[perturb%in%c(0,2)])
 
 
 t <- t.test(strideLength1[perturb==0,diffVal],strideLength1[perturb==2,diffVal])
+t2 <- t.test(ex[perturb==0,rng],ex[perturb==2,rng])
 
-
-print(t)
+print(t2)
 
 p <- ggplot(avgs[perturb %in% c(0,1,2)],aes(x=pgc,y=mn,colour=factor(perturb))) +
     geom_line() +
@@ -185,6 +211,14 @@ p9 <- ggplot(strideLength1[perturb < 4,],aes(x=cycle,y=strideLen,colour=factor(p
   geom_point(size=3) +
   geom_smooth(aes(fill=factor(perturb)),method="lm")
 
+p10 <- ggplot(ex[perturb < 4],aes(x=cycle,y=rng,colour=factor(perturb))) +
+  geom_point(size=3) +
+  geom_smooth(aes(fill=factor(perturb)),method=lm)
+
+p11 <- ggplot(ex[perturb < 4],aes(x=rng,fill=as.factor(perturb))) +
+  geom_density(alpha=0.5)
+
+
 print(p)
 print(p3)
 print(p5)
@@ -192,3 +226,5 @@ print(p6)
 print(p7)
 print(p8)
 print(p9)
+print(p10)
+print(p11)

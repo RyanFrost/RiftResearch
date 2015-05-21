@@ -4,6 +4,7 @@ library(data.table)
 library(tidyr)
 library(dplyr)
 library(ggplot2)
+library(propagate)
 
 gaitData <- fread("../Data/erinData3_22_15.txt")
 gaitData[,V54:=NULL]
