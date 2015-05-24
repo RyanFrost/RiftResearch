@@ -1,0 +1,13 @@
+sample.interval=20000
+"integer" "[.data.table" "[" "eval" "eval" "withVisible" "source" 
+"spline" "makeSpline" "[.data.table" "[" "eval" "eval" "withVisible" "source" 
+"unique" "regularize.values" "spline" "makeSpline" "[.data.table" "[" "eval" "eval" "withVisible" "source" 
+">" "eval" "eval" "[.data.table" "[" "unique" "eval" "eval" "withVisible" "source" 
+"stopifnot" "var" "sd" "[.data.table" "[" "eval" "eval" "withVisible" "source" 
+"length" "length" "dim.data.table" "dim" "dim" "nrow" ".set_row_names" "setattr" "[.data.table" "[" "[.data.table" "[" "eval" "eval" "withVisible" "source" 
+"as.character" "factor" "table" "eval" "eval" "withVisible" "source" 
+"as.vector" "setdiff" "[.data.table" "[" "eval" "eval" "withVisible" "source" 
+"<Anonymous>" "[[.data.frame" "[[" "is.data.table" "setattr" "alloc.col" "[.data.table" "[" "<Anonymous>" "spread_.data.frame" "spread_" "spread" "eval" "eval" "withVisible" "source" 
+"parent.frame" "new.env" "[.data.table" "[" "eval" "eval" "withVisible" "source" 
+"identical" "proto" "<Anonymous>" "layer" "do.call" "<Anonymous>" "<Anonymous>" "geom_ribbon" "eval" "eval" "withVisible" "source" 
+"as.environment" "as.environment" "$" "$" "plot_clone" "add_ggplot" "+.gg" "+" "eval" "eval" "withVisible" "source" 

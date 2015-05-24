@@ -61,6 +61,8 @@ splines <- upToSpeed[cycle > 60 & cycle < 1003,
 splines[,pgc:=seq(0,100,length.out=nSpline)]
 
 
+
+
 # Separate post-perturbation cycles - cycles after perturbation are given 
 # perturb value of 3 plus the perturb value of the previous cycle
 
@@ -78,6 +80,29 @@ avgs <- splines[,
                       std=sd(y),
                       sse=sum((y-mean(y))^2)),
                 by=list(pgc,perturb)]
+
+
+set.seed(1234)
+
+splinesOrdered <- splines[order(perturb)]
+
+nSamp <- splinesOrdered[, list(count = .N/nSpline), by = list(perturb)]
+
+trainingSet <- splinesOrdered[,.SD[cycle %in% sample(.N,as.integer(.N*0.6))],by=perturb]
+trainingCycs <- sort(unique(trainingSet$cycle))
+testSet <- splinesOrdered[,.SD[!cycle %in% trainingCycs]]
+testCycs <- sort(unique(testSet$cycle))
+
+trainingIndices <- as.vector(sapply(trainingCycs, function(x) 1:nSpline + x*nSpline))
+testIndices <- as.vector(sapply(testCycs, function(x) 1:nSpline + x*nSpline))
+
+
+samp <- c()
+
+#nn <- nnet(perturb~.,data=splinesOrdered,subset=trainingIndices,size=10)
+
+
+#pred <- predict(nn,testSet,type="class")
 
 
 ## Statistical Analysis
@@ -118,13 +143,6 @@ probsCorrected <- p.adjust(sort(probs),method="bonferroni")
 
 
 
-
-mins <- splines[,list(lowpt=min(y)),by=list(perturb,cycle)]
-mins2 <- mins[,list(lowmn=mean(lowpt),lowsd=sd(lowpt)),by=list(perturb)]
-
-maxs <- splines[,list(highpt=max(y)),by=list(perturb,cycle)]
-maxs2 <- maxs[,list(highmn=mean(highpt),highsd=sd(highpt)),by=list(perturb)]
-
 extrema <- splines[,list(time=max(x),low=min(y),high=max(y)),by=list(perturb,cycle)] %>%
   gather(extreme,value,high,low)
 extremaMeans <- extrema[,list(mnTime=mean(time),sdTime=sd(time),mn=mean(value),std=sd(value)),by=list(perturb,extreme)]
@@ -135,12 +153,16 @@ ex2 <- spread(extrema,extreme,value)
 
 
 
+unc <- (ex[,list(mn = mean(rng), unc = sd(rng)/sqrt(.N)),by=perturb])
+
+dif <- unc[perturb %in% c(0,2), list(D=diff(mn),uncD=sqrt(sum(unc^2)))]
+
 prop <- lapply(0:3,
                function(x) propagate(expression(high-low),
                                      ex2[perturb==x,list(high,low)],
                                      type="raw",
                                      dist.sim="t",
-                                     nsim=100000))
+                                     nsim=10000))
 
 
 prop0 <- prop[[1]]
@@ -149,7 +171,11 @@ prop2 <- prop[[3]]
 dtprop <- data.table("0"=prop0$datPROP,"1"=prop2$datPROP) %>%
   gather(perturb,rng,1,2)
 
-propLogit <- glm(as.double(perturb)~rng,data=dtprop)
+
+
+
+
+
 
 
 strideLength <- splines[pgc %in% c(0,100),list(time=max(x),val=y),by=list(perturb,cycle,point=pgc/100)]
@@ -164,19 +190,26 @@ strideLength2[,sdSL:=sqrt((70*sdTime)^2+sdVal^2)]
 
 setkey(strideLength2,perturb)
 
-print(strideLength2)
-
-#strideLength3[,strideLength:=]
-#fit <- lm(value~factor(extreme)+factor(perturb)+cycle,extrema[perturb%in%c(0,1,2)])
-fit <- lm(lowpt~factor(perturb)+(cycle),mins[perturb%in%c(0,2)])
 
 
+fit <- lm(rng~factor(perturb)+time,data=ex[perturb %in% c(0,2)])
+
+print(summary(fit))
+print(anova(fit))
 
 
-t <- t.test(strideLength1[perturb==0,diffVal],strideLength1[perturb==2,diffVal])
-t2 <- t.test(ex[perturb==0,rng],ex[perturb==2,rng])
+t <- t.test(diffVal~perturb,data=strideLength1[perturb %in% c(0,2)])
+
+t2 <- t.test(rng~perturb,data=ex[perturb %in% c(0,2)])
 
 print(t2)
+
+
+
+
+
+## Plots
+
 
 p <- ggplot(avgs[perturb %in% c(0,1,2)],aes(x=pgc,y=mn,colour=factor(perturb))) +
     geom_line() +
@@ -211,20 +244,18 @@ p9 <- ggplot(strideLength1[perturb < 4,],aes(x=cycle,y=strideLen,colour=factor(p
   geom_point(size=3) +
   geom_smooth(aes(fill=factor(perturb)),method="lm")
 
-p10 <- ggplot(ex[perturb < 4],aes(x=cycle,y=rng,colour=factor(perturb))) +
-  geom_point(size=3) +
+p10 <- ggplot(ex[perturb < 4],aes(x=time,y=rng,colour=factor(perturb))) +
+  geom_point(size=4) +
   geom_smooth(aes(fill=factor(perturb)),method=lm)
 
 p11 <- ggplot(ex[perturb < 4],aes(x=rng,fill=as.factor(perturb))) +
   geom_density(alpha=0.5)
 
+p12 <- ggplot(ex[perturb < 4],aes(x=factor(perturb),y=rng)) +
+  geom_violin(aes(fill=factor(perturb)),alpha=0.4) +
+  geom_jitter(size=2,
+              position= position_jitter(width= 0.3),
+              aes(colour=factor(perturb)))
 
-print(p)
-print(p3)
-print(p5)
-print(p6)
-print(p7)
-print(p8)
-print(p9)
-print(p10)
-print(p11)
+
+print(p12)
