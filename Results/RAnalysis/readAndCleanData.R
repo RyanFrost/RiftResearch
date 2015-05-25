@@ -80,4 +80,5 @@ gaitData[,distance:=NULL]
 
 # Add column for right foot position
 gaitData[,xfr:=(marker_x_r_5+marker_x_r_6)/2]
-
+gaitData[,yf :=(marker_y_l_5+marker_y_l_6)/2]
+gaitData[,yfr:=(marker_y_r_5+marker_y_r_6)/2]

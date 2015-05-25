@@ -35,25 +35,29 @@ makeSpline <- function(x,y,sequence)
 
 
 
-nSpline <- 100  # Number of points to fit each spline to
+nSpline <- 200  # Number of points to fit each spline to
 
-upToSpeed <- gaitData[tspeed_desired==700,
+upToSpeed <- gaitData[tspeed_desired==700 & cycle > 60 & cycle < 1003,
                       list(cycle,
                            perturb,
                            time,
+                           relTime = time/max(time),
                            xf,
                            xfr,
+                           yf,
+                           yfr,
                            hip_right,
                            knee_right,
                            ankle_right,
                            hip_left,
                            knee_left,
-                           ankle_left)]
+                           ankle_left),
+                      by=cycle]
 
 
-splines <- upToSpeed[cycle > 60 & cycle < 1003,
+splines <- upToSpeed[,
                      makeSpline(time,
-                                xfr,
+                                yfr,
                                 seq(0,max(time),length.out=nSpline)),
                      by=list(cycle,perturb)]
 
@@ -171,10 +175,15 @@ prop2 <- prop[[3]]
 dtprop <- data.table("0"=prop0$datPROP,"1"=prop2$datPROP) %>%
   gather(perturb,rng,1,2)
 
+#list(pk2 = max(y),
+ #    pgc=pgc[head(which(y==max(y)),1)]
 
 
 
-
+peak2 <- splines[pgc > 37.5 & pgc < 60,
+                 list(pk2 = y[head(which(diff(sign(diff(y)))==-2)+1,1)],
+                      pgc=pgc[head(which(diff(sign(diff(y)))==-2)+1,1)]),
+                 by=list(cycle,perturb)]
 
 
 
@@ -202,7 +211,9 @@ t <- t.test(diffVal~perturb,data=strideLength1[perturb %in% c(0,2)])
 
 t2 <- t.test(rng~perturb,data=ex[perturb %in% c(0,2)])
 
-print(t2)
+t3 <- t.test(pgc~perturb,data=peak2[perturb %in% c(2,0)])
+
+print(t3)
 
 
 
@@ -211,7 +222,7 @@ print(t2)
 ## Plots
 
 
-p <- ggplot(avgs[perturb %in% c(0,1,2)],aes(x=pgc,y=mn,colour=factor(perturb))) +
+p <- ggplot(avgs[perturb %in% c(0,1,2,3) ],aes(x=pgc,y=mn,colour=factor(perturb))) +
     geom_line() +
     geom_ribbon(aes(ymin=mn-std,ymax=mn+std,fill=factor(perturb)),alpha=0.3,colour=NA)
 
@@ -225,37 +236,42 @@ p3 <- ggplot(,aes(x=1:nSpline,y=probsCorrected)) +
 p4 <- ggplot(splines[perturb %in% c(0,2)],aes(x=pgc,y=y,colour=factor(perturb),group=cycle)) +
   geom_line()
 
-p5 <- ggplot(mins,aes(lowpt,fill=as.factor(perturb))) +
-    geom_density(alpha=0.5)
-
-p6 <- ggplot(mins,aes(x=cycle,y=lowpt,colour=factor(perturb))) +
-    geom_point(size=3) +
-    stat_smooth(aes(x=cycle,fill=factor(perturb)),method="lm")
-
-p7 <- ggplot(extrema,aes(x=cycle,y=value,colour=factor(perturb)))+
+p5 <- ggplot(extrema,aes(x=cycle,y=value,colour=factor(perturb)))+
   geom_point() +
   stat_smooth(aes(fill=factor(perturb)),method="lm") +
   facet_grid(extreme~.,scales="free_y")
 
-p8 <- ggplot(strideLength1,aes(x=diffVal)) +
+p6 <- ggplot(strideLength1,aes(x=diffVal)) +
   geom_density(aes(fill=factor(perturb)),alpha=0.3)
 
-p9 <- ggplot(strideLength1[perturb < 4,],aes(x=cycle,y=strideLen,colour=factor(perturb))) +
+p7 <- ggplot(strideLength1[perturb < 4,],aes(x=cycle,y=strideLen,colour=factor(perturb))) +
   geom_point(size=3) +
   geom_smooth(aes(fill=factor(perturb)),method="lm")
 
-p10 <- ggplot(ex[perturb < 4],aes(x=time,y=rng,colour=factor(perturb))) +
+p8 <- ggplot(ex[perturb < 4],aes(x=time,y=rng,colour=factor(perturb))) +
   geom_point(size=4) +
   geom_smooth(aes(fill=factor(perturb)),method=lm)
 
-p11 <- ggplot(ex[perturb < 4],aes(x=rng,fill=as.factor(perturb))) +
+p9 <- ggplot(ex[perturb < 4],aes(x=rng,fill=as.factor(perturb))) +
   geom_density(alpha=0.5)
 
-p12 <- ggplot(ex[perturb < 4],aes(x=factor(perturb),y=rng)) +
+p10 <- ggplot(ex[perturb < 4],aes(x=factor(perturb),y=rng)) +
   geom_violin(aes(fill=factor(perturb)),alpha=0.4) +
   geom_jitter(size=2,
               position= position_jitter(width= 0.3),
               aes(colour=factor(perturb)))
 
+p11 <- ggplot(upToSpeed[perturb %in% c(0,2)],aes(x=relTime,y=yfr,colour=factor(perturb))) +
+  geom_line(aes(group=cycle))
 
+p12 <- ggplot(peak2[perturb < 4],aes(x=pgc)) +
+  geom_density(aes(fill=factor(perturb)),alpha=0.3)
+
+p13 <- ggplot(peak2[perturb < 4],aes(x=pk2)) +
+  geom_density(aes(fill=factor(perturb)),alpha=0.3)
+
+
+print(p)
+print(p4)
 print(p12)
+print(p13)
